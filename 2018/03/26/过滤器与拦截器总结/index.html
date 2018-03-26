@@ -87,13 +87,13 @@
 <meta property="og:site_name" content="风居者的街道">
 <meta property="og:description" content="背景在学习过程中，我们总会遇到过滤器和拦截器的使用，因为对于他们之间的关系和区别不是很清楚，所以每次用的时候都感觉模棱两可的。所以今天特意写一篇文章总结之前用的过滤器与拦截器它们拦截请求的处理过程，不仅要知其然，还要知其所以然。 过滤器我们第一次接触过滤器的时候应该是在学习servlet的时候，过滤器本质是Java组件，它也是一种代码重用技术，它可以改变HTTP请求的内容，响应和header信息。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="c:/Users/Administrator/AppData/Local/YNote/data/13572446538@163.com/03f61f7ad5a84a8988608616bd590192/clipboard.png">
-<meta property="og:image" content="c:/Users/Administrator/Desktop/捕获.PNG">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/c.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/b.PNG">
 <meta property="og:updated_time" content="2018-03-26T09:25:44.743Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="过滤器与拦截器总结">
 <meta name="twitter:description" content="背景在学习过程中，我们总会遇到过滤器和拦截器的使用，因为对于他们之间的关系和区别不是很清楚，所以每次用的时候都感觉模棱两可的。所以今天特意写一篇文章总结之前用的过滤器与拦截器它们拦截请求的处理过程，不仅要知其然，还要知其所以然。 过滤器我们第一次接触过滤器的时候应该是在学习servlet的时候，过滤器本质是Java组件，它也是一种代码重用技术，它可以改变HTTP请求的内容，响应和header信息。">
-<meta name="twitter:image" content="c:/Users/Administrator/AppData/Local/YNote/data/13572446538@163.com/03f61f7ad5a84a8988608616bd590192/clipboard.png">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/c.png">
 
 
 
@@ -368,7 +368,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="多个拦截器协同工作"><a href="#多个拦截器协同工作" class="headerlink" title="多个拦截器协同工作"></a>多个拦截器协同工作</h2><p><img src="C:/Users/Administrator/AppData/Local/YNote/data/13572446538@163.com/03f61f7ad5a84a8988608616bd590192/clipboard.png" alt="img"></p>
+<h2 id="多个拦截器协同工作"><a href="#多个拦截器协同工作" class="headerlink" title="多个拦截器协同工作"></a>多个拦截器协同工作</h2><p><img src="http://osvtz719h.bkt.clouddn.com/c.png" alt="img"></p>
 <h2 id="拦截器的使用场景"><a href="#拦截器的使用场景" class="headerlink" title="拦截器的使用场景"></a>拦截器的使用场景</h2><ul>
 <li>解决乱码问题</li>
 <li>解决权限问题</li>
@@ -377,10 +377,13 @@
 <li>过滤器Filter依赖于servlet容器</li>
 <li>拦截器HttpInterceptor依赖于框架容器</li>
 </ul>
-<h1 id="关于Restful-API的拦截顺序"><a href="#关于Restful-API的拦截顺序" class="headerlink" title="关于Restful API的拦截顺序"></a>关于Restful API的拦截顺序</h1><p><img src="C:\Users\Administrator\Desktop\捕获.PNG" alt="捕获"></p>
+<h1 id="关于Restful-API的拦截顺序"><a href="#关于Restful-API的拦截顺序" class="headerlink" title="关于Restful API的拦截顺序"></a>关于Restful API的拦截顺序</h1><p><img src="http://osvtz719h.bkt.clouddn.com/b.PNG" alt="捕获"></p>
 <ul>
 <li>请求拦截时，从外到里，先从filter开始，然后Interceptor,最后到达Controller方法</li>
 <li>Controller抛出异常时，先由Aspect处理，如果它不处理，再交给ControllerAdvice异常处理器处理，一层一层往外交。</li>
+</ul>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><h3 id="Servlet3-1规范翻译——过滤器"><a href="#Servlet3-1规范翻译——过滤器" class="headerlink" title="Servlet3.1规范翻译——过滤器"></a><a href="http://jinnianshilongnian.iteye.com/blog/1736348" target="_blank" rel="noopener">Servlet3.1规范翻译——过滤器</a></h3></li>
 </ul>
 
           
@@ -595,7 +598,7 @@ var jiathis_config={
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#过滤器"><span class="nav-number">2.</span> <span class="nav-text">过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义过滤器"><span class="nav-number">2.1.</span> <span class="nav-text">自定义过滤器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三方的过滤器"><span class="nav-number">2.2.</span> <span class="nav-text">第三方的过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传统的spring项目"><span class="nav-number">2.2.1.</span> <span class="nav-text">传统的spring项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#springboot项目"><span class="nav-number">2.2.2.</span> <span class="nav-text">springboot项目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤器总结"><span class="nav-number">2.3.</span> <span class="nav-text">过滤器总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拦截器"><span class="nav-number">3.</span> <span class="nav-text">拦截器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#拦截器的实现"><span class="nav-number">3.1.</span> <span class="nav-text">拦截器的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多个拦截器协同工作"><span class="nav-number">3.2.</span> <span class="nav-text">多个拦截器协同工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拦截器的使用场景"><span class="nav-number">3.3.</span> <span class="nav-text">拦截器的使用场景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拦截器和过滤器的区别"><span class="nav-number">4.</span> <span class="nav-text">拦截器和过滤器的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于Restful-API的拦截顺序"><span class="nav-number">5.</span> <span class="nav-text">关于Restful API的拦截顺序</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#过滤器"><span class="nav-number">2.</span> <span class="nav-text">过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义过滤器"><span class="nav-number">2.1.</span> <span class="nav-text">自定义过滤器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三方的过滤器"><span class="nav-number">2.2.</span> <span class="nav-text">第三方的过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传统的spring项目"><span class="nav-number">2.2.1.</span> <span class="nav-text">传统的spring项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#springboot项目"><span class="nav-number">2.2.2.</span> <span class="nav-text">springboot项目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤器总结"><span class="nav-number">2.3.</span> <span class="nav-text">过滤器总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拦截器"><span class="nav-number">3.</span> <span class="nav-text">拦截器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#拦截器的实现"><span class="nav-number">3.1.</span> <span class="nav-text">拦截器的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多个拦截器协同工作"><span class="nav-number">3.2.</span> <span class="nav-text">多个拦截器协同工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拦截器的使用场景"><span class="nav-number">3.3.</span> <span class="nav-text">拦截器的使用场景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拦截器和过滤器的区别"><span class="nav-number">4.</span> <span class="nav-text">拦截器和过滤器的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于Restful-API的拦截顺序"><span class="nav-number">5.</span> <span class="nav-text">关于Restful API的拦截顺序</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Servlet3-1规范翻译——过滤器"><span class="nav-number">6.0.1.</span> <span class="nav-text">Servlet3.1规范翻译——过滤器</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

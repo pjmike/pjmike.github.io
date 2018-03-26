@@ -364,7 +364,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="多个拦截器协同工作"><a href="#多个拦截器协同工作" class="headerlink" title="多个拦截器协同工作"></a>多个拦截器协同工作</h2><p><img src="C:/Users/Administrator/AppData/Local/YNote/data/13572446538@163.com/03f61f7ad5a84a8988608616bd590192/clipboard.png" alt="img"></p>
+<h2 id="多个拦截器协同工作"><a href="#多个拦截器协同工作" class="headerlink" title="多个拦截器协同工作"></a>多个拦截器协同工作</h2><p><img src="http://osvtz719h.bkt.clouddn.com/c.png" alt="img"></p>
 <h2 id="拦截器的使用场景"><a href="#拦截器的使用场景" class="headerlink" title="拦截器的使用场景"></a>拦截器的使用场景</h2><ul>
 <li>解决乱码问题</li>
 <li>解决权限问题</li>
@@ -373,10 +373,13 @@
 <li>过滤器Filter依赖于servlet容器</li>
 <li>拦截器HttpInterceptor依赖于框架容器</li>
 </ul>
-<h1 id="关于Restful-API的拦截顺序"><a href="#关于Restful-API的拦截顺序" class="headerlink" title="关于Restful API的拦截顺序"></a>关于Restful API的拦截顺序</h1><p><img src="C:\Users\Administrator\Desktop\捕获.PNG" alt="捕获"></p>
+<h1 id="关于Restful-API的拦截顺序"><a href="#关于Restful-API的拦截顺序" class="headerlink" title="关于Restful API的拦截顺序"></a>关于Restful API的拦截顺序</h1><p><img src="http://osvtz719h.bkt.clouddn.com/b.PNG" alt="捕获"></p>
 <ul>
 <li>请求拦截时，从外到里，先从filter开始，然后Interceptor,最后到达Controller方法</li>
 <li>Controller抛出异常时，先由Aspect处理，如果它不处理，再交给ControllerAdvice异常处理器处理，一层一层往外交。</li>
+</ul>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><h3 id="Servlet3-1规范翻译——过滤器"><a href="#Servlet3-1规范翻译——过滤器" class="headerlink" title="Servlet3.1规范翻译——过滤器"></a><a href="http://jinnianshilongnian.iteye.com/blog/1736348" target="_blank" rel="noopener">Servlet3.1规范翻译——过滤器</a></h3></li>
 </ul>
 
           
