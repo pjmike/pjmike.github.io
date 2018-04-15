@@ -252,6 +252,335 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/15/JWT的介绍与使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="pjmike">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://osvtz719h.bkt.clouddn.com/lADPBbCc1SjLjH_NAwDNAwA_768_768.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居者的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/15/JWT的介绍与使用/" itemprop="url">JWT的介绍与使用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-15T23:45:35+08:00">
+                2018-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+          
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>今天写一篇关于JWT学习的记录，虽然网上有很多介绍JWT用法和特性的文章博客，但是还是想自己写一点JWT的总结，其中参照很多优秀的博文。更重要是加深自己的理解。</p>
+<hr>
+<h3 id="什么是JSON-Web-Token"><a href="#什么是JSON-Web-Token" class="headerlink" title="什么是JSON Web Token"></a>什么是JSON Web Token</h3><p>Json web token (JWT), 根据官网的定义，是为了在网络应用环境间传递声明而执行的一种<strong>基于JSON的开放标准</strong>（(RFC 7519).该token被设计为紧凑且安全的，特别适用于分布式站点的单点登录（SSO）场景。<strong>JWT的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息</strong>，以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，该token也可直接被用于认证，也可被加密。</p>
+<h3 id="JWT的结构"><a href="#JWT的结构" class="headerlink" title="JWT的结构"></a>JWT的结构</h3><p>JWT是由三段信息构成的，将这三段信息文本用.链接一起就构成了Jwt字符串<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7 zhi</span><br></pre></td></tr></table></figure></p>
+<p>JWT主要由三部分构成。第一部分头部(header),第二部分载荷(payload),第三部分签名(signature).下面分别具体说说这三部分。</p>
+<p><strong>头部(header)</strong></p>
+<p>头部的结构如下,包含类别(typ)和算法(alg):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;alg&quot;: &quot;HS256&quot;,</span><br><span class="line">  &quot;typ&quot;: &quot;JWT&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>载荷(payload)</strong></p>
+<p>载荷，一直觉得这个词挺难念的，总以为是”负载”。实际上其存放的是一些有用的东西。以下为demo.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;iss&quot;: &quot;pjmike&quot;,</span><br><span class="line">    &quot;iat&quot;: 1441593542,</span><br><span class="line">    &quot;exp&quot;: 1441594332,</span><br><span class="line">    &quot;aud&quot;: &quot;www.example.com&quot;,</span><br><span class="line">    &quot;sub&quot;: &quot;pj@example.com&quot;,</span><br><span class="line">    &quot;from_user&quot;: &quot;B&quot;,</span><br><span class="line">    &quot;target_user&quot;: &quot;A&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>具体解读其中标准字段的含义是(可以根据实际情况定义字段):</p>
+<ul>
+<li>iss:该JWT的签发者</li>
+<li>iat:什么时候签发</li>
+<li>exp:什么时候过期，这是一个Unix时间戳</li>
+<li>aud:接收该JWT的一方</li>
+<li>sub:JWT所面向的用户</li>
+<li>nbf：如果当前时间在nbf里的时间之前，则Token不被接受；一般都会留一些余地，比如几分钟</li>
+</ul>
+<p><strong>签名(signature)</strong></p>
+<p>将上面两部分分别进行Base64编码后的字符串用.连接在一起(头部在前)，就形成如下的样子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcm9tX3VzZXIiOiJCIiwidGFyZ2V0X3VzZXIiOiJBIn0</span><br></pre></td></tr></table></figure></p>
+<p>至于这个Base64编码仅是一种编码方式，可以解码的，并不是加密方式。所以不要放入敏感数据。</p>
+<p>最后，我们将上面拼接完的字符串用HS256算法(一种加密算法)进行加密。在加密的时候，我们还需要提供一个密钥（secret）。以下是用master做密钥加密后的内容:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rSWamyAYwuHCo7IFAgd1oRpSP7nzL7BF5t7ItqpKViM</span><br></pre></td></tr></table></figure>
+<p>以上加密后的内容就是<strong>签名</strong>。</p>
+<p>最后将这一部分签名也拼接在被签名的字符串后面，我们就得到了完整的JWT:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcm9tX3VzZXIiOiJCIiwidGFyZ2V0X3VzZXIiOiJBIn0.rSWamyAYwuHCo7IFAgd1oRpSP7nzL7BF5t7</span><br></pre></td></tr></table></figure></p>
+<h3 id="JWT的特点"><a href="#JWT的特点" class="headerlink" title="JWT的特点"></a>JWT的特点</h3><ul>
+<li>构成简单，体积小，因而传输速度快</li>
+<li>传输方式多样，可以通过URL/POST参数/HTTP头部等方式传输,一般在认证机制上是放在cookie或者HTTP头部里。</li>
+<li>严格的结构化。它自身（在 payload 中）就包含了所有与用户相关的验证消息，如用户可访问路由、访问有效期等信息，服务器无需再去连接数据库验证信息的有效性，并且 payload 支持为你的应用而定制化。</li>
+<li>支持跨域验证，可以应用于单点登录。</li>
+</ul>
+<h3 id="JWT的使用场景"><a href="#JWT的使用场景" class="headerlink" title="JWT的使用场景"></a>JWT的使用场景</h3><p>因为JWT的传输方便，速度快等特点，它一般用于以下场景</p>
+<ul>
+<li>后台认证和授权应用(用的最多)，移动端的后台认证更多使用token机制。</li>
+<li>单点登录</li>
+<li>邮件服务</li>
+</ul>
+<p>当然，JWT还有更多其他的用处，这个就要看具体情况，具体分析了。</p>
+<h3 id="JWT的认证机制"><a href="#JWT的认证机制" class="headerlink" title="JWT的认证机制"></a>JWT的认证机制</h3><p>接下来讲讲JWT被用的最多的认证机制。我们都知道现在有很多种实现登录认证的手段，比如cookie,session机制，还有OAuth2.0机制。那么JWT是怎么杀出重围，赢得世界的喜爱呢。下面分别浅谈一下session机制，OAuth2.0和JWT的区别。</p>
+<p><strong>传统的session认证</strong></p>
+<p>以下是传统的session认证过程</p>
+<ul>
+<li>服务器用session保存用户的登录信息</li>
+<li>响应时设置带有验证信息cookie让客户端保存</li>
+<li>客户端请求验证时带上cookie，服务端进行验证</li>
+</ul>
+<p><strong>session认证的不足</strong></p>
+<ul>
+<li>当用户数量增多时，每个用户访问都要在服务器端做记录，而session是放在内存中的，这样会加大服务器开销。</li>
+<li>扩展性不好，不利于分布式场景，因为每次用户请求需要到相对应的服务器端去获取授权的资源。因为session是放在服务端的。一般我们在服务端这么做就可以了Access-Control-Allow-Origin: *。</li>
+<li>会有CSRF危险.:因为是基于cookie来识别的，如果cookie被截获，用户很容易受到跨站请求伪造的攻击。</li>
+</ul>
+<p>参考文章:</p>
+<ul>
+<li>Cookie/Session的机制与安全:<br><a href="http://harttle.land/2015/08/10/cookie-session.html" target="_blank" rel="noopener">http://harttle.land/2015/08/10/cookie-session.html</a></li>
+<li>更详细的对于cookie和session的介绍可以参阅《深入分析 Java Web 技术内幕》第10章(session和cookie的介绍):<br><a href="https://www.ibm.com/developerworks/cn/java/books/javaweb_xlb/10/index.html" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/java/books/javaweb_xlb/10/index.html</a></li>
+</ul>
+<p><strong>OAuth2.0的认证机制</strong></p>
+<p><strong>JWT的认证</strong></p>
+<p>在用户使用证书或者账号密码登入的时候一个 JWT将会返回，同时可以把这个 JWT 存储在local storage、或者 cookie 中.<br><img src="http://osvtz719h.bkt.clouddn.com/token.webp" alt="image"></p>
+<ul>
+<li>用户使用用户名密码登录</li>
+<li>服务器通过验证返回用户一个token</li>
+<li>客户端存储token,在每次请求时加上这个token值</li>
+<li>服务端拦截验证token值,并返回数据</li>
+</ul>
+<p><strong>登录过程</strong></p>
+<p>服务器返回token,普遍的做法是放在cookie和HTTP头部。<br><img src="http://osvtz719h.bkt.clouddn.com/JWT%E7%99%BB%E5%BD%95%E8%BF%87%E7%A8%8B.jpg" alt="image"></p>
+<p><strong>请求认证</strong></p>
+<p>客户端带着token到服务端进行验证。<br><img src="http://osvtz719h.bkt.clouddn.com/JWT%E8%AF%B7%E6%B1%82%E8%AE%A4%E8%AF%81.jpg" alt="image"><br>(以上图片来自网络或博客)</p>
+<p><strong>注意:</strong> 服务端保存的token一般是放在JWT包自带的缓存设计中里,如图所示，当然也可以将token保存在nosql和一般数据库中，具体看安全性要求。</p>
+<hr>
+<h3 id="JWT的Java代码实现"><a href="#JWT的Java代码实现" class="headerlink" title="JWT的Java代码实现"></a>JWT的Java代码实现</h3><p>介绍完了JWT的基本概念和特点等，接下来开始实践。JWT的官网(<a href="https://jwt.io/)里面有对各种语言的库，而且都放在github上的。" target="_blank" rel="noopener">https://jwt.io/)里面有对各种语言的库，而且都放在github上的。</a><br>以下是Java的github地址:<br><a href="https://github.com/auth0/java-jwt" target="_blank" rel="noopener">https://github.com/auth0/java-jwt</a></p>
+<p>这里面也介绍其具体用法，接下来我们用它创建JWT的实现demo.</p>
+<p>首先添加maven依赖：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.auth0&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;java-jwt&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.3.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></p>
+<p>编写创建JWT的工具类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">package cn.pjmike.Blog.Jwt;</span><br><span class="line"></span><br><span class="line">import com.auth0.jwt.JWT;</span><br><span class="line">import com.auth0.jwt.JWTVerifier;</span><br><span class="line">import com.auth0.jwt.algorithms.Algorithm;</span><br><span class="line">import com.auth0.jwt.interfaces.Claim;</span><br><span class="line">import com.auth0.jwt.interfaces.DecodedJWT;</span><br><span class="line"></span><br><span class="line">import java.io.UnsupportedEncodingException;</span><br><span class="line">import java.util.Date;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * JWT工具类</span><br><span class="line"> *</span><br><span class="line"> * @author pjmike</span><br><span class="line"> * @create 2018-01-30 16:01</span><br><span class="line"> **/</span><br><span class="line">public class JwtToken &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 加密所需盐</span><br><span class="line">     */</span><br><span class="line">    private static final String SECRET = &quot;secret&quot;;</span><br><span class="line">    /**</span><br><span class="line">     * 令牌过期时间3天</span><br><span class="line">     */</span><br><span class="line">    private static final Long TTLMILLS = 1000*60*60*24*3L;</span><br><span class="line"></span><br><span class="line">    public static String createToken(long userid) throws UnsupportedEncodingException &#123;</span><br><span class="line">        //当前系统时间</span><br><span class="line">        long nowMillis = System.currentTimeMillis();</span><br><span class="line">        Date date = new Date(TTLMILLS+nowMillis);</span><br><span class="line">        //利用hashmap设置JWT的头信息</span><br><span class="line">        Map&lt;String, Object&gt; head = new HashMap&lt;String, Object&gt;(16);</span><br><span class="line">        head.put(&quot;type&quot;, &quot;jwt&quot;);</span><br><span class="line">        head.put(&quot;alg&quot;, &quot;HS256&quot;);</span><br><span class="line">        return JWT.create()</span><br><span class="line">                .withHeader(head)</span><br><span class="line">                .withClaim(&quot;userid&quot;, userid)</span><br><span class="line">                .withExpiresAt(date)</span><br><span class="line">                .withNotBefore(new Date(nowMillis))</span><br><span class="line">                .sign(Algorithm.HMAC256(SECRET));</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 验证token</span><br><span class="line">     *</span><br><span class="line">     * @param token</span><br><span class="line">     * @return</span><br><span class="line">     * @throws UnsupportedEncodingException</span><br><span class="line">     */</span><br><span class="line">    public static Map&lt;String, Claim&gt; verifyToken(String token) throws UnsupportedEncodingException &#123;</span><br><span class="line">        //用加密方式</span><br><span class="line">        JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(SECRET)).build();</span><br><span class="line">        DecodedJWT jwt = jwtVerifier.verify(token);</span><br><span class="line">        return jwt.getClaims();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 判断token是否过期</span><br><span class="line">     * @param token</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    public static boolean verifyTokenTime(String token) &#123;</span><br><span class="line">        DecodedJWT jwt = JWT.decode(token);</span><br><span class="line">        Date date = jwt.getExpiresAt();</span><br><span class="line">        System.out.println(date.getTime());</span><br><span class="line">        //如果过期了，返回true</span><br><span class="line">        if (date.getTime() &gt; 0) &#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Token过期时间设置。</p>
+<ul>
+<li><a href="https://juejin.im/post/5a6c60166fb9a01caf37a5e5" target="_blank" rel="noopener">Token 认证的来龙去脉</a></li>
+<li><a href="http://andydev.me/2016/05/07/android-notes-1/" target="_blank" rel="noopener">Token的过期处理以及不同API环境的切换技巧</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/05/spring-security学习笔记-四/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="pjmike">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://osvtz719h.bkt.clouddn.com/lADPBbCc1SjLjH_NAwDNAwA_768_768.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居者的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/05/spring-security学习笔记-四/" itemprop="url">spring-security学习笔记-四</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-05T17:05:25+08:00">
+                2018-04-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+          
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="spring-security控制授权"><a href="#spring-security控制授权" class="headerlink" title="spring security控制授权"></a>spring security控制授权</h1><h1 id="权限表达式"><a href="#权限表达式" class="headerlink" title="权限表达式"></a>权限表达式</h1><p><img src="http://osvtz719h.bkt.clouddn.com/%E6%9D%83%E9%99%90.png" alt="权限表达式"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">     http.formLogin()</span><br><span class="line">             .loginPage(<span class="string">"/authentication"</span>)</span><br><span class="line">             .successHandler(myAuthenticationSuccessHandler)</span><br><span class="line">             .and()</span><br><span class="line">             <span class="comment">//请求验证</span></span><br><span class="line">             .authorizeRequests()</span><br><span class="line">                 <span class="comment">//不需要验证</span></span><br><span class="line">                 .antMatchers(<span class="string">"/authentication"</span>).hasRole(<span class="string">"ADMIN"</span>)</span><br><span class="line">             <span class="comment">//任何请求</span></span><br><span class="line">             .anyRequest()</span><br><span class="line">             <span class="comment">//都需要身份验证</span></span><br><span class="line">             .authenticated()</span><br><span class="line">             .and()</span><br><span class="line">             .csrf().disable();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> User(s,  passwordEncoder.encode(<span class="string">"123456"</span>),<span class="keyword">true</span>,<span class="keyword">true</span>,<span class="keyword">true</span>,<span class="keyword">true</span>,AuthorityUtils.commaSeparatedStringToAuthorityList(<span class="string">"ROLE_ADMIN"</span>));</span><br></pre></td></tr></table></figure>
+<p>如果要添加多个权限表达式，则使用access方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    http.formLogin()</span><br><span class="line">            .loginPage(<span class="string">"/authentication"</span>)</span><br><span class="line">            .successHandler(myAuthenticationSuccessHandler)</span><br><span class="line">            .and()</span><br><span class="line">            <span class="comment">//请求验证</span></span><br><span class="line">            .authorizeRequests()</span><br><span class="line">                .antMatchers(<span class="string">"/authentication"</span>).hasRole(<span class="string">"ADMIN"</span>)</span><br><span class="line">                .antMatchers(HttpMethod.GET,<span class="string">"/user"</span>).access(<span class="string">"hasRole('ADMIN') and hasIpAddress('xxxxx')"</span>)</span><br><span class="line">            <span class="comment">//任何请求</span></span><br><span class="line">            .anyRequest()</span><br><span class="line">            <span class="comment">//都需要身份验证</span></span><br><span class="line">            .authenticated()</span><br><span class="line">            .and()</span><br><span class="line">            .csrf().disable();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="基于数据库RBAC数据模型控制权限"><a href="#基于数据库RBAC数据模型控制权限" class="headerlink" title="基于数据库RBAC数据模型控制权限"></a>基于数据库RBAC数据模型控制权限</h1><p>通过RBAC数据模型实则是由三张实体表和两张关系表组成。</p>
+<p><strong>实体表：用户表，角色表，资源表</strong></p>
+<p><strong>关系表: 用户角色关系表，角色资源关系表</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Rbacservice</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">hasPermisson</span><span class="params">(HttpServletRequest request, Authentication authentication)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RbacServiceImpl</span> <span class="keyword">implements</span> <span class="title">Rbacservice</span></span>&#123;</span><br><span class="line">    AntPathMatcher antPathMatcher = <span class="keyword">new</span> AntPathMatcher();</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasPermisson</span><span class="params">(HttpServletRequest request, Authentication authentication)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> hasPermisson = <span class="keyword">false</span>;</span><br><span class="line">        Object principal = authentication.getPrincipal();</span><br><span class="line">        <span class="keyword">if</span> (principal <span class="keyword">instanceof</span> UserDetails) &#123;</span><br><span class="line">            String username = ((UserDetails) principal).getUsername();</span><br><span class="line">            <span class="comment">//读取用户所拥有权限所有的URL</span></span><br><span class="line">            Set&lt;String&gt; urls = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line">            <span class="keyword">for</span> (String url : urls) &#123;</span><br><span class="line">                <span class="keyword">if</span> (antPathMatcher.match(url, request.getRequestURI())) &#123;</span><br><span class="line">                    hasPermisson = <span class="keyword">true</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> hasPermisson;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/05/spring-security学习笔记-三/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1471,161 +1800,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="pjmike">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://osvtz719h.bkt.clouddn.com/lADPBbCc1SjLjH_NAwDNAwA_768_768.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="风居者的街道">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" itemprop="url">项目中遇到的ExceptionInInitializerError异常引发的问题</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-18T00:13:12+08:00">
-                2018-03-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-          
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前在集成第三方即时通信系统-融云的时候，我直接clone它的服务端源码，然后导入我的项目，我在测试它连接融云服务器案例时，发现一直不成功，始终报一个 ExceptionInInitializerError 的异常。后来通过网上查资料才发现，这个异常是静态变量初始化时出现异常时，JVM会抛出<strong>java.lang.ExceptionInInitializerError</strong>的异常。由此，我对这个异常做了进一步探究。</p>
-<h2 id="抛出ExceptionInInitializerError异常的原因"><a href="#抛出ExceptionInInitializerError异常的原因" class="headerlink" title="抛出ExceptionInInitializerError异常的原因"></a>抛出ExceptionInInitializerError异常的原因</h2><p>因为这个异常时在静态变量初始化发生异常时抛出的，所以首先我们了解一下<strong>静态变量初始化的问题</strong>。</p>
-<h3 id="静态变量初始化"><a href="#静态变量初始化" class="headerlink" title="静态变量初始化"></a>静态变量初始化</h3><p>提到静态变量初始化，又不得不提JVM的类加载机制，<strong>把描述类的数据从class文件加载到内存，并对数据进行校验，转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。</strong></p>
-<p>类加载的生命周期包括:加载，验证，准备，解析，初始化，使用和卸载这7个阶段。静态变量的初始化相关操作主要在准备和初始化阶段。</p>
-<p><strong>准备阶段</strong></p>
-<p>对于我们的静态变量来说,首先在准备阶段进行类变量内存的分配以及设置类变量初始值，(类变量是指被static修饰的变量),例如:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value = <span class="number">123</span>.</span><br><span class="line"><span class="comment">//这时初始值为value = 0;</span></span><br></pre></td></tr></table></figure>
-<p><strong>初始化阶段</strong></p>
-<p>初始化阶段是执行类构造器clinit()方法的过程：</p>
-<ul>
-<li>clinit方法是有<strong>编译器自动收集类中</strong>的<strong>所有类变量(类变量就是静态变量)的赋值动作和静态语句块（static{}）块</strong>中的语句合并产生的，编译器收集顺序是 <strong>由语句在源文件中出现的顺序所决定的</strong>，静态语句块只能访问到定义在静态语句块之前的变量。</li>
-<li>clinit()方法不需要显式调用父类构造器，虚拟机会保证在子类clinit（)方法执行之前，父类的clinit()方法已经执行完毕。所以虚拟机第一个执行的肯定是java.lang.object.</li>
-<li>由于父类的clinit()方法先执行，也就意味着父类中定义的静态语句块要优于子类的变量赋值操作。</li>
-<li>如果一个类中没有静态语句块和堆变量赋值语句，<strong>编译器可以不为这个类生成clinit（）方法。</strong></li>
-</ul>
-<p>所以由以上可以看出类变量的初始化顺序由它们在源文件中出现的顺序决定的，如果第一行声明了一个静态变量，它在第二行被使用，实际上它却在第三行被初始化，这样的情况就会出现变量初始化异常，具体异常就是<strong>NullPointerException异常</strong></p>
-<h3 id="引起ExceptionInInitializerError异常的真凶"><a href="#引起ExceptionInInitializerError异常的真凶" class="headerlink" title="引起ExceptionInInitializerError异常的真凶"></a>引起ExceptionInInitializerError异常的真凶</h3><p>分析完了静态变量初始化问题,再来看具体引起ExceptionInInitializerError异常产生的原因是什么。在没碰到ExceptionInInitializerError异常的时候，我也不知道具体能引起它的原因有什么，所以我还是利用了搜索引擎Google了一下，发现任何异常都有可能引起ExceptionInInitializerError异常的发生，比如说：java.lang.ArrayIndexOutOfBound或者java.lang.NullPointerException。</p>
-<p>再来具体看看我项目中的实际情况是什么:</p>
-<p>我运行代码发现，控制台打印出了空指针的错误</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">"main"</span> java.lang.ExceptionInInitializerError</span><br><span class="line">	at io.rong.util.CommonUtil.getCheckInfo(CommonUtil.java:<span class="number">340</span>)</span><br><span class="line">	at io.rong.util.CommonUtil.checkFiled(CommonUtil.java:<span class="number">73</span>)</span><br><span class="line">	at io.rong.methods.user.User.register(User.java:<span class="number">59</span>)</span><br><span class="line">	at io.rong.example.user.UserExample.main(UserExample.java:<span class="number">40</span>)</span><br><span class="line">Caused by: java.lang.NullPointerException <span class="comment">//空指针</span></span><br><span class="line">	at io.rong.util.JsonUtil.&lt;clinit&gt;(JsonUtil.java:<span class="number">17</span>)</span><br><span class="line">	... <span class="number">4</span> more</span><br></pre></td></tr></table></figure>
-<p>空指针的错误具体位置是在：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JsonUtil</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String JSONFILE = JsonUtil.class.getClassLoader().getResource(<span class="string">"jsonsource"</span>).getPath()+<span class="string">"/"</span>;<span class="comment">//这个地方报错</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>即也就是在静态变量初始化的时候抛出的空指针异常。那么为什么会抛出空指针呢。接下来就要说JsonUtil.class.getClassLoader().getResource(“jsonsource”)的问题</p>
-<p><strong>class.getClassLoader()解析问题</strong></p>
-<p>getClassLoader()获取的是这个 <strong>类对象的加载器</strong>，只有Class类才有getClassLoader()方法，当一个类被虚拟机加载完毕过后，也就是上面所说的类加载机制，然后会创建一个Class类实例，用于<strong>虚拟机对类的管理</strong>，所以JsonUtil.class就是获得它的Class类，。</p>
-<p>而JsonUtil.class.getClassLoader().getResource(“jsonsource”)就是在JsonUtil当前位置查找“jsonsource”这个资源文件。这是一个相对路径，实际上它返回的是一个URL.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public URL getResource(String name) &#123;</span><br><span class="line">       URL url;</span><br><span class="line">       ...</span><br></pre></td></tr></table></figure>
-<p>然后getPath(),就是获取这个URL的路径地址。但是却报出 java.lang.NullPointerException空指针异常。说明资源没找到。想想第三方平台肯定提供的资源的，结果仔细一看，是<strong>我没有把它SDK中的resources资源文件导入，所以找不到“jsonsource”资源，所以才报出空指针错误，从而报出ExceptionInInitializerError异常</strong>。这才找到了最终的真凶。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li><a href="http://blog.csdn.net/briblue/article/details/54973413" target="_blank" rel="noopener"> 一看你就懂，超详细java中的ClassLoader详解</a></li>
-<li>《深入理解java虚拟机》</li>
-<li><a href="http://deepinmind.iteye.com/blog/2078286" target="_blank" rel="noopener">java中的ExceptionInInitializerError异常及解决方法</a></li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -1673,7 +1854,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1686,7 +1867,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>
