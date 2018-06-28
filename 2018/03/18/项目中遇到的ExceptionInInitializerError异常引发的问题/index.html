@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang="zh-Hans">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -98,7 +98,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Pisces',
+    scheme: 'Mist',
     version: '5.1.4',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
@@ -324,41 +324,15 @@
       
         
           
-            <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前在集成第三方即时通信系统-融云的时候，我直接clone它的服务端源码，然后导入我的项目，我在测试它连接融云服务器案例时，发现一直不成功，始终报一个 ExceptionInInitializerError 的异常。后来通过网上查资料才发现，这个异常是静态变量初始化时出现异常时，JVM会抛出<strong>java.lang.ExceptionInInitializerError</strong>的异常。由此，我对这个异常做了进一步探究。</p>
-<h2 id="抛出ExceptionInInitializerError异常的原因"><a href="#抛出ExceptionInInitializerError异常的原因" class="headerlink" title="抛出ExceptionInInitializerError异常的原因"></a>抛出ExceptionInInitializerError异常的原因</h2><p>因为这个异常时在静态变量初始化发生异常时抛出的，所以首先我们了解一下<strong>静态变量初始化的问题</strong>。</p>
-<h3 id="静态变量初始化"><a href="#静态变量初始化" class="headerlink" title="静态变量初始化"></a>静态变量初始化</h3><p>提到静态变量初始化，又不得不提JVM的类加载机制，<strong>把描述类的数据从class文件加载到内存，并对数据进行校验，转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。</strong></p>
-<p>类加载的生命周期包括:加载，验证，准备，解析，初始化，使用和卸载这7个阶段。静态变量的初始化相关操作主要在准备和初始化阶段。</p>
-<p><strong>准备阶段</strong></p>
-<p>对于我们的静态变量来说,首先在准备阶段进行类变量内存的分配以及设置类变量初始值，(类变量是指被static修饰的变量),例如:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value = <span class="number">123</span>.</span><br><span class="line"><span class="comment">//这时初始值为value = 0;</span></span><br></pre></td></tr></table></figure>
-<p><strong>初始化阶段</strong></p>
-<p>初始化阶段是执行类构造器clinit()方法的过程：</p>
-<ul>
-<li>clinit方法是有<strong>编译器自动收集类中</strong>的<strong>所有类变量(类变量就是静态变量)的赋值动作和静态语句块（static{}）块</strong>中的语句合并产生的，编译器收集顺序是 <strong>由语句在源文件中出现的顺序所决定的</strong>，静态语句块只能访问到定义在静态语句块之前的变量。</li>
-<li>clinit()方法不需要显式调用父类构造器，虚拟机会保证在子类clinit（)方法执行之前，父类的clinit()方法已经执行完毕。所以虚拟机第一个执行的肯定是java.lang.object.</li>
-<li>由于父类的clinit()方法先执行，也就意味着父类中定义的静态语句块要优于子类的变量赋值操作。</li>
-<li>如果一个类中没有静态语句块和堆变量赋值语句，<strong>编译器可以不为这个类生成clinit（）方法。</strong></li>
-</ul>
-<p>所以由以上可以看出类变量的初始化顺序由它们在源文件中出现的顺序决定的，如果第一行声明了一个静态变量，它在第二行被使用，实际上它却在第三行被初始化，这样的情况就会出现变量初始化异常，具体异常就是<strong>NullPointerException异常</strong></p>
-<h3 id="引起ExceptionInInitializerError异常的真凶"><a href="#引起ExceptionInInitializerError异常的真凶" class="headerlink" title="引起ExceptionInInitializerError异常的真凶"></a>引起ExceptionInInitializerError异常的真凶</h3><p>分析完了静态变量初始化问题,再来看具体引起ExceptionInInitializerError异常产生的原因是什么。在没碰到ExceptionInInitializerError异常的时候，我也不知道具体能引起它的原因有什么，所以我还是利用了搜索引擎Google了一下，发现任何异常都有可能引起ExceptionInInitializerError异常的发生，比如说：java.lang.ArrayIndexOutOfBound或者java.lang.NullPointerException。</p>
-<p>再来具体看看我项目中的实际情况是什么:</p>
-<p>我运行代码发现，控制台打印出了空指针的错误</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">"main"</span> java.lang.ExceptionInInitializerError</span><br><span class="line">	at io.rong.util.CommonUtil.getCheckInfo(CommonUtil.java:<span class="number">340</span>)</span><br><span class="line">	at io.rong.util.CommonUtil.checkFiled(CommonUtil.java:<span class="number">73</span>)</span><br><span class="line">	at io.rong.methods.user.User.register(User.java:<span class="number">59</span>)</span><br><span class="line">	at io.rong.example.user.UserExample.main(UserExample.java:<span class="number">40</span>)</span><br><span class="line">Caused by: java.lang.NullPointerException <span class="comment">//空指针</span></span><br><span class="line">	at io.rong.util.JsonUtil.&lt;clinit&gt;(JsonUtil.java:<span class="number">17</span>)</span><br><span class="line">	... <span class="number">4</span> more</span><br></pre></td></tr></table></figure>
-<p>空指针的错误具体位置是在：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JsonUtil</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String JSONFILE = JsonUtil.class.getClassLoader().getResource(<span class="string">"jsonsource"</span>).getPath()+<span class="string">"/"</span>;<span class="comment">//这个地方报错</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>即也就是在静态变量初始化的时候抛出的空指针异常。那么为什么会抛出空指针呢。接下来就要说JsonUtil.class.getClassLoader().getResource(“jsonsource”)的问题</p>
-<p><strong>class.getClassLoader()解析问题</strong></p>
-<p>getClassLoader()获取的是这个 <strong>类对象的加载器</strong>，只有Class类才有getClassLoader()方法，当一个类被虚拟机加载完毕过后，也就是上面所说的类加载机制，然后会创建一个Class类实例，用于<strong>虚拟机对类的管理</strong>，所以JsonUtil.class就是获得它的Class类，。</p>
-<p>而JsonUtil.class.getClassLoader().getResource(“jsonsource”)就是在JsonUtil当前位置查找“jsonsource”这个资源文件。这是一个相对路径，实际上它返回的是一个URL.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public URL getResource(String name) &#123;</span><br><span class="line">       URL url;</span><br><span class="line">       ...</span><br></pre></td></tr></table></figure>
-<p>然后getPath(),就是获取这个URL的路径地址。但是却报出 java.lang.NullPointerException空指针异常。说明资源没找到。想想第三方平台肯定提供的资源的，结果仔细一看，是<strong>我没有把它SDK中的resources资源文件导入，所以找不到“jsonsource”资源，所以才报出空指针错误，从而报出ExceptionInInitializerError异常</strong>。这才找到了最终的真凶。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li><a href="http://blog.csdn.net/briblue/article/details/54973413" target="_blank" rel="noopener"> 一看你就懂，超详细java中的ClassLoader详解</a></li>
-<li>《深入理解java虚拟机》</li>
-<li><a href="http://deepinmind.iteye.com/blog/2078286" target="_blank" rel="noopener">java中的ExceptionInInitializerError异常及解决方法</a></li>
-</ul>
-
-          
+          背景之前在集成第三方即时通信系统-融云的时候，我直接clone它的服务端源码，然后导入我的项目，我在测试它连接融云服务器案例时，发现一直不成功，始终报一个 ExceptionInInitializerError 的异常。后来通过网上查资料才发现，这个异常是静态变量初始化时出现异常时，JVM会抛出ja
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -482,7 +456,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -494,10 +468,10 @@ var jiathis_config={
               
               
               <div class="site-state-item site-state-tags">
-                
+                <a href="/tags/index.html">
                   <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">标签</span>
-                
+                </a>
               </div>
             
 
@@ -608,7 +582,7 @@ var jiathis_config={
 
 
 
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
 <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 本站总访问量 <span id="busuanzi_value_site_pv"></span> &nbsp&nbsp&nbsp
 您是第<span id="busuanzi_value_site_uv"></span>个来到的小伙伴
@@ -658,7 +632,12 @@ var jiathis_config={
   
 
 
+  
 
+
+
+  
+  
 
 
 
@@ -698,6 +677,21 @@ var jiathis_config={
     <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
   
 
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three-waves.min.js"></script>
+  
+
 
   
 
@@ -710,13 +704,6 @@ var jiathis_config={
 
   
   
-
-
-  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
-
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
-
-
 
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
