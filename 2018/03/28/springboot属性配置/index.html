@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="背景@ConfigurationProperties 和 @Value 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形 @value的配置application.properties配置文件中 12user.name=pjm">
+<meta name="description" content="背景@ConfigurationProperties 和 @Value 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形">
 <meta name="keywords" content="springboot">
 <meta property="og:type" content="article">
 <meta property="og:title" content="springboot属性配置">
 <meta property="og:url" content="http://yoursite.com/2018/03/28/springboot属性配置/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="背景@ConfigurationProperties 和 @Value 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形 @value的配置application.properties配置文件中 12user.name=pjm">
+<meta property="og:description" content="背景@ConfigurationProperties 和 @Value 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2018-04-05T01:58:00.610Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="springboot属性配置">
-<meta name="twitter:description" content="背景@ConfigurationProperties 和 @Value 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形 @value的配置application.properties配置文件中 12user.name=pjm">
+<meta name="twitter:description" content="背景@ConfigurationProperties 和 @Value 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形">
 
 
 
@@ -354,28 +354,14 @@
 
       
         
-          
-            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><code>@ConfigurationProperties</code> 和 <code>@Value</code> 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形</p>
-<h1 id="value的配置"><a href="#value的配置" class="headerlink" title="@value的配置"></a>@value的配置</h1><p><strong>application.properties配置文件中</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user.name=pjmike</span><br><span class="line">user.age=<span class="number">21</span></span><br></pre></td></tr></table></figure>
-<p><strong>实体类中</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="meta">@Value</span>(<span class="string">"$&#123;user.name&#125;"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="meta">@Value</span>(<span class="string">"$&#123;user.age"</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>直接在参数上添加@Value注解即可</p>
-<h1 id="ConfigurationProperties配置"><a href="#ConfigurationProperties配置" class="headerlink" title="@ConfigurationProperties配置"></a>@ConfigurationProperties配置</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@ConfigurationProperties</span>(prefix = <span class="string">"user"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties</span>(User.class)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Chapter2Application</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		SpringApplication.run(Chapter2Application.class, args);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user.name=pjmike</span><br><span class="line">user.age=<span class="number">21</span></span><br></pre></td></tr></table></figure>
-<p>以上代码就可实现@ConfigurationProperties对属性的绑定操作</p>
-<p><strong>注意</strong>:</p>
-<ul>
-<li>在<code>@EnableConfigurationProperties</code>注解中列出要注册的属性类</li>
-</ul>
-<h1 id="PropertySource注解"><a href="#PropertySource注解" class="headerlink" title="@PropertySource注解"></a>@PropertySource注解</h1><p>@PropertySource注解可以从properties文件中，获取对应的key-value值，将其赋予变量.</p>
-<p>它可以和@value和@ConfigurationProperties配合使用。通过该注解可以指定某一个properties配置文件，而不是默认的application.properties文件</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@PropertySource</span>(<span class="string">"classpath:user.properties"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="meta">@Value</span>(<span class="string">"$&#123;user.name&#125;"</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="meta">@Value</span>(<span class="string">"$&#123;user.age"</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="添加参数验证"><a href="#添加参数验证" class="headerlink" title="添加参数验证"></a>添加参数验证</h1><p><code>@ConfigurationProperties</code> 是可以和 validation 注解一起使用的</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@ConfigurationProperties</span>(prefix = <span class="string">"user"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="meta">@NotBlank</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
+          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><code>@ConfigurationProperties</code> 和 <code>@Value</code> 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/28/springboot属性配置/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
