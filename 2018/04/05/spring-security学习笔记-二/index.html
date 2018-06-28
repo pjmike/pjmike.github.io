@@ -355,16 +355,16 @@
       
         
           
-          处理用户信息获取逻辑(UseDetailService)我们在表单登录时，spring securtiy是使用UserDetailService类来处理用户传过来的用户名和密码，所以我们来实现这个接口类，来自定义处理用户信息的逻辑
-123456789101112131415161718@Compon
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/05/spring-security学习笔记-二/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
+            <h1 id="处理用户信息获取逻辑-UseDetailService"><a href="#处理用户信息获取逻辑-UseDetailService" class="headerlink" title="处理用户信息获取逻辑(UseDetailService)"></a>处理用户信息获取逻辑(UseDetailService)</h1><p>我们在表单登录时，spring securtiy是使用UserDetailService类来处理用户传过来的用户名和密码，所以我们来实现这个接口类，来自定义处理用户信息的逻辑</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyUserDetailService</span> <span class="keyword">implements</span> <span class="title">UserDetailsService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> UserRepository userRepository;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> PasswordEncoder passwordEncoder;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> UserDetails <span class="title">loadUserByUsername</span><span class="params">(String s)</span> <span class="keyword">throws</span> UsernameNotFoundException </span>&#123;</span><br><span class="line">        log.info(<span class="string">"用户名 "</span> + s);</span><br><span class="line">        <span class="comment">//从数据库查找用户名对应的密码，然后放入User中,与前台传入的密码进行校验匹配由security帮你实现。</span></span><br><span class="line">        <span class="comment">//判定用户账号是否被锁定</span></span><br><span class="line">        <span class="comment">//处理加密与解密</span></span><br><span class="line">        log.info(<span class="string">"每次的密码:&#123;&#125;"</span>, passwordEncoder.encode(<span class="string">"123456"</span>));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> User(s,  passwordEncoder.encode(<span class="string">"123456"</span>),<span class="keyword">true</span>,<span class="keyword">true</span>,<span class="keyword">true</span>,<span class="keyword">true</span>,AuthorityUtils.commaSeparatedStringToAuthorityList(<span class="string">"admin"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="处理用户校验逻辑-UserDetails"><a href="#处理用户校验逻辑-UserDetails" class="headerlink" title="处理用户校验逻辑(UserDetails)"></a>处理用户校验逻辑(UserDetails)</h1><p>在处理用户信息获取逻辑时，我们实现了UserDetailService接口，其中的loadUserByUsername方法载入用户信息，其返回值就是一个UserDetails接口，该接口有以下几个方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDetails</span> <span class="keyword">extends</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">  	<span class="comment">//用户的权限</span></span><br><span class="line">    Collection&lt;? extends GrantedAuthority&gt; getAuthorities();</span><br><span class="line">	<span class="comment">//获取用户密码</span></span><br><span class="line">    <span class="function">String <span class="title">getPassword</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//获取用户名</span></span><br><span class="line">    <span class="function">String <span class="title">getUsername</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//判断用户的账号是否过期，过期的账号不能被校验</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isAccountNonExpired</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//判断用户是否被锁定，锁定的账号不能被校验</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isAccountNonLocked</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//判断用户的密码是否过期，过期的账号不能被校验</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isCredentialsNonExpired</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//判断用户是启用还是被禁用</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isEnabled</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>loadUserByUsername方法实则返回的是User类，该类实现了UserDetails接口，当然我们也可以自己实现该接口。</p>
+<h1 id="处理密码加密与解密"><a href="#处理密码加密与解密" class="headerlink" title="处理密码加密与解密"></a>处理密码加密与解密</h1><p>对于用户登录的密码，一般情况下我们是加密过后将其存入数据库的，不应该将其明文直接放在数据库中。加密用户密码，springsecurtiy为我们提供了一个工具类，PasswordEncoder。PasswordEncoder只是一个接口，我们可以用BCryptPasswordEncoder这个实现了该接口的类来完成加密解密的工作。</p>
+<p>对用户密码的加密与解密,将PasswordEncoder注入进来。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span></span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">PasswordEncoder <span class="title">passwordEncoder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> BCryptPasswordEncoder();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
         
       
     </div>
@@ -602,6 +602,15 @@ var jiathis_config={
   </span>
   <span class="author" itemprop="copyrightHolder">pjmike</span>
 
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">10.9k</span>
   
 </div>
 
