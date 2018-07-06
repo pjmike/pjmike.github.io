@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="CORS概念CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。 例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。">
+<meta name="description" content="CORS概念CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。 例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。 CORS实现跨域访问授权方式 方法一: 返回新的CorsFilter 方法二: 重写WebMvcConfigurer  1. 设置新的CorsFilter1234">
 <meta name="keywords" content="springboot">
 <meta property="og:type" content="article">
 <meta property="og:title" content="springgboot实现跨域访问(CORS)">
 <meta property="og:url" content="https://pjmike.github.io/2018/03/28/springgboot实现跨域访问-CORS/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="CORS概念CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。 例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。">
+<meta property="og:description" content="CORS概念CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。 例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。 CORS实现跨域访问授权方式 方法一: 返回新的CorsFilter 方法二: 重写WebMvcConfigurer  1. 设置新的CorsFilter1234">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-06-28T12:53:54.824Z">
+<meta property="og:updated_time" content="2018-07-06T12:42:04.624Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="springgboot实现跨域访问(CORS)">
-<meta name="twitter:description" content="CORS概念CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。 例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。">
+<meta name="twitter:description" content="CORS概念CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。 例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。 CORS实现跨域访问授权方式 方法一: 返回新的CorsFilter 方法二: 重写WebMvcConfigurer  1. 设置新的CorsFilter1234">
 
 
 
@@ -301,8 +301,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2018-06-28T20:53:54+08:00">
-                2018-06-28
+              <time title="更新于" itemprop="dateModified" datetime="2018-07-06T20:42:04+08:00">
+                2018-07-06
               </time>
             
           </span>
@@ -367,15 +367,17 @@
 
       
         
-          <h1 id="CORS概念"><a href="#CORS概念" class="headerlink" title="CORS概念"></a>CORS概念</h1><p>CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。</p>
+          
+            <h1 id="CORS概念"><a href="#CORS概念" class="headerlink" title="CORS概念"></a>CORS概念</h1><p>CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。</p>
 <p>例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/28/springgboot实现跨域访问-CORS/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
+<h1 id="CORS实现跨域访问"><a href="#CORS实现跨域访问" class="headerlink" title="CORS实现跨域访问"></a>CORS实现跨域访问</h1><h2 id="授权方式"><a href="#授权方式" class="headerlink" title="授权方式"></a><strong>授权方式</strong></h2><ul>
+<li>方法一: 返回新的CorsFilter</li>
+<li>方法二: 重写WebMvcConfigurer</li>
+</ul>
+<h3 id="1-设置新的CorsFilter"><a href="#1-设置新的CorsFilter" class="headerlink" title="1. 设置新的CorsFilter"></a><strong>1. 设置新的CorsFilter</strong></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalCorsConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CorsFilter <span class="title">corsFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1.添加CORS配置信息</span></span><br><span class="line">        CorsConfiguration config = <span class="keyword">new</span> CorsConfiguration();</span><br><span class="line">          <span class="comment">//放行哪些原始域</span></span><br><span class="line">          config.addAllowedOrigin(<span class="string">"*"</span>);</span><br><span class="line">          <span class="comment">//是否发送Cookie信息</span></span><br><span class="line">          config.setAllowCredentials(<span class="keyword">true</span>);</span><br><span class="line">          <span class="comment">//放行哪些原始域(请求方式)</span></span><br><span class="line">          config.addAllowedMethod(<span class="string">"*"</span>);</span><br><span class="line">          <span class="comment">//放行哪些原始域(头部信息)</span></span><br><span class="line">          config.addAllowedHeader(<span class="string">"*"</span>);</span><br><span class="line">          <span class="comment">//暴露哪些头部信息（因为跨域访问默认不能获取全部头部信息）</span></span><br><span class="line">          config.addExposedHeader(<span class="string">"*"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.添加映射路径</span></span><br><span class="line">        UrlBasedCorsConfigurationSource configSource = <span class="keyword">new</span> UrlBasedCorsConfigurationSource();</span><br><span class="line">        configSource.registerCorsConfiguration(<span class="string">"/**"</span>, config);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//3.返回新的CorsFilter.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CorsFilter(configSource);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-重写WebMvcConfigurer（全局跨域）"><a href="#2-重写WebMvcConfigurer（全局跨域）" class="headerlink" title="2.重写WebMvcConfigurer（全局跨域）"></a><strong>2.重写WebMvcConfigurer（全局跨域）</strong></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyWebMvcConfiguration</span> <span class="keyword">implements</span> <span class="title">WebMvcConfigurer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addCorsMappings</span><span class="params">(CorsRegistry registry)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//添加映射路径</span></span><br><span class="line">        registry.addMapping(<span class="string">"/**"</span>)</span><br><span class="line">                <span class="comment">//放行哪些原始域</span></span><br><span class="line">                .allowedOrigins(<span class="string">"*"</span>)</span><br><span class="line">                <span class="comment">//是否发送Cookie信息</span></span><br><span class="line">                .allowCredentials(<span class="keyword">true</span>)</span><br><span class="line">                <span class="comment">//放行哪些原始域(请求方式)</span></span><br><span class="line">                .allowedMethods(<span class="string">"GET"</span>, <span class="string">"POST"</span>, <span class="string">"PUT"</span>, <span class="string">"DELETE"</span>)</span><br><span class="line">                <span class="comment">//放行哪些原始域(头部信息)</span></span><br><span class="line">                .allowedHeaders(<span class="string">"*"</span>)</span><br><span class="line">                <span class="comment">//暴露哪些头部信息（因为跨域访问默认不能获取全部头部信息）</span></span><br><span class="line">                .exposedHeaders(<span class="string">"Header1"</span>, <span class="string">"Header2"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
         
       
     </div>
