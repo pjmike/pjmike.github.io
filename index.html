@@ -159,33 +159,119 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-leecode题解-二叉搜索树迭代器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-MySQL常用语句-一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">leecode题解 二叉搜索树迭代器</a>
+      <a class="article-title" href="/2018/08/05/MySQL常用语句-一/">MySQL常用语句(一)</a>
     </h1>
   
 
         
-        <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/" class="archive-article-date">
-  	<time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-22</time>
+        <a href="/2018/08/05/MySQL常用语句-一/" class="archive-article-date">
+  	<time datetime="2018-08-05T02:06:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-05</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>实现一个二叉搜索树迭代器。你将使用二叉搜索树的根节点初始化迭代器。</p>
-<p>调用 <code>next()</code> 将返回二叉搜索树中的下一个最小的数。</p>
-<p><strong>注意</strong>: <code>next()</code> 和<code>hasNext()</code> 操作的时间复杂度是O(1)，并使用 <em>O(h)</em>内存，其中 <em>h</em>是树的高度。</p>
-<p>原题地址：<a href="https://leetcode.com/problems/binary-search-tree-iterator/" target="_blank" rel="noopener">https://leetcode.com/problems/binary-search-tree-iterator/</a></p>
-        
-          <a class="article-more-a" href="/2018/07/22/leecode题解-二叉搜索树迭代器/#more">more >></a>
-        
+        <h2 id="关于Show语句"><a href="#关于Show语句" class="headerlink" title="关于Show语句"></a>关于Show语句</h2><ul>
+<li>show tables; 显示表</li>
+<li>show status;    用于显示广泛的服务器状态信息</li>
+<li>show create tables;/show create database;用于显示创建数据库的MySQL语句</li>
+<li>show grants,用来显示授予用户的安全权限</li>
+<li>show errors和show warnings</li>
+<li>show columns from [table],要求显示表名及其设置</li>
+</ul>
+<h2 id="查询语句"><a href="#查询语句" class="headerlink" title="查询语句"></a>查询语句</h2><h3 id="DISTINCT关键字"><a href="#DISTINCT关键字" class="headerlink" title="DISTINCT关键字"></a>DISTINCT关键字</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select distinct vent_id from products <span class="comment">//返回不同的vent_id</span></span><br></pre></td></tr></table></figure>
+<p>注意: 不能部分使用DISTINCT ,DISTINCT应用于所有列而不仅是前置它的列</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select distinct vent_id,price from customers<span class="comment">//除非两个列都不同，这将检索出所有的列</span></span><br></pre></td></tr></table></figure>
+<h3 id="LIMIT"><a href="#LIMIT" class="headerlink" title="LIMIT"></a>LIMIT</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select vent_id from customers limit <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+<p>而Limit 5,5指示从行5开始的5行，第一个表示开始位置，第二个表示要检索的行数。</p>
+<p><strong>MySQL5支持Limit的另一种语法，Limit 4 offset 3.从行3开始取4行</strong></p>
+<h2 id="排序检索"><a href="#排序检索" class="headerlink" title="排序检索"></a>排序检索</h2><h3 id="ORDER-BY"><a href="#ORDER-BY" class="headerlink" title="ORDER BY"></a>ORDER BY</h3><p>order by子句取一个或多个列的名字，据此对输出进行排序，默认为升序（ASC)</p>
+<h3 id="排序方向-DESC关键字"><a href="#排序方向-DESC关键字" class="headerlink" title="排序方向-DESC关键字"></a>排序方向-DESC关键字</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//以降序排列</span></span><br><span class="line">select price from products order by price desc</span><br></pre></td></tr></table></figure>
+<p>想在多个列上进行排序，必须对每个列指定desc关键字</p>
+<h3 id="ORDER-BY-和Limit组合"><a href="#ORDER-BY-和Limit组合" class="headerlink" title="ORDER BY 和Limit组合"></a>ORDER BY 和Limit组合</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//保证order by 在from的后面，limit在order by的后面</span></span><br><span class="line">select price from products order by price desc limit <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="过滤数据"><a href="#过滤数据" class="headerlink" title="过滤数据"></a>过滤数据</h2><h3 id="where子句操作符"><a href="#where子句操作符" class="headerlink" title="where子句操作符"></a>where子句操作符</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">不等于操作符: &lt;&gt; 或者!=</span><br></pre></td></tr></table></figure>
+<h3 id="空值检查"><a href="#空值检查" class="headerlink" title="空值检查"></a>空值检查</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select pro_name from products where price is <span class="keyword">null</span></span><br></pre></td></tr></table></figure>
+<h3 id="AND操作符"><a href="#AND操作符" class="headerlink" title="AND操作符"></a>AND操作符</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select prod_id from products where vend_id =<span class="number">1003</span> and prod_price &lt;= <span class="number">10</span></span><br></pre></td></tr></table></figure>
+<h3 id="OR操作符"><a href="#OR操作符" class="headerlink" title="OR操作符"></a>OR操作符</h3><p>OR操作符指示MySQL检索匹配任一条件的行，而不是同时匹配两个条件</p>
+<h3 id="计算次序"><a href="#计算次序" class="headerlink" title="计算次序"></a>计算次序</h3><p>在OR和AND操作符一起用时，SQL优先处理AND操作符</p>
+<h3 id="IN操作符"><a href="#IN操作符" class="headerlink" title="IN操作符"></a>IN操作符</h3><p>IN操作符用来指定条件范围，范围中每个条件都可以进行匹配。IN取合法值的由逗号分隔的清单，全都括在圆括号中。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//检索1002和1003的产品，效果与OR操作符一样</span></span><br><span class="line"><span class="function">select pro_name from products where vend_id <span class="title">in</span> <span class="params">(<span class="number">1002</span>,<span class="number">1003</span>)</span></span></span><br></pre></td></tr></table></figure></p>
+<p><strong>IN操作符的优点</strong>:</p>
+<ul>
+<li>在使用长的合法选项清单时，IN操作符的语法更清楚直观</li>
+<li>在使用IN,计算的次序更容易管理</li>
+<li>IN操作符一般比OR操作符更快</li>
+<li><strong>IN最大优点是可以包含其他select语句，使得能够更动态地建立where子句</strong></li>
+</ul>
+<h3 id="NOT操作符"><a href="#NOT操作符" class="headerlink" title="NOT操作符"></a>NOT操作符</h3><p>NOT操作符只有一个功能，否定它之后跟的所有条件<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//检索1002,1003以外的数据</span></span><br><span class="line"><span class="function">select prod_name from products where vend_id not <span class="title">in</span> <span class="params">(<span class="number">1002</span>,<span class="number">1003</span>)</span></span></span><br></pre></td></tr></table></figure></p>
+<h2 id="用通配符进行过滤"><a href="#用通配符进行过滤" class="headerlink" title="用通配符进行过滤"></a>用通配符进行过滤</h2><h3 id="LIKE操作符"><a href="#LIKE操作符" class="headerlink" title="LIKE操作符"></a>LIKE操作符</h3><p><strong>百分号(%)通配符</strong></p>
+<p>%表示任意字符出现任意次数<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//检索以jet开头的词，而不管它后面出现什么字符</span></span><br><span class="line">select prod_id from products where prod_name like <span class="string">'jet%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//检索包含jet的词，而不论它前面或后面出现什么字符</span></span><br><span class="line">select prod_id from products where prod_name like <span class="string">'%jet%'</span>;</span><br></pre></td></tr></table></figure></p>
+<p><strong>下划线_通配符</strong></p>
+<p>下划线与%用途一样，但是它只匹配单个字符而不是多个字符</p>
+<h2 id="使用正则表达式进行匹配"><a href="#使用正则表达式进行匹配" class="headerlink" title="使用正则表达式进行匹配"></a>使用正则表达式进行匹配</h2><h3 id="基本字符匹配"><a href="#基本字符匹配" class="headerlink" title="基本字符匹配"></a>基本字符匹配</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select prod_name from products where prod_name regexp <span class="string">'1000'</span>;</span><br></pre></td></tr></table></figure>
+<p><strong>Like操作符与REGEXP的区别</strong></p>
+<ul>
+<li>Like操作符匹配整个列，如果被匹配的文本在列中出现，Like将不会找到它，相应的行也不会被返回（<strong>除非使用通配符</strong>）</li>
+<li>REGEXP在列中进行匹配，如果被匹配的文本在列中出现，REGEXP将找到它并返回行</li>
+</ul>
+<h2 id="计算字段"><a href="#计算字段" class="headerlink" title="计算字段"></a>计算字段</h2><h3 id="拼接字段"><a href="#拼接字段" class="headerlink" title="拼接字段"></a>拼接字段</h3><p>MySQL的SELECT语句中，可使用Concat()函数来拼接每个列<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">select <span class="title">Concat</span><span class="params">(vent_name,<span class="string">'('</span>,vend_country,<span class="string">')'</span>)</span> from vendors</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//结果</span></span><br><span class="line">ACME (USA)</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用别名</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">select <span class="title">Concat</span><span class="params">(vent_name,<span class="string">'('</span>,vend_country,<span class="string">')'</span>)</span>  as vend_title from vendors</span>;</span><br></pre></td></tr></table></figure></p>
+<h2 id="使用数据处理函数"><a href="#使用数据处理函数" class="headerlink" title="使用数据处理函数"></a>使用数据处理函数</h2><h3 id="常用文本处理函数"><a href="#常用文本处理函数" class="headerlink" title="常用文本处理函数"></a>常用文本处理函数</h3><ul>
+<li>使用RTrim()函数来去除列值右边的空格</li>
+<li>使用Upper()函数来将文本转换为大写</li>
+<li>使用Lower()函数来将文本转换为小写</li>
+<li>使用Left()函数来返回串左边的字符，比如Left(content,3),第一个参数是字符串，第二个参数是返回的字符串长度</li>
+</ul>
+<h3 id="日期和时间处理函数"><a href="#日期和时间处理函数" class="headerlink" title="日期和时间处理函数"></a>日期和时间处理函数</h3><ul>
+<li>Date() 返回日期时间的日期部分</li>
+<li>Time() 返回一个日期的时间部分</li>
+<li>Now() 返回当前日期和时间</li>
+<li>Month() 返回一个日期的月份部分</li>
+<li>Year() 返回一个日期的年份部分</li>
+</ul>
+<p><strong>注意</strong>: <strong>MySQL使用的日期格式是yyyy-MM-dd</strong></p>
+<h3 id="数值处理函数"><a href="#数值处理函数" class="headerlink" title="数值处理函数"></a>数值处理函数</h3><ul>
+<li>Abs 返回一个数的绝对值</li>
+<li>Rand() 返回一个随机数</li>
+<li>Mod() 返回除操作的余数</li>
+</ul>
+<h2 id="聚集函数汇总数据"><a href="#聚集函数汇总数据" class="headerlink" title="聚集函数汇总数据"></a>聚集函数汇总数据</h2><h3 id="AVG-函数"><a href="#AVG-函数" class="headerlink" title="AVG()函数"></a>AVG()函数</h3><p>AVG()函数返回某列的平均值,忽略列值为NULL的行<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//返回products表中所有产品的平均值</span></span><br><span class="line"><span class="function">select <span class="title">avg</span><span class="params">(prod_price)</span> as avg_price from products</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="COUNT-函数"><a href="#COUNT-函数" class="headerlink" title="COUNT()函数"></a>COUNT()函数</h3><p>COUNT()函数返回某列的行数，一般用于计数。</p>
+<p>COUNT()函数有两种表现形式:</p>
+<ul>
+<li>使用COUNT(*)对表中行的数目进行计数，不管表列中包含的是空值NULL还是非空值</li>
+<li>使用COUNT(column)对特定列中具有值的进行计数，不包含空值NULL</li>
+</ul>
+<h3 id="MAX-函数"><a href="#MAX-函数" class="headerlink" title="MAX()函数"></a>MAX()函数</h3><p>MAX()函数返回指定列中的最大值，要求指定列名</p>
+<h3 id="MIN-函数"><a href="#MIN-函数" class="headerlink" title="MIN()函数"></a>MIN()函数</h3><p>MIN函数返回指定列中的最小值，要求指定列名</p>
+<h3 id="SUM函数"><a href="#SUM函数" class="headerlink" title="SUM函数"></a>SUM函数</h3><p>SUM函数返回指定列中的和，忽略NULL值</p>
+<h3 id="聚集不同值"><a href="#聚集不同值" class="headerlink" title="聚集不同值"></a>聚集不同值</h3><ul>
+<li>对所有行进行计算，指定ALL参数或者不给参数，它是默认</li>
+<li>只包含不同的值，指定DISTINCT参数</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//平均值只考虑不同的值</span></span><br><span class="line"><span class="function">select <span class="title">avg</span><span class="params">(distinct prod_price)</span> as avg_price from products</span></span><br></pre></td></tr></table></figure>
+<h2 id="分组数据"><a href="#分组数据" class="headerlink" title="分组数据"></a>分组数据</h2><h3 id="GROUP-BY语句"><a href="#GROUP-BY语句" class="headerlink" title="GROUP BY语句"></a>GROUP BY语句</h3><p>利用GROUP BY语句创建分组<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//以vend_id进行分组计算</span></span><br><span class="line">select vend_id,count(*) as nums_prods from products group by vend_id</span><br></pre></td></tr></table></figure></p>
+<p>GROUP BY语句的规定:</p>
+<ul>
+<li>GROUP BY可以包含任意数目的列</li>
+<li>GROUP BY子句列出的列必须是检索列或有效的表达式</li>
+<li>分组列中如果有NULL值，NULL被分为一组</li>
+<li>GROUP BY必须在WHERE之后，ORDER BY之前</li>
+</ul>
+<h3 id="过滤分组-HAVING关键字"><a href="#过滤分组-HAVING关键字" class="headerlink" title="过滤分组(HAVING关键字)"></a>过滤分组(HAVING关键字)</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//过滤出count(*)&gt;=2的那些分组，排除小于2的分组</span></span><br><span class="line"></span><br><span class="line">select cust_id,count(*) <span class="function">as orders from orders group by cust_id having <span class="title">count</span><span class="params">(*)</span> &gt;</span>= <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p><strong>HAVIING和WHERE的区别: WHERE在分组前进行过滤，HAVING在分组后进行过滤</strong></p>
+<h3 id="分组和排序"><a href="#分组和排序" class="headerlink" title="分组和排序"></a>分组和排序</h3><p>我们经常发现用GROUP BY分组的数据确实是以分组顺序输出的，但情况不是总是这样的，它并不是SQL规范所要求的。有时候我们应该明确提出ORDER BY语句进行对分组进行排序</p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="http://product.dangdang.com/20426804.html" target="_blank" rel="noopener">MySQL必知必会</a></li>
+</ul>
+
       
 
       
@@ -198,7 +284,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
         		</li>
       		
 		</ul>
@@ -210,7 +296,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构//" class="article-tag-list-link color5">数据结构</a>
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
         		</li>
       		
 		</ul>
@@ -219,7 +305,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/08/05/MySQL常用语句-一/">展开全文 >></a>
         </p>
       
 
@@ -341,6 +427,96 @@
 
 
   
+    <article id="post-leecode题解-二叉搜索树迭代器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">leecode题解 二叉搜索树迭代器</a>
+    </h1>
+  
+
+        
+        <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/" class="archive-article-date">
+  	<time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>实现一个二叉搜索树迭代器。你将使用二叉搜索树的根节点初始化迭代器。</p>
+<p>调用 <code>next()</code> 将返回二叉搜索树中的下一个最小的数。</p>
+<p><strong>注意</strong>: <code>next()</code> 和<code>hasNext()</code> 操作的时间复杂度是O(1)，并使用 <em>O(h)</em>内存，其中 <em>h</em>是树的高度。</p>
+<p>原题地址：<a href="https://leetcode.com/problems/binary-search-tree-iterator/" target="_blank" rel="noopener">https://leetcode.com/problems/binary-search-tree-iterator/</a></p>
+        
+          <a class="article-more-a" href="/2018/07/22/leecode题解-二叉搜索树迭代器/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/数据结构//" class="article-tag-list-link color5">数据结构</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-JWT的介绍与使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -388,234 +564,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/04/15/JWT的介绍与使用/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-spring-security学习笔记-四" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/05/spring-security学习笔记-四/">spring-security学习笔记-四</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/05/spring-security学习笔记-四/" class="archive-article-date">
-  	<time datetime="2018-04-05T09:05:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="spring-security控制授权"><a href="#spring-security控制授权" class="headerlink" title="spring security控制授权"></a>spring security控制授权</h1><h1 id="权限表达式"><a href="#权限表达式" class="headerlink" title="权限表达式"></a>权限表达式</h1><p><img src="http://osvtz719h.bkt.clouddn.com/%E6%9D%83%E9%99%90.png" alt="权限表达式"><br>
-        
-          <a class="article-more-a" href="/2018/04/05/spring-security学习笔记-四/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">spring security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/05/spring-security学习笔记-四/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-spring-security学习笔记-三" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/05/spring-security学习笔记-三/">spring-security学习笔记-三</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/05/spring-security学习笔记-三/" class="archive-article-date">
-  	<time datetime="2018-04-05T06:52:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>开发过程中，往往我们需要自定义登录页面，对于前后端分离的情况，登录页面是由前端提供，后端只需要专注数据接口的编写。所以spring securtiy中我们需要自定义登录逻辑以及成功失败的逻辑处理</p>
-        
-          <a class="article-more-a" href="/2018/04/05/spring-security学习笔记-三/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">spring security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/05/spring-security学习笔记-三/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-spring-security学习笔记-二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/05/spring-security学习笔记-二/">spring security学习笔记(二)</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/05/spring-security学习笔记-二/" class="archive-article-date">
-  	<time datetime="2018-04-05T04:02:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="处理用户信息获取逻辑-UseDetailService"><a href="#处理用户信息获取逻辑-UseDetailService" class="headerlink" title="处理用户信息获取逻辑(UseDetailService)"></a>处理用户信息获取逻辑(UseDetailService)</h1><p>我们在表单登录时，spring securtiy是使用UserDetailService类来处理用户传过来的用户名和密码，所以我们来实现这个接口类，来自定义处理用户信息的逻辑</p>
-        
-          <a class="article-more-a" href="/2018/04/05/spring-security学习笔记-二/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">spring security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/05/spring-security学习笔记-二/">展开全文 >></a>
         </p>
       
 
@@ -798,82 +746,6 @@
 
 
   
-    <article id="post-spring-security学习笔记-一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/28/spring-security学习笔记-一/">spring security学习笔记(一)</a>
-    </h1>
-  
-
-        
-        <a href="/2018/03/28/spring-security学习笔记-一/" class="archive-article-date">
-  	<time datetime="2018-03-28T03:40:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>今天来讲讲Spring大家族中的安全框架——spring security.当我们开发一个项目，要进行登录验证，权限管理的时候，不用安全框架的前提下，我们会想到使用servlet的过滤器,spring的拦截器等来实现我们的功能。这些原生的实现在一些简单应用上已经能够很好的帮到我们，并完成相关的功能实现。但是对于一个复杂的系统，权限管理用的比较多的项目中，往往我们会选择一些安全框架来帮助实现，因为他们已经已经封装好了，功能十分强大，我们只需要拿来用就可以了。现在市面上流行的安全框架有两种，一个shiro，一个是spring security。spring securtiy相对于shiro来说没那么容易上手，自身的功能是十分强大，导致有些开发者用起来有些吃力。今天我们就来学习下spring security的一些基本知识。</p>
-        
-          <a class="article-more-a" href="/2018/03/28/spring-security学习笔记-一/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">spring security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/03/28/spring-security学习笔记-一/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-springboot参数校验总结(一)" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -950,10 +822,240 @@
 
 
   
+    <article id="post-HttpClient与Spring的RestTemplate使用总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
-    </nav>
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/27/HttpClient与Spring的RestTemplate使用总结/">HttpClient与Spring的RestTemplate使用总结</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/27/HttpClient与Spring的RestTemplate使用总结/" class="archive-article-date">
+  	<time datetime="2018-03-27T14:11:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在我们在开发过程要获取外部网络资源时，一般有三种解决办法。</p>
+<ul>
+<li>一种是java本身的java.net包提供了基础的功能，可以通过HTTP协议来访问网络资源。</li>
+<li>一种是使用Apache下的HttpClient，它实现了HTTP绝大部分的标准和建议的客户端</li>
+<li>一种是使用Spring框架里的RestTemplate,它是用于访问Rest服务的客户端。</li>
+</ul>
+<p>接下来我们来看看这三者之间的用法与差别。</p>
+        
+          <a class="article-more-a" href="/2018/03/27/HttpClient与Spring的RestTemplate使用总结/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Spring</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/27/HttpClient与Spring的RestTemplate使用总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-过滤器与拦截器总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/26/过滤器与拦截器总结/">过滤器与拦截器总结</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/26/过滤器与拦截器总结/" class="archive-article-date">
+  	<time datetime="2018-03-26T09:25:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在学习过程中，我们总会遇到过滤器和拦截器的使用，因为对于他们之间的关系和区别不是很清楚，所以每次用的时候都感觉模棱两可的。所以今天特意写一篇文章总结之前用的过滤器与拦截器它们<strong>拦截请求的处理过程</strong>，不仅要知其然，还要知其所以然。</p>
+        
+          <a class="article-more-a" href="/2018/03/26/过滤器与拦截器总结/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">spring</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/26/过滤器与拦截器总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-项目中遇到的ExceptionInInitializerError异常引发的问题" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/">项目中遇到的ExceptionInInitializerError异常引发的问题</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" class="archive-article-date">
+  	<time datetime="2018-03-17T16:13:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前在集成第三方即时通信系统-融云的时候，我直接clone它的服务端源码，然后导入我的项目，我在测试它连接融云服务器案例时，发现一直不成功，始终报一个 ExceptionInInitializerError 的异常。后来通过网上查资料才发现，这个异常是静态变量初始化时出现异常时，JVM会抛出<strong>java.lang.ExceptionInInitializerError</strong>的异常。由此，我对这个异常做了进一步探究。</p>
+        
+          <a class="article-more-a" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
   
 
 
@@ -1047,11 +1149,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
+                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
+                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1059,7 +1161,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">spring security</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
