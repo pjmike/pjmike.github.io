@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="https://pjmike.github.io">
   <title>MySQL常用语句(一) | 风居者的街道</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="关于Show语句 show tables; 显示表 show status;    用于显示广泛的服务器状态信息 show create tables;/show create database;用于显示创建数据库的MySQL语句 show grants,用来显示授予用户的安全权限 show errors和show warnings show columns from [table],要求显示表名">
+  <meta name="description" content="关于Show语句show语句可以用来查询数据库，表，列和服务器状态信息，show后面还可以跟like操作符，甚至有的还可以跟where语句 show variables 查看系统变量show variables 显示MySQL系统变量的值1234567891011121314mysql&amp;gt; show variables like &amp;quot;%char%&amp;quot;;+------------">
 <meta name="keywords" content="MySQL">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL常用语句(一)">
 <meta property="og:url" content="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="关于Show语句 show tables; 显示表 show status;    用于显示广泛的服务器状态信息 show create tables;/show create database;用于显示创建数据库的MySQL语句 show grants,用来显示授予用户的安全权限 show errors和show warnings show columns from [table],要求显示表名">
+<meta property="og:description" content="关于Show语句show语句可以用来查询数据库，表，列和服务器状态信息，show后面还可以跟like操作符，甚至有的还可以跟where语句 show variables 查看系统变量show variables 显示MySQL系统变量的值1234567891011121314mysql&amp;gt; show variables like &amp;quot;%char%&amp;quot;;+------------">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-05T02:06:31.092Z">
+<meta property="og:updated_time" content="2018-08-05T15:44:15.084Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL常用语句(一)">
-<meta name="twitter:description" content="关于Show语句 show tables; 显示表 show status;    用于显示广泛的服务器状态信息 show create tables;/show create database;用于显示创建数据库的MySQL语句 show grants,用来显示授予用户的安全权限 show errors和show warnings show columns from [table],要求显示表名">
+<meta name="twitter:description" content="关于Show语句show语句可以用来查询数据库，表，列和服务器状态信息，show后面还可以跟like操作符，甚至有的还可以跟where语句 show variables 查看系统变量show variables 显示MySQL系统变量的值1234567891011121314mysql&amp;gt; show variables like &amp;quot;%char%&amp;quot;;+------------">
   
     <link rel="alternative" href="/atom.xml" title="风居者的街道" type="application/atom+xml">
   
@@ -179,15 +179,14 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="关于Show语句"><a href="#关于Show语句" class="headerlink" title="关于Show语句"></a>关于Show语句</h2><ul>
-<li>show tables; 显示表</li>
-<li>show status;    用于显示广泛的服务器状态信息</li>
-<li>show create tables;/show create database;用于显示创建数据库的MySQL语句</li>
-<li>show grants,用来显示授予用户的安全权限</li>
-<li>show errors和show warnings</li>
-<li>show columns from [table],要求显示表名及其设置</li>
-</ul>
+        <h2 id="关于Show语句"><a href="#关于Show语句" class="headerlink" title="关于Show语句"></a>关于Show语句</h2><p>show语句可以用来查询数据库，表，列和服务器状态信息，<strong>show后面还可以跟like操作符</strong>，甚至有的还可以跟where语句</p>
+<h3 id="show-variables-查看系统变量"><a href="#show-variables-查看系统变量" class="headerlink" title="show variables 查看系统变量"></a>show variables 查看系统变量</h3><p>show variables 显示MySQL系统变量的值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &quot;%char%&quot;;</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| Variable_name            | Value                      |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| character_set_client     | utf8mb4                    |</span><br><span class="line">| character_set_connection | utf8mb4                    |</span><br><span class="line">| character_set_database   | utf8                       |</span><br><span class="line">| character_set_filesystem | binary                     |</span><br><span class="line">| character_set_results    | utf8mb4                    |</span><br><span class="line">| character_set_server     | latin1                     |</span><br><span class="line">| character_set_system     | utf8                       |</span><br><span class="line">| character_sets_dir       | /usr/share/mysql/charsets/ |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">8 rows in set (0.07 sec)</span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
+<h3 id="show-grants-查看用户权限"><a href="#show-grants-查看用户权限" class="headerlink" title="show grants 查看用户权限"></a>show grants 查看用户权限</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show grants;</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for root@%                                                                                                              |</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT ALL PRIVILEGES ON *.* TO &apos;root&apos;@&apos;%&apos; IDENTIFIED BY PASSWORD &apos;*DCC34AC0D1740AF22078E4130604D4AC65207D0E&apos; WITH GRANT OPTION |</span><br><span class="line">+--------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">1 row in set (0.29 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="show-columns-from-TABLES-查看表的列信息"><a href="#show-columns-from-TABLES-查看表的列信息" class="headerlink" title="show columns from TABLES 查看表的列信息"></a>show columns from TABLES 查看表的列信息</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show columns from user;</span><br><span class="line">+-------------+--------------+------+-----+-------------------+----------------+</span><br><span class="line">| Field       | Type         | Null | Key | Default           | Extra          |</span><br><span class="line">+-------------+--------------+------+-----+-------------------+----------------+</span><br><span class="line">| id          | int(11)      | NO   | PRI | NULL              | auto_increment |</span><br><span class="line">| phone       | varchar(255) | NO   |     | NULL              |                |</span><br><span class="line">+-------------+--------------+------+-----+-------------------+----------------+</span><br><span class="line">9 rows in set (0.09 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="show-status-显示广泛的服务器状态信息"><a href="#show-status-显示广泛的服务器状态信息" class="headerlink" title="show status 显示广泛的服务器状态信息"></a>show status 显示广泛的服务器状态信息</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show status;</span><br><span class="line">+-----------------------------------------------+-------------+</span><br><span class="line">| Variable_name                                 | Value       |</span><br><span class="line">+-----------------------------------------------+-------------+</span><br><span class="line">| Aborted_clients                               | 302         |</span><br><span class="line">| Aborted_connects                              | 414         |</span><br><span class="line">| Binlog_cache_disk_use                         | 0           |</span><br><span class="line"> ......</span><br></pre></td></tr></table></figure>
+<h3 id="show-create-table-表-显示创建数据表的MySQL语句"><a href="#show-create-table-表-显示创建数据表的MySQL语句" class="headerlink" title="show create table [表] 显示创建数据表的MySQL语句"></a>show create table [表] 显示创建数据表的MySQL语句</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show create table user;</span><br><span class="line">| user  | CREATE TABLE `user` (</span><br><span class="line">  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT &apos;主键&apos;,</span><br><span class="line">  `phone` varchar(255) NOT NULL COMMENT &apos;手机号&apos;,</span><br><span class="line">  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT &apos;创建时间&apos;,</span><br><span class="line">  PRIMARY KEY (`id`)</span><br><span class="line">) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 |</span><br><span class="line"></span><br><span class="line">1 row in set (0.10 sec)</span><br></pre></td></tr></table></figure>
+<p><strong>更多关于show语法，查看官方手册: <a href="https://dev.mysql.com/doc/refman/5.7/en/show.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/show.html</a></strong></p>
 <h2 id="查询语句"><a href="#查询语句" class="headerlink" title="查询语句"></a>查询语句</h2><h3 id="DISTINCT关键字"><a href="#DISTINCT关键字" class="headerlink" title="DISTINCT关键字"></a>DISTINCT关键字</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select distinct vent_id from products <span class="comment">//返回不同的vent_id</span></span><br></pre></td></tr></table></figure>
 <p>注意: 不能部分使用DISTINCT ,DISTINCT应用于所有列而不仅是前置它的列</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select distinct vent_id,price from customers<span class="comment">//除非两个列都不同，这将检索出所有的列</span></span><br></pre></td></tr></table></figure>
@@ -519,7 +518,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -527,7 +526,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
               </li>
              
               <li class="article-tag-list-item">

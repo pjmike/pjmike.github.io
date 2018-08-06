@@ -179,14 +179,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="关于Show语句"><a href="#关于Show语句" class="headerlink" title="关于Show语句"></a>关于Show语句</h2><ul>
-<li>show tables; 显示表</li>
-<li>show status;    用于显示广泛的服务器状态信息</li>
-<li>show create tables;/show create database;用于显示创建数据库的MySQL语句</li>
-<li>show grants,用来显示授予用户的安全权限</li>
-<li>show errors和show warnings</li>
-<li>show columns from [table],要求显示表名及其设置</li>
-</ul>
+        <h2 id="关于Show语句"><a href="#关于Show语句" class="headerlink" title="关于Show语句"></a>关于Show语句</h2><p>show语句可以用来查询数据库，表，列和服务器状态信息，<strong>show后面还可以跟like操作符</strong>，甚至有的还可以跟where语句</p>
+<h3 id="show-variables-查看系统变量"><a href="#show-variables-查看系统变量" class="headerlink" title="show variables 查看系统变量"></a>show variables 查看系统变量</h3><p>show variables 显示MySQL系统变量的值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &quot;%char%&quot;;</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| Variable_name            | Value                      |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| character_set_client     | utf8mb4                    |</span><br><span class="line">| character_set_connection | utf8mb4                    |</span><br><span class="line">| character_set_database   | utf8                       |</span><br><span class="line">| character_set_filesystem | binary                     |</span><br><span class="line">| character_set_results    | utf8mb4                    |</span><br><span class="line">| character_set_server     | latin1                     |</span><br><span class="line">| character_set_system     | utf8                       |</span><br><span class="line">| character_sets_dir       | /usr/share/mysql/charsets/ |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">8 rows in set (0.07 sec)</span><br></pre></td></tr></table></figure></p>
         
           <a class="article-more-a" href="/2018/08/05/MySQL常用语句-一/#more">more >></a>
         
@@ -1071,7 +1065,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1079,7 +1073,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
               </li>
              
               <li class="article-tag-list-item">
