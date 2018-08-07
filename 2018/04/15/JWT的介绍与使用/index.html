@@ -182,7 +182,31 @@
       </header>
     
     <!-- 目录内容 -->
-       
+
+    <p class="show-toc-btn" id="show-toc-btn" onclick="showToc();" style="display:none">
+          <span class="btn-bg"></span>
+          <span class="btn-text">文章导航</span>
+          </p>
+    <div id="toc-article" class="toc-article">
+        <span id="toc-close" class="toc-close" title="隐藏导航" onclick="showBtn();">×</span>
+        <strong class="toc-title">文章目录</strong>
+           <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是JSON-Web-Token"><span class="toc-number">1.</span> <span class="toc-text">什么是JSON Web Token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的结构"><span class="toc-number">2.</span> <span class="toc-text">JWT的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的特点"><span class="toc-number">3.</span> <span class="toc-text">JWT的特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的使用场景"><span class="toc-number">4.</span> <span class="toc-text">JWT的使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的认证机制"><span class="toc-number">5.</span> <span class="toc-text">JWT的认证机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的Java代码实现"><span class="toc-number">6.</span> <span class="toc-text">JWT的Java代码实现</span></a></li></ol>
+         </div>
+   <script type="text/javascript">
+    function showToc(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:block");
+        show_toc_btn.setAttribute("style","display:none");
+        };
+    function showBtn(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:none");
+        show_toc_btn.setAttribute("style","display:block");
+        };
+   </script>
+             
 <!-- 目录内容结束 -->
     <div class="article-entry" itemprop="articleBody">
       
@@ -372,11 +396,11 @@
   
 <nav id="article-nav">
   
-    <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          leetcode题解 98 验证二叉搜索树
+          leecode题解 二叉搜索树迭代器
         
       </div>
     </a>
@@ -402,6 +426,19 @@
             </div>
         </div>
         
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是JSON-Web-Token"><span class="toc-number">1.</span> <span class="toc-text">什么是JSON Web Token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的结构"><span class="toc-number">2.</span> <span class="toc-text">JWT的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的特点"><span class="toc-number">3.</span> <span class="toc-text">JWT的特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的使用场景"><span class="toc-number">4.</span> <span class="toc-text">JWT的使用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的认证机制"><span class="toc-number">5.</span> <span class="toc-text">JWT的认证机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JWT的Java代码实现"><span class="toc-number">6.</span> <span class="toc-text">JWT的Java代码实现</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
         
     </div>
 </aside>
@@ -513,7 +550,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -521,7 +558,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
