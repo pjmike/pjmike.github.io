@@ -8,13 +8,13 @@
   <link rel="dns-prefetch" href="https://pjmike.github.io">
   <title>动态代理的原理及其应用 | 风居者的街道</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活  ISubject,该接口是被访问者或者被访问的对象 SubjectImpl，被访问者的具体实现类 SubjectProxy,被访问者或被">
+  <meta name="description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活">
 <meta name="keywords" content="代理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="动态代理的原理及其应用">
 <meta property="og:url" content="https://pjmike.github.io/2018/08/07/动态代理的原理及其应用/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活  ISubject,该接口是被访问者或者被访问的对象 SubjectImpl，被访问者的具体实现类 SubjectProxy,被访问者或被">
+<meta property="og:description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/proxy.jpg">
@@ -23,7 +23,7 @@
 <meta property="og:updated_time" content="2018-08-07T06:38:25.990Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="动态代理的原理及其应用">
-<meta name="twitter:description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活  ISubject,该接口是被访问者或者被访问的对象 SubjectImpl，被访问者的具体实现类 SubjectProxy,被访问者或被">
+<meta name="twitter:description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活">
 <meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg">
   
     <link rel="alternative" href="/atom.xml" title="风居者的街道" type="application/atom+xml">
@@ -214,6 +214,7 @@
         <h2 id="动态代理的介绍"><a href="#动态代理的介绍" class="headerlink" title="动态代理的介绍"></a>动态代理的介绍</h2><p>动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。</p>
 <p>实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用</p>
 <h2 id="与静态代理的比较"><a href="#与静态代理的比较" class="headerlink" title="与静态代理的比较"></a>与静态代理的比较</h2><h3 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a><strong>静态代理</strong></h3><p>提前写好代理类，每个业务类都要对应一个代理类,不灵活<br><img src="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg" alt=""></p>
+<a id="more"></a>
 <ul>
 <li>ISubject,该接口是被访问者或者被访问的对象</li>
 <li>SubjectImpl，被访问者的具体实现类</li>
@@ -527,11 +528,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -543,11 +544,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">spring</a>
+                <a href="javascript:void(0)" class="js-tag color3">代理</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">代理</a>
+                <a href="javascript:void(0)" class="js-tag color2">spring</a>
               </li>
              
               <li class="article-tag-list-item">
