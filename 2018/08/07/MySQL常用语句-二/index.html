@@ -186,6 +186,7 @@
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这文主要介绍MySQL查询,联结表，全文索引的常用语句</p>
 <h2 id="使用子查询"><a href="#使用子查询" class="headerlink" title="使用子查询"></a>使用子查询</h2><h3 id="使用IN操作符进行子查询"><a href="#使用IN操作符进行子查询" class="headerlink" title="使用IN操作符进行子查询"></a>使用IN操作符进行子查询</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select cust_id from orders where order_num in (select order_num from orderitems where prod_id = &apos;TNT2&apos;)</span><br></pre></td></tr></table></figure>
 <h3 id="作为计算字段使用子查询"><a href="#作为计算字段使用子查询" class="headerlink" title="作为计算字段使用子查询"></a>作为计算字段使用子查询</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select cust_name,cust_state,(select count(*) from orders where orders_cust_id = customers.cust_id) as orders from customers order by cust_name;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
 <h2 id="联结表"><a href="#联结表" class="headerlink" title="联结表"></a>联结表</h2><h3 id="联结"><a href="#联结" class="headerlink" title="联结"></a>联结</h3><p>当数据存储在多个表时，表之间还存在外键关系，这时如果要检索出牵连多个表的数据时，使用联结来解决。</p>
 <p>下图是常见的联结方式(主要是JOIN操作):<br><img src="http://osvtz719h.bkt.clouddn.com/SQLJOIN.png" alt="SQLJOIN"></p>
 <h3 id="使用WHERE子句创建联结"><a href="#使用WHERE子句创建联结" class="headerlink" title="使用WHERE子句创建联结"></a>使用WHERE子句创建联结</h3><p>为了避免出现二义性，必须使用完全限定名，即用一个点分隔的表名和列名。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//两个表之间用where进行联结，指示MySQL匹配vendors表中的vend_id和products表中vent_id</span><br><span class="line"></span><br><span class="line">select vend_name,prod_name,prod_price from vendors,products where vendors.vend_id = products.vent_id</span><br></pre></td></tr></table></figure></p>
@@ -473,11 +474,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
+                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
+                <a href="javascript:void(0)" class="js-tag color4">jwt</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -493,11 +494,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Java</a>
+                <a href="javascript:void(0)" class="js-tag color2">spring</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">spring</a>
+                <a href="javascript:void(0)" class="js-tag color5">Java</a>
               </li>
             
             <div class="clearfix"></div>
