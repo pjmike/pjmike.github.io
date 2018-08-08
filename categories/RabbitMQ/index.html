@@ -6,20 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://pjmike.github.io">
-  <title>springboot参数校验总结(一) | 风居者的街道</title>
+  <title>Category: RabbitMQ | 风居者的街道</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="背景我们在练习项目的时候，往往会涉及参数校验的问题，有时候是前端进行大部分校验，如用户名唯一性，生日格式，邮箱格式校验等等常用的校验。但是为了避免用户绕过浏览器，使用http工具直接向后端请求一些违法数据，服务端的数据校验也是必要的，可以防止脏数据落到数据库中，如果数据库中出现一个非法的邮箱格式，也会让运维人员头疼不已，所以后端校验也是有必要的。">
-<meta name="keywords" content="springboot">
-<meta property="og:type" content="article">
-<meta property="og:title" content="springboot参数校验总结(一)">
-<meta property="og:url" content="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/index.html">
+  <meta name="description" content="努力，不一定成功，成功却需努力">
+<meta property="og:type" content="website">
+<meta property="og:title" content="风居者的街道">
+<meta property="og:url" content="https://pjmike.github.io/categories/RabbitMQ/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="背景我们在练习项目的时候，往往会涉及参数校验的问题，有时候是前端进行大部分校验，如用户名唯一性，生日格式，邮箱格式校验等等常用的校验。但是为了避免用户绕过浏览器，使用http工具直接向后端请求一些违法数据，服务端的数据校验也是必要的，可以防止脏数据落到数据库中，如果数据库中出现一个非法的邮箱格式，也会让运维人员头疼不已，所以后端校验也是有必要的。">
+<meta property="og:description" content="努力，不一定成功，成功却需努力">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-22T11:31:55.343Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="springboot参数校验总结(一)">
-<meta name="twitter:description" content="背景我们在练习项目的时候，往往会涉及参数校验的问题，有时候是前端进行大部分校验，如用户名唯一性，生日格式，邮箱格式校验等等常用的校验。但是为了避免用户绕过浏览器，使用http工具直接向后端请求一些违法数据，服务端的数据校验也是必要的，可以防止脏数据落到数据库中，如果数据库中出现一个非法的邮箱格式，也会让运维人员头疼不已，所以后端校验也是有必要的。">
+<meta name="twitter:title" content="风居者的街道">
+<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
   
     <link rel="alternative" href="/atom.xml" title="风居者的街道" type="application/atom+xml">
   
@@ -159,277 +157,71 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-springboot参数校验总结(一)" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      springboot参数校验总结(一)
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2018" class="archive-year">2018</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2018/08/08/RabbitMQ的安装详解/" class="archive-article-date">
+  	<time datetime="2018-08-08T15:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-08</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2018/08/08/RabbitMQ的安装详解/">RabbitMQ的安装详解</a>
     </h1>
   
 
-        
-        <a href="/2018/03/28/springboot参数校验总结(一)/" class="archive-article-date">
-  	<time datetime="2018-03-28T02:37:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-28</time>
-</a>
-        
-      </header>
-    
-    <!-- 目录内容 -->
-       
-<!-- 目录内容结束 -->
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>我们在练习项目的时候，往往会涉及参数校验的问题，有时候是前端进行大部分校验，如用户名唯一性，生日格式，邮箱格式校验等等常用的校验。但是为了避免用户绕过浏览器，使用http工具直接向后端请求一些违法数据，服务端的数据校验也是必要的，可以防止脏数据落到数据库中，如果数据库中出现一个非法的邮箱格式，也会让运维人员头疼不已，所以后端校验也是有必要的。</p>
-<a id="more"></a>
-<h1 id="校验框架validation依赖"><a href="#校验框架validation依赖" class="headerlink" title="校验框架validation依赖"></a>校验框架validation依赖</h1><p>首先添加校验框架validation的依赖，实际上在springboot项目，我们只需要入spring-boot-starter-web依赖即可</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>查看其子依赖，发现它已经添加了validation依赖了。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;org.hibernate&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;hibernate-validator&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">			&lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;</span><br><span class="line">			&lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>这是对于springboot项目是这样，对于传统的springmvc项目还是需要添加</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;hibernate-validator&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;5.3.1.Final&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<h1 id="参数校验的具体步骤"><a href="#参数校验的具体步骤" class="headerlink" title="参数校验的具体步骤"></a>参数校验的具体步骤</h1><h2 id="第一步-在实体类需要校验的属性上加上校验的注解"><a href="#第一步-在实体类需要校验的属性上加上校验的注解" class="headerlink" title="第一步:在实体类需要校验的属性上加上校验的注解"></a>第一步:在实体类需要校验的属性上加上校验的注解</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> id;</span><br><span class="line">  	<span class="meta">@NotBlank</span></span><br><span class="line">    <span class="keyword">private</span> String username;</span><br><span class="line">    <span class="meta">@NotBlank</span>(message = <span class="string">"密码不能为空"</span>)</span><br><span class="line">    <span class="keyword">private</span> String password;</span><br><span class="line">  	<span class="meta">@Pattern</span>(regexp = <span class="string">"^1(3|4|5|7|8)\\d&#123;9&#125;$"</span>,message = <span class="string">"手机号码格式错误"</span>)</span><br><span class="line">    <span class="meta">@NotBlank</span>(message = <span class="string">"手机号码不能为空"</span>)</span><br><span class="line">    <span class="keyword">private</span> String phone;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Email</span>(message = <span class="string">"邮箱格式错误"</span>)</span><br><span class="line">    <span class="keyword">private</span> String email;</span><br><span class="line">    <span class="meta">@Past</span></span><br><span class="line">    <span class="keyword">private</span> Date birthday;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>每个注解都包含一个message字段，用于校验失败后的提示信息。特殊的校验注解，如Pattern（正则校验），还可以自己添加正则表达式。</p>
-<h2 id="第二步-在controller请求方法上添加-Validated注解，开启请求参数的校验。"><a href="#第二步-在controller请求方法上添加-Validated注解，开启请求参数的校验。" class="headerlink" title="第二步:在controller请求方法上添加@Validated注解，开启请求参数的校验。"></a>第二步:在controller请求方法上添加@Validated注解，开启请求参数的校验。</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@PutMapping</span>(value = <span class="string">"&#123;id:\\d+&#125;"</span>)</span><br><span class="line">   <span class="function"><span class="keyword">public</span> User <span class="title">updateUser</span><span class="params">(@Validated @RequestBody User user, BindingResult errors)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (errors.hasErrors()) &#123;</span><br><span class="line">           errors.getAllErrors().stream().forEach(error -&gt; System.out.println(error.getDefaultMessage()));</span><br><span class="line">       &#125;</span><br><span class="line">       System.out.println(user.getUsername());</span><br><span class="line">       System.out.println(user.getId());</span><br><span class="line">       System.out.println(user.getPassword());</span><br><span class="line">       System.out.println(user.getBirthday());</span><br><span class="line">       <span class="keyword">return</span> user;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-<p>注意:</p>
-<ul>
-<li>@Valid注解需放置在需被校验的参数前面，表明spring将对其进行校验，校验信息会存放在其后的BindingResult里面。</li>
-<li>如果有多个参数需要校验，形式可以如下。updateUser(@Valid User user, BindingResult userError ，@Valid Student student, BindingResult studentError);即一个校验类对应一个校验结果。</li>
-</ul>
-<p>对于校验结果的处理，可以直接在controller方法中处理</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (errors.hasErrors()) &#123;</span><br><span class="line">         errors.getAllErrors().stream().forEach(error -&gt; System.out.println(error.getDefaultMessage()));</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
-<p>也可以将校验错误交由异常处理器处理</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestControllerAdvice</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExceptionController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@ExceptionHandler</span>(MethodArgumentNotValidException.class)</span><br><span class="line">    <span class="meta">@ResponseStatus</span>(HttpStatus.BAD_REQUEST)</span><br><span class="line">    <span class="keyword">public</span> ResponseResult&lt;Map&lt;String, String&gt;&gt; handlerValidaException(MethodArgumentNotValidException ex) &#123;</span><br><span class="line">        ResponseResult&lt;Map&lt;String, String&gt;&gt; result = <span class="keyword">new</span> ResponseResult&lt;&gt;();</span><br><span class="line">        result.setCode(<span class="number">1</span>);</span><br><span class="line">        result.setMsg(<span class="string">"校验失败"</span>);</span><br><span class="line">        result.setData(getErrors(ex.getBindingResult()));</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 返回校验字段错误的提示信息</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> result</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Map&lt;String, String&gt; <span class="title">getErrors</span><span class="params">(BindingResult result)</span> </span>&#123;</span><br><span class="line">        Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="comment">//得到所有的属性错误</span></span><br><span class="line">        List&lt;FieldError&gt; list = result.getFieldErrors();</span><br><span class="line">        <span class="comment">//将其组成键值对的形式存入map</span></span><br><span class="line">        <span class="keyword">for</span> (FieldError fieldError : list) &#123;</span><br><span class="line">            map.put(fieldError.getField(), fieldError.getDefaultMessage());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> map;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="分组校验"><a href="#分组校验" class="headerlink" title="分组校验"></a>分组校验</h1><p>如果同一个类，在不同的情形有不同的校验规则，可以进行分组校验</p>
-<p><strong>实体类改写</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">  	<span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Group1</span></span>&#123;&#125;</span><br><span class="line">  	<span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Group2</span></span>&#123;&#125;</span><br><span class="line">  	<span class="meta">@Pattern</span>(regexp = <span class="string">"^1(3|4|5|7|8)\\d&#123;9&#125;$"</span>,message = <span class="string">"手机号码格式错误"</span>,group=Group1.class)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>控制器类改写</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@PutMapping(value = &quot;&#123;id:\\d+&#125;&quot;)</span><br><span class="line">   public User updateUser(@Validated(&#123;User.Group1.class&#125;) @RequestBody User user, BindingResult errors) &#123;</span><br><span class="line">       if (errors.hasErrors()) &#123;</span><br><span class="line">           errors.getAllErrors().stream().forEach(error -&gt; System.out.println(error.getDefaultMessage()));</span><br><span class="line">       &#125;</span><br><span class="line">       return user;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-<h1 id="框架提供的注解信息"><a href="#框架提供的注解信息" class="headerlink" title="框架提供的注解信息"></a>框架提供的注解信息</h1><table>
-<thead>
-<tr>
-<th>@Null</th>
-<th>限制只能为null</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>@NotNull</td>
-<td>限制必须不为null</td>
-</tr>
-<tr>
-<td>@AssertFalse</td>
-<td>限制必须为false</td>
-</tr>
-<tr>
-<td>@AssertTrue</td>
-<td>限制必须为true</td>
-</tr>
-<tr>
-<td>@DecimalMax(value)</td>
-<td>限制必须为一个不大于指定值的数字</td>
-</tr>
-<tr>
-<td>@DecimalMin(value)</td>
-<td>限制必须为一个不小于指定值的数字</td>
-</tr>
-<tr>
-<td>@Digits(integer,fraction)</td>
-<td>限制必须为一个小数，且整数部分的位数不能超过integer，小数部分的位数不能超过fraction</td>
-</tr>
-<tr>
-<td>@Future</td>
-<td>限制必须是一个将来的日期</td>
-</tr>
-<tr>
-<td>@Max(value)</td>
-<td>限制必须为一个不大于指定值的数字</td>
-</tr>
-<tr>
-<td>@Min(value)</td>
-<td>限制必须为一个不小于指定值的数字</td>
-</tr>
-<tr>
-<td>@Past</td>
-<td>限制必须是一个过去的日期</td>
-</tr>
-<tr>
-<td>@Pattern(value)</td>
-<td>限制必须符合指定的正则表达式</td>
-</tr>
-<tr>
-<td>@Size(max,min)</td>
-<td>限制字符长度必须在min到max之间</td>
-</tr>
-<tr>
-<td>@Past</td>
-<td>验证注解的元素值（日期类型）比当前时间早</td>
-</tr>
-<tr>
-<td>@NotEmpty</td>
-<td>验证注解的元素值不为null且不为空（字符串长度不为0、集合大小不为0）</td>
-</tr>
-<tr>
-<td>@NotBlank</td>
-<td>验证注解的元素值不为空（不为null、去除首位空格后长度为0），不同于@NotEmpty，@NotBlank只应用于字符串且在比较时会去除字符串的空格</td>
-</tr>
-<tr>
-<td>@Email</td>
-<td>验证注解的元素值是Email，也可以通过正则表达式和flag指定自定义的email格式</td>
-</tr>
-</tbody>
-</table>
-
-      
-
-      
-        <div class="page-reward">
-          <a href="javascript:;" class="page-reward-btn tooltip-top">
-            <div class="tooltip tooltip-east">
-            <span class="tooltip-item">
-              赏
-            </span>
-            <span class="tooltip-content">
-              <span class="tooltip-text">
-                <span class="tooltip-inner">
-                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
-                  <div class="reward-box">
-                    
-                    
-                  </div>
-                </span>
-              </span>
-            </span>
-          </div>
-          </a>
-        </div>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">springboot</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RabbitMQ</a>
         		</li>
       		
 		</ul>
 	</div>
 
-      
+          
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/RabbitMQ//" class="article-tag-list-link color4">RabbitMQ</a>
+        		</li>
+      		
+		</ul>
+	</div>
 
-      
 
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2018/03/28/springboot实现跨域访问-CORS/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          springboot实现跨域访问(CORS)
-        
-      </div>
-    </a>
   
   
-    <a href="/2018/03/26/过滤器与拦截器总结/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">过滤器与拦截器总结</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -452,10 +244,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
+		isPost: false,
 		isArchive: false,
 		isTag: false,
-		isCategory: false,
+		isCategory: true,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
