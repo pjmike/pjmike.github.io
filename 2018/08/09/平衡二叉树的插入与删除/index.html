@@ -21,7 +21,7 @@
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/AVL2.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/AVL3.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/AVL4.png">
-<meta property="og:updated_time" content="2018-08-09T14:08:41.828Z">
+<meta property="og:updated_time" content="2018-08-09T14:17:13.628Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="平衡二叉树的插入与删除">
 <meta name="twitter:description" content="定义AVL树是带有平衡条件的二叉查找树。它要求在AVL树中任何节点的两个子树的高度(高度是指节点到一片树叶的最长路径的长) 最大差别为1,如下图所示:">
@@ -215,9 +215,9 @@
         <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>AVL树是带有平衡条件的二叉查找树。<strong>它要求在AVL树中任何节点的两个子树的高度(高度是指节点到一片树叶的最长路径的长) 最大差别为1</strong>,如下图所示:</p>
 <p><img src="http://osvtz719h.bkt.clouddn.com/AVL-Tree1.jpg" alt="AVL"></p>
 <a id="more"></a>
-<h2 id="为什么有AVL树"><a href="#为什么有AVL树" class="headerlink" title="为什么有AVL树"></a>为什么有AVL树</h2><p>大多数BST操作，例如搜索，最大，最小，插入，删除等，消耗取O（h）时间，h是BST的高度。对于倾斜的二叉树，这些操作的成本可能会变成O(n)。</p>
-<p>如果我们在每次插入和删除之后确保树的高度保持O（Logn），那么我们就可以保证所有这些操作的O（Logn）的上界。而AVL树的高度总是O（Logn），其中n是树中节点的数量。</p>
-<p><strong>所以AVL树很好的解决了二叉搜索树退化成链表的问题。把插入，查找，删除的时间复杂度的最好情况和最坏情况都维持在O(logn)</strong>。</p>
+<h2 id="为什么有AVL树"><a href="#为什么有AVL树" class="headerlink" title="为什么有AVL树"></a>为什么有AVL树</h2><p>大多数BST操作，例如查找，找最大，最小值，插入，删除等操作，基本上消耗O(h)时间，h是BST的高度。对于倾斜的二叉树，这些操作的成本可能会变成O(n)。</p>
+<p>如果我们在每次插入和删除之后确保树的高度保持O(logn)，那么我们就可以保证所有这些操作的O(logn）的上界。而AVL树的高度总是O(logn)，其中n是树中节点的数量。</p>
+<p><strong>所以AVL树很好的解决了二叉搜索树退化成链表的问题，把插入，查找，删除的时间复杂度的最好情况和最坏情况都维持在O(logn)</strong>。</p>
 <h2 id="插入操作"><a href="#插入操作" class="headerlink" title="插入操作"></a>插入操作</h2><p>当我们执行插入一个节点时，很可能会破坏AVL树的平衡特性，所以我们需要调整AVL树的结构，使其重新平衡，而调整的方式称之为<strong>旋转</strong>。</p>
 <p>这里我们<strong>针对父节点的位置</strong>分为<strong>左-左</strong>，<strong>左-右</strong>，<strong>右-右</strong>，<strong>右-左</strong>这4类情况分析，而对<strong>左-左</strong>，<strong>右-右</strong>情况进行<strong>单旋转</strong>，也就是一次旋转，对<strong>左-右</strong>，<strong>右-左</strong>情况进行<strong>双旋转</strong>，两次旋转，最终恢复其平衡特性。</p>
 <h3 id="1-左-左情况"><a href="#1-左-左情况" class="headerlink" title="1.左-左情况"></a>1.左-左情况</h3><p><img src="http://osvtz719h.bkt.clouddn.com/AVL1.png" alt="AVL1"></p>
@@ -524,11 +524,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">spring</a>
+                <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">排序算法</a>
+                <a href="javascript:void(0)" class="js-tag color2">spring</a>
               </li>
              
               <li class="article-tag-list-item">
