@@ -213,29 +213,33 @@
 <a id="more"></a>
 <h3 id="Centos-7下安装RabbitMQ"><a href="#Centos-7下安装RabbitMQ" class="headerlink" title="Centos 7下安装RabbitMQ"></a>Centos 7下安装RabbitMQ</h3><p>以下的安装方式都是通过源码包的形式安装，当然也可以通过centos的yum源进行安装。</p>
 <h4 id="安装Erlang"><a href="#安装Erlang" class="headerlink" title="安装Erlang"></a>安装Erlang</h4><p>从Erlang官网下载安装包: <a href="http://www.erlang.org/downloads" target="_blank" rel="noopener">http://www.erlang.org/downloads</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# tar xvf otp_src_21.0.tar.gz</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# cd otp_src_21.0</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz otp_src_21.0]# ./configure --prefix=/opt/erlang</span><br><span class="line"></span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz otp_src_21.0]# make</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz otp_src_21.0]# make install</span><br></pre></td></tr></table></figure>
-<p>修改/etc/profile,添加环境变量:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ERLANG_HOME=/opt/erlang</span><br><span class="line">export PATH=$PATH:$ERLANG_HOME/bin</span><br><span class="line">export ERLANG_HOME</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# tar xvf otp_src_21.0.tar.gz</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# cd otp_src_21.0</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz otp_src_21.0]# ./configure --prefix=/opt/erlang</span><br><span class="line"></span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz otp_src_21.0]# make</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz otp_src_21.0]# make install</span><br></pre></td></tr></table></figure>
+<p>修改/etc/profile,添加环境变量:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ERLANG_HOME=/opt/erlang</span><br><span class="line">export PATH=$PATH:$ERLANG_HOME/bin</span><br><span class="line">export ERLANG_HOME</span><br></pre></td></tr></table></figure></p>
 <p>然后source /etc/profile使其生效</p>
 <h4 id="安装RabbitMQ"><a href="#安装RabbitMQ" class="headerlink" title="安装RabbitMQ"></a>安装RabbitMQ</h4><p>从RabbitMQ官网下载源码包: <a href="https://www.rabbitmq.com/download.html" target="_blank" rel="noopener">https://www.rabbitmq.com/download.html</a></p>
-<p>官网也提供RPM(Linux下的软件包管理器)安装形式,详情参阅<a href="https://www.rabbitmq.com/install-rpm.html#with-rpm" target="_blank" rel="noopener">官网</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# tar xvf rabbitmq-server-generic-unix-3.6.15.tar.xz -C /opt</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# cd /opt</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# ls</span><br><span class="line">erlang  rabbitmq_server-3.6.15</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# mv rabbitmq_server-3.6.15 rabbitmq</span><br></pre></td></tr></table></figure></p>
-<p>修改/etc/profile,添加环境变量:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export PATH=$PATH:/opt/rabbitmq/sbin</span><br><span class="line">export RABBITMQ_HOME=/opt/rabbitmq</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# vi /etc/profile</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# source /etc/profile</span><br></pre></td></tr></table></figure>
-<h4 id="运行RabbitMQ"><a href="#运行RabbitMQ" class="headerlink" title="运行RabbitMQ"></a>运行RabbitMQ</h4><p>rabbitmq-server -detached 以守护进程的方式运行rabbitmq<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# rabbitmq-server -detached</span><br><span class="line">Warning: PID file not written; -detached was passed.</span><br></pre></td></tr></table></figure></p>
-<p>rabbitmq status查看RabbiMQ是否运行成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# rabbitmqctl status</span><br><span class="line">Status of node rabbit@iz2zeaf3cg1099kiidi06mz</span><br><span class="line">[&#123;pid,30300&#125;,</span><br><span class="line"> &#123;running_applications,</span><br></pre></td></tr></table></figure></p>
+<p>官网也提供RPM(Linux下的软件包管理器)安装形式,详情参阅<a href="https://www.rabbitmq.com/install-rpm.html#with-rpm" target="_blank" rel="noopener">官网</a><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# tar xvf rabbitmq-server-generic-unix-3.6.15.tar.xz -C /opt</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# cd /opt</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# ls</span><br><span class="line">erlang  rabbitmq_server-<span class="number">3.6</span>.15</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# mv rabbitmq_server-3.6.15 rabbitmq</span><br></pre></td></tr></table></figure></p>
+<p>修改/etc/profile,添加环境变量:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export PATH=$PATH:/opt/rabbitmq/sbin</span><br><span class="line">export RABBITMQ_HOME=/opt/rabbitmq</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# vi /etc/profile</span><br><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# source /etc/profile</span><br></pre></td></tr></table></figure>
+<h4 id="运行RabbitMQ"><a href="#运行RabbitMQ" class="headerlink" title="运行RabbitMQ"></a>运行RabbitMQ</h4><p>rabbitmq-server -detached 以守护进程的方式运行rabbitmq<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# rabbitmq-server -detached</span><br><span class="line">Warning: PID file not written; -detached was passed.</span><br></pre></td></tr></table></figure></p>
+<p>rabbitmq status查看RabbiMQ是否运行成功<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz opt]# rabbitmqctl status</span><br><span class="line">Status of node rabbit<span class="meta">@iz</span>2zeaf3cg1099kiidi06mz</span><br><span class="line">[&#123;pid,<span class="number">30300</span>&#125;,</span><br><span class="line"> &#123;running_applications,</span><br></pre></td></tr></table></figure></p>
 <h4 id="开启WEB后台管理界面"><a href="#开启WEB后台管理界面" class="headerlink" title="开启WEB后台管理界面"></a>开启WEB后台管理界面</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmq-plugins enable rabbitmq_management</span><br></pre></td></tr></table></figure>
 <h4 id="创建远程登录账号密码"><a href="#创建远程登录账号密码" class="headerlink" title="创建远程登录账号密码"></a>创建远程登录账号密码</h4><p>由于rabbitmq的默认账号(账号guest,密码guest)具有全部权限,guest账号只允许在Localhost登录WEB界面，远程登录会失败，所以我们需要新建账号并设置相应权限</p>
-<p><strong>1. 查看当前用户列表</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl list_users;</span><br><span class="line">Listing users</span><br><span class="line">guest	[administrator]</span><br></pre></td></tr></table></figure></p>
-<p><strong>2. 新增一个用户</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl add_user root root</span><br><span class="line">Creating user &quot;root&quot;</span><br></pre></td></tr></table></figure></p>
-<p><strong>3. 设置用户角色</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl set_user_tags root administrator</span><br><span class="line">Setting tags for user &quot;root&quot; to [administrator]</span><br></pre></td></tr></table></figure></p>
+<p><strong>1. 查看当前用户列表</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl list_users;</span><br><span class="line">Listing users</span><br><span class="line">guest	[administrator]</span><br></pre></td></tr></table></figure></p>
+<p><strong>2. 新增一个用户</strong></p>
+<p>命令<code>rabbitmqctl add_user {username} {password}</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl add_user root root</span><br><span class="line">Creating user <span class="string">"root"</span></span><br></pre></td></tr></table></figure>
+<p><strong>3. 设置用户角色</strong></p>
+<p>命令<code>rabbitmqctl set_user_tags {username} {tag...}</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl set_user_tags root administrator</span><br><span class="line">Setting tags <span class="keyword">for</span> user <span class="string">"root"</span> to [administrator]</span><br><span class="line"><span class="comment">//administrator代表最高权限</span></span><br></pre></td></tr></table></figure>
 <p><strong>4. 设置用户权限</strong></p>
 <p>命令是<code>rabbitmqctl set_permissions [-p vhost] {user}{conf}{write}{read}</code>。<br>而rabbitmq默认的虚拟主机host为”/“。当然也可以新建一个虚拟主机，命令为<code>rabbitmqctl add_vhosts 虚拟主机名称</code></p>
 <p>这里授予root用户访问虚拟主机 /,并在所有资源上都具备可配置，可写以及可读的权限</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl set_permissions -p / root &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;</span><br><span class="line">Setting permissions for user &quot;root&quot; in vhost &quot;/&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# rabbitmqctl set_permissions -p / root ".*" ".*" ".*"</span><br><span class="line">Setting permissions <span class="keyword">for</span> user <span class="string">"root"</span> in vhost <span class="string">"/"</span></span><br></pre></td></tr></table></figure>
 <p>通过以上步骤之后，就可以通过自己设定的账号远程访问web管理界面了。</p>
 <h3 id="Docker中安装RabbitMQ"><a href="#Docker中安装RabbitMQ" class="headerlink" title="Docker中安装RabbitMQ"></a>Docker中安装RabbitMQ</h3><p>在Docker中安装RabbiMQ是很方便的，当前前提你得有Docker环境，至于Docker的安装这里就不介绍了，详情请参阅<a href="https://yeasy.gitbooks.io/docker_practice/content/install/centos.html" target="_blank" rel="noopener">CentOS 安装 Docker</a></p>
 <p><strong>1. 拉取镜像</strong></p>
-<p>从官方下载镜像到本地，这里是带有web管理插件的镜像<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# docker pull rabbitmq:management</span><br><span class="line">management: Pulling from library/rabbitmq</span><br></pre></td></tr></table></figure></p>
-<p><strong>2. 运行镜像,创建rabbitmq容器</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management</span><br><span class="line">a190a7d8245d09eae9cdf8322ba7def2397b4dad12bdcf6200143ea3a3519920</span><br></pre></td></tr></table></figure></p>
+<p>从官方下载镜像到本地，这里是带有web管理插件的镜像<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# docker pull rabbitmq:management</span><br><span class="line">management: Pulling from library/rabbitmq</span><br></pre></td></tr></table></figure></p>
+<p><strong>2. 运行镜像,创建rabbitmq容器</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@iz2zeaf3cg1099kiidi06mz ~]# docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management</span><br><span class="line">a190a7d8245d09eae9cdf8322ba7def2397b4dad12bdcf6200143ea3a3519920</span><br></pre></td></tr></table></figure></p>
 <p>参数说明:</p>
 <ul>
 <li>-d 表示后台进程运行</li>
@@ -516,15 +520,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">jwt</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">springboot</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -532,7 +528,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">leetcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">springboot</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -540,11 +544,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">代理</a>
+                <a href="javascript:void(0)" class="js-tag color1">平衡二叉树</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">平衡二叉树</a>
+                <a href="javascript:void(0)" class="js-tag color3">代理</a>
               </li>
              
               <li class="article-tag-list-item">
