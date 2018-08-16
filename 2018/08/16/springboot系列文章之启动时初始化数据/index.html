@@ -6,18 +6,30 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://pjmike.github.io">
-  <title>Archives | 风居者的街道</title>
+  <title>springboot系列文章之启动时初始化数据 | 风居者的街道</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="风居者的街道">
-<meta property="og:url" content="https://pjmike.github.io/archives/index.html">
+  <meta name="description" content="前言在我们用springboot搭建项目的时候，有时候会碰到在项目启动时初始化一些操作的需求，针对这种需求springboot为我们提供了以下几种方案供我们选择:  ApplicationRunner与CommandLineRunner接口 InitializingBean接口 Spring的事件机制">
+<meta name="keywords" content="springboot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot系列文章之启动时初始化数据">
+<meta property="og:url" content="https://pjmike.github.io/2018/08/16/springboot系列文章之启动时初始化数据/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="努力，不一定成功，成功却需努力">
+<meta property="og:description" content="前言在我们用springboot搭建项目的时候，有时候会碰到在项目启动时初始化一些操作的需求，针对这种需求springboot为我们提供了以下几种方案供我们选择:  ApplicationRunner与CommandLineRunner接口 InitializingBean接口 Spring的事件机制">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/ApplicationRunner.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/context.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/TIM%E5%9B%BE%E7%89%8720180816213215.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/in.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/init.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/watch.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/application.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/EventPublisher.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/listener.png">
+<meta property="og:updated_time" content="2018-08-16T14:06:38.678Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="风居者的街道">
-<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
+<meta name="twitter:title" content="springboot系列文章之启动时初始化数据">
+<meta name="twitter:description" content="前言在我们用springboot搭建项目的时候，有时候会碰到在项目启动时初始化一些操作的需求，针对这种需求springboot为我们提供了以下几种方案供我们选择:  ApplicationRunner与CommandLineRunner接口 InitializingBean接口 Spring的事件机制">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/ApplicationRunner.png">
   
     <link rel="alternative" href="/atom.xml" title="风居者的街道" type="application/atom+xml">
   
@@ -157,36 +169,139 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-springboot系列文章之启动时初始化数据" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/16/springboot系列文章之启动时初始化数据/" class="archive-article-date">
-  	<time datetime="2018-08-16T14:06:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-16</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/16/springboot系列文章之启动时初始化数据/">springboot系列文章之启动时初始化数据</a>
+    <h1 class="article-title" itemprop="name">
+      springboot系列文章之启动时初始化数据
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/08/16/springboot系列文章之启动时初始化数据/" class="archive-article-date">
+  	<time datetime="2018-08-16T14:06:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-16</time>
+</a>
+        
+      </header>
+    
+    <!-- 目录内容 -->
+
+    <p class="show-toc-btn" id="show-toc-btn" onclick="showToc();" style="display:none">
+          <span class="btn-bg"></span>
+          <span class="btn-text">文章导航</span>
+          </p>
+    <div id="toc-article" class="toc-article">
+        <span id="toc-close" class="toc-close" title="隐藏导航" onclick="showBtn();">×</span>
+        <strong class="toc-title">文章目录</strong>
+           <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ApplicationRunner与CommandLineRunner"><span class="toc-number">2.</span> <span class="toc-text">ApplicationRunner与CommandLineRunner</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ApplicationRunner"><span class="toc-number">2.1.</span> <span class="toc-text">ApplicationRunner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CommandLineRunner"><span class="toc-number">2.2.</span> <span class="toc-text">CommandLineRunner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#两者的联系与区别"><span class="toc-number">2.3.</span> <span class="toc-text">两者的联系与区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#源码跟踪"><span class="toc-number">2.4.</span> <span class="toc-text">源码跟踪</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#InitializingBean"><span class="toc-number">3.</span> <span class="toc-text">InitializingBean</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring的事件机制"><span class="toc-number">4.</span> <span class="toc-text">Spring的事件机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基础概念"><span class="toc-number">4.1.</span> <span class="toc-text">基础概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件"><span class="toc-number">4.2.</span> <span class="toc-text">事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建事件监听者"><span class="toc-number">4.3.</span> <span class="toc-text">创建事件监听者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件发布"><span class="toc-number">4.4.</span> <span class="toc-text">事件发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用ContextRefreshedEvent事件进行初始化操作"><span class="toc-number">4.5.</span> <span class="toc-text">利用ContextRefreshedEvent事件进行初始化操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+         </div>
+   <script type="text/javascript">
+    function showToc(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:block");
+        show_toc_btn.setAttribute("style","display:none");
+        };
+    function showBtn(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:none");
+        show_toc_btn.setAttribute("style","display:block");
+        };
+   </script>
+             
+<!-- 目录内容结束 -->
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在我们用springboot搭建项目的时候，有时候会碰到在项目启动时初始化一些操作的需求，针对这种需求springboot为我们提供了以下几种方案供我们选择:</p>
+<ul>
+<li><code>ApplicationRunner</code>与<code>CommandLineRunner</code>接口</li>
+<li><code>InitializingBean接口</code></li>
+<li>Spring的事件机制</li>
+</ul>
+<a id="more"></a>
+<h2 id="ApplicationRunner与CommandLineRunner"><a href="#ApplicationRunner与CommandLineRunner" class="headerlink" title="ApplicationRunner与CommandLineRunner"></a>ApplicationRunner与CommandLineRunner</h2><p>如果需要在<code>SpringApplication</code>启动时执行一些特殊的代码，你可以实现<code>ApplicationRunner</code>或<code>CommandLineRunner</code>接口，<strong>这两个接口工作方式相同，都只提供单一的run方法，而且该方法仅在SpringApplication.run(…)完成之前调用，更准确的说是在构造SpringApplication实例完成之后调用run()的时候，具体分析见后文</strong>，所以这里将他们分为一类。</p>
+<h3 id="ApplicationRunner"><a href="#ApplicationRunner" class="headerlink" title="ApplicationRunner"></a>ApplicationRunner</h3><p>构造一个类实现ApplicationRunner接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationRunnerTest</span> <span class="keyword">implements</span> <span class="title">ApplicationRunner</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(ApplicationArguments args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"ApplicationRunner"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>项目启动测试结果如图:<br><img src="http://osvtz719h.bkt.clouddn.com/ApplicationRunner.png" alt="application"></p>
+<h3 id="CommandLineRunner"><a href="#CommandLineRunner" class="headerlink" title="CommandLineRunner"></a>CommandLineRunner</h3><p>对于这两个接口而言，我们可以通过Order注解或者使用Ordered接口来指定调用顺序，<code>@Order()</code>中的值越小，优先级越高<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Order</span>(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CommandLineRunnerTest</span> <span class="keyword">implements</span> <span class="title">CommandLineRunner</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"CommandLineRunner..."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当然我们也可以同时使用<code>ApplicationRunner</code>和<code>CommandLineRunner</code>，默认情况下前者比后者先执行，但是这没有必要，使用一个就好了</p>
+<h3 id="两者的联系与区别"><a href="#两者的联系与区别" class="headerlink" title="两者的联系与区别"></a>两者的联系与区别</h3><p><strong>前面就提到过，两个接口都有run()方法，只不过它们的参数不一样，CommandLineRunner的参数是最原始的参数，没有进行任何处理，ApplicationRunner的参数是ApplicationArguments,是对原始参数的进一步封装</strong></p>
+<h3 id="源码跟踪"><a href="#源码跟踪" class="headerlink" title="源码跟踪"></a>源码跟踪</h3><p>接下来我们简要跟踪一下源码看<code>ApplicationRunner(CommandLineRunner)</code>是如何被调用的。</p>
+<p>Springboot在启动的时候，都会构造一个<code>SpringApplication</code>实例，至于这个实例怎么构造的，这里不去探究了，有感兴趣的可以去看下源码。这里主要看<code>ApplicationRunner</code>是如何被调用的，而它的调用就是在<code>SpringApplication</code>这个实例调用run方法中。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(Application.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>进入run方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ConfigurableApplicationContext <span class="title">run</span><span class="params">(Class&lt;?&gt; primarySource,</span></span></span><br><span class="line"><span class="function"><span class="params">		String... args)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> run(<span class="keyword">new</span> Class&lt;?&gt;[] &#123; primarySource &#125;, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行SpringApplication的run方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ConfigurableApplicationContext <span class="title">run</span><span class="params">(Class&lt;?&gt;[] primarySources,</span></span></span><br><span class="line"><span class="function"><span class="params">		String[] args)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">new</span> SpringApplication(primarySources).run(args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>一路点击run()来到这里<br><img src="http://osvtz719h.bkt.clouddn.com/context.png" alt="context"><br>发现对ApplicationRunner的调用实际上在callRunners方法中<br><img src="http://osvtz719h.bkt.clouddn.com/TIM%E5%9B%BE%E7%89%8720180816213215.png" alt="runer"></p>
+<h2 id="InitializingBean"><a href="#InitializingBean" class="headerlink" title="InitializingBean"></a>InitializingBean</h2><p><code>InitializingBean</code>接口为<code>bean</code>提供了初始化方法的方式，它只包括<code>afterPropertiesSet()</code>方法。</p>
+<p><strong>在spring初始化bean的时候，如果bean实现了<code>InitializingBean</code>接口，在对象的所有属性被初始化后之后才会调用afterPropertiesSet()方法</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InitialingzingBeanTest</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"InitializingBean.."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/in.png" alt="in"></p>
+<p>当然，我们可以看出spring初始化bean肯定会在<br>ApplicationRunner和CommandLineRunner接口调用之前。</p>
+<p><strong>当然有一点我们要注意的是，尽管使用<code>initialingBean</code>接口可以实现初始化动作，但是官方并不建议我们使用<code>InitializingBean</code>接口,因为它将你的代码耦合在Spring代码中，官方的建议是在bean的配置文件指定<code>init-method</code>方法，或者在<code>@Bean</code>中设置<code>init-method</code>属性，这同样可以实现我们的需求</strong><br><img src="http://osvtz719h.bkt.clouddn.com/init.png" alt="init"></p>
+<h2 id="Spring的事件机制"><a href="#Spring的事件机制" class="headerlink" title="Spring的事件机制"></a>Spring的事件机制</h2><p>Spring的事件机制实际上是设计模式中观察者模式的典型应用，在<a href="https://www.amazon.cn/gp/product/B0011FBU34/ref=as_li_qf_sp_asin_il_tl?ie=UTF8&amp;camp=536&amp;creative=3200&amp;creativeASIN=B0011FBU34&amp;linkCode=as2&amp;tag=droidyue-23" target="_blank" rel="noopener">Head First 设计模式</a>中是这样定义观察者模式的:</p>
+<blockquote>
+<p>观察者模式定义了一个一对多的依赖关系，让一个或多个观察者对象监听一个主题对象。这样一来，当被观察者状态改变时，需要通知相应的观察者，使这些观察者能够自动更新</p>
+</blockquote>
+<p><img src="http://osvtz719h.bkt.clouddn.com/watch.png" alt="watch"></p>
+<h3 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h3><p>Spring的事件驱动模型由三部分组成</p>
+<ul>
+<li>事件: <code>ApplicationEvent</code>,继承自JDK的<code>EventObject</code>，所有事件都要继承它,也就是被观察者</li>
+<li>事件发布者: <code>ApplicationEventPublisher</code>及<code>ApplicationEventMulticaster</code>接口，使用这个接口，就可以发布事件了</li>
+<li>事件监听者: <code>ApplicationListener</code>,继承JDK的<code>EventListener</code>，所有监听者都继承它，也就是我们所说的观察者，当然我们也可以使用注解 <code>@EventListener</code>，效果是一样的</li>
+</ul>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><p>在Spring框架中，默认对ApplicationEvent事件提供了如下支持:</p>
+<ul>
+<li>ContextStartedEvent：ApplicationContext启动后触发的事件</li>
+<li>ContextStoppedEvent：ApplicationContext停止后触发的事件</li>
+<li>ContextRefreshedEvent：<strong>ApplicationContext初始化或刷新完成后触发的事件</strong>；（容器初始化完成后调用，所以我们可以利用这个事件做一些初始化操作）</li>
+<li>ContextClosedEvent：ApplicationContext关闭后触发的事件；（如web容器关闭时自动会触发spring容器的关闭，如果是普通java应用，需要调用ctx.registerShutdownHook();注册虚拟机关闭时的钩子才行）<br><img src="http://osvtz719h.bkt.clouddn.com/application.png" alt="application"></li>
+</ul>
+<p>构造一个类继承ApplicationEvent<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestEvent</span> <span class="keyword">extends</span> <span class="title">ApplicationEvent</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">376299954511699499L</span>;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Create a new ApplicationEvent.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> source the object on which the event initially occurred (never &#123;<span class="doctag">@code</span> null&#125;)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">TestEvent</span><span class="params">(Object source)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(source);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setMessage</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.message = message;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="创建事件监听者"><a href="#创建事件监听者" class="headerlink" title="创建事件监听者"></a>创建事件监听者</h3><p>有两种方法可以创建监听者，一种是直接实现ApplicationListener的接口，一种是使用注解 <code>@EventListener</code>，<strong>注解是添加在监听方法上的</strong>，下面的例子是直接实现的接口<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationListenerTest</span> <span class="keyword">implements</span> <span class="title">ApplicationListener</span>&lt;<span class="title">TestEvent</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onApplicationEvent</span><span class="params">(TestEvent testEvent)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        testEvent.getMessage();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="事件发布"><a href="#事件发布" class="headerlink" title="事件发布"></a>事件发布</h3><p>对于事件发布，代表者是<code>ApplicationEventPublisher</code>和<code>ApplicationEventMulticaster</code>,系统提供的实现如下<br><img src="http://osvtz719h.bkt.clouddn.com/EventPublisher.png" alt="a"><br>ApplicationContext接口继承了ApplicationEventPublisher，并在AbstractApplicationContext实现了具体代码，实际执行是委托给ApplicationEventMulticaster（可以认为是多播）</p>
+<p>下面是一个事件发布者的测试实例:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RunWith</span>(SpringRunner.class)</span><br><span class="line"><span class="meta">@SpringBootTest</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EventTest</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> ApplicationContext applicationContext;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">publishTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        TestEvent testEvent = <span class="keyword">new</span> TestEvent(<span class="string">""</span>);</span><br><span class="line">        testEvent.setMessage(<span class="string">"hello world"</span>);</span><br><span class="line">        applicationContext.publishEvent(testEvent);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//output:</span></span><br><span class="line">hello world</span><br></pre></td></tr></table></figure></p>
+<h3 id="利用ContextRefreshedEvent事件进行初始化操作"><a href="#利用ContextRefreshedEvent事件进行初始化操作" class="headerlink" title="利用ContextRefreshedEvent事件进行初始化操作"></a>利用ContextRefreshedEvent事件进行初始化操作</h3><p>前面做了这么多铺垫，下面进入今天的主题，利用Spring的事件机制进行初始化一些操作，实际上就是前面提到了，利用<code>ContextRefreshedEvent</code>事件进行初始化，该事件是<code>ApplicationContext</code>初始化完成后调用的事件，所以我们可以利用这个事件，对应实现一个监听器，在其<code>onApplicationEvent()</code>方法里初始化操作<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationListenerTest</span> <span class="keyword">implements</span> <span class="title">ApplicationListener</span>&lt;<span class="title">ContextRefreshedEvent</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onApplicationEvent</span><span class="params">(ContextRefreshedEvent event)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"我被调用了.."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/listener.png" alt="listener"></p>
+<p><strong>注意</strong>: 在传统的基于XML配置的Spring项目中会存在二次调用的问题，即调用两次该方法，原因是在传统的Spring MVC项目中，系统存在两个容器，一个root容器，一个project-servlet.xml对应的子容器，在初始化这两个容器的时候都会调用该方法一次，所以有二次调用的问题,而对于基于Springboot的项目不存在这个问题</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上简要总结了在springboot启动时进行初始化操作的几个方案，这几种方式都可以满足我们的需求，针对具体场景使用对应的方案。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/" target="_blank" rel="noopener">Spring官网</a></li>
+<li><a href="https://fangjian0423.github.io/2017/04/30/springboot-startup-analysis/" target="_blank" rel="noopener">SpringBoot源码分析之SpringBoot的启动过程</a></li>
+<li><a href="http://jinnianshilongnian.iteye.com/blog/1902886" target="_blank" rel="noopener">Spring事件驱动模型</a></li>
+<li><a href="https://github.com/jiwenxing/spring-boot-demo/wiki/Spring-Events" target="_blank" rel="noopener">Spring Events</a></li>
+<li><a href="http://blueskykong.com/2018/02/22/spring-event-sourcing/" target="_blank" rel="noopener">Spring中的事件驱动模型（一）</a></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -198,7 +313,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -211,465 +326,116 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://pjmike.github.io/2018/08/16/springboot系列文章之启动时初始化数据/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/13/详解Java-Socket的工作机制/" class="archive-article-date">
-  	<time datetime="2018-08-12T16:28:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-13</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2018/08/13/详解Java-Socket的工作机制/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">详解Java Socket的工作机制</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/13/详解Java-Socket的工作机制/">详解Java Socket的工作机制</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Socket</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ApplicationRunner与CommandLineRunner"><span class="toc-number">2.</span> <span class="toc-text">ApplicationRunner与CommandLineRunner</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ApplicationRunner"><span class="toc-number">2.1.</span> <span class="toc-text">ApplicationRunner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CommandLineRunner"><span class="toc-number">2.2.</span> <span class="toc-text">CommandLineRunner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#两者的联系与区别"><span class="toc-number">2.3.</span> <span class="toc-text">两者的联系与区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#源码跟踪"><span class="toc-number">2.4.</span> <span class="toc-text">源码跟踪</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#InitializingBean"><span class="toc-number">3.</span> <span class="toc-text">InitializingBean</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring的事件机制"><span class="toc-number">4.</span> <span class="toc-text">Spring的事件机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基础概念"><span class="toc-number">4.1.</span> <span class="toc-text">基础概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件"><span class="toc-number">4.2.</span> <span class="toc-text">事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建事件监听者"><span class="toc-number">4.3.</span> <span class="toc-text">创建事件监听者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件发布"><span class="toc-number">4.4.</span> <span class="toc-text">事件发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用ContextRefreshedEvent事件进行初始化操作"><span class="toc-number">4.5.</span> <span class="toc-text">利用ContextRefreshedEvent事件进行初始化操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/09/二叉搜索树的增删查/" class="archive-article-date">
-  	<time datetime="2018-08-09T14:24:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-09</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/09/二叉搜索树的增删查/">二叉搜索树的增删查</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">二叉搜索树</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构与算法//" class="article-tag-list-link color3">数据结构与算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/09/平衡二叉树的插入与删除/" class="archive-article-date">
-  	<time datetime="2018-08-09T14:08:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-09</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/09/平衡二叉树的插入与删除/">平衡二叉树的插入与删除</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">平衡二叉树</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构与算法//" class="article-tag-list-link color3">数据结构与算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/08/RabbitMQ的安装详解/" class="archive-article-date">
-  	<time datetime="2018-08-08T15:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-08</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/08/RabbitMQ的安装详解/">RabbitMQ的安装详解</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RabbitMQ</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/RabbitMQ//" class="article-tag-list-link color4">RabbitMQ</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/07/死磕排序算法之堆排序/" class="archive-article-date">
-  	<time datetime="2018-08-07T15:31:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/07/死磕排序算法之堆排序/">死磕排序算法之堆排序</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">排序算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构与算法//" class="article-tag-list-link color3">数据结构与算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/07/MySQL常用语句-二/" class="archive-article-date">
-  	<time datetime="2018-08-07T02:52:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/07/MySQL常用语句-二/">MySQL常用语句(二)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/07/动态代理的原理及其应用/" class="archive-article-date">
-  	<time datetime="2018-08-06T16:39:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/07/动态代理的原理及其应用/">动态代理的原理及其应用</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">代理</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/代理//" class="article-tag-list-link color3">代理</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/05/MySQL常用语句-一/" class="archive-article-date">
-  	<time datetime="2018-08-05T02:06:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-05</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/05/MySQL常用语句-一/">MySQL常用语句(一)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/" class="archive-article-date">
-  	<time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">leetcode题解 98 验证二叉搜索树</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构//" class="article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">Next &raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -693,8 +459,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
