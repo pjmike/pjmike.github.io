@@ -6,18 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://pjmike.github.io">
-  <title>Archives: 2018/7 | 风居者的街道</title>
+  <title>MySQL常用基础类型详解 | 风居者的街道</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="风居者的街道">
-<meta property="og:url" content="https://pjmike.github.io/archives/2018/07/index.html">
+  <meta name="description" content="前言以下是对《高性能MySQL》中MySQL基础类型的学习总结 整数类型有如下几种整数类型，以及它们相应的存储空间:  TINYINT，8位存储空间 SMALLINT，16位存储空间 MEDIUMINT，24位存储空间 INT，32位存储空间 BIGINT，64位存储空间">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL常用基础类型详解">
+<meta property="og:url" content="https://pjmike.github.io/2018/08/19/MySQL常用基础类型详解/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="努力，不一定成功，成功却需努力">
+<meta property="og:description" content="前言以下是对《高性能MySQL》中MySQL基础类型的学习总结 整数类型有如下几种整数类型，以及它们相应的存储空间:  TINYINT，8位存储空间 SMALLINT，16位存储空间 MEDIUMINT，24位存储空间 INT，32位存储空间 BIGINT，64位存储空间">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/time.png">
+<meta property="og:updated_time" content="2018-08-19T08:41:03.651Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="风居者的街道">
-<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
+<meta name="twitter:title" content="MySQL常用基础类型详解">
+<meta name="twitter:description" content="前言以下是对《高性能MySQL》中MySQL基础类型的学习总结 整数类型有如下几种整数类型，以及它们相应的存储空间:  TINYINT，8位存储空间 SMALLINT，16位存储空间 MEDIUMINT，24位存储空间 INT，32位存储空间 BIGINT，64位存储空间">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/time.png">
   
     <link rel="alternative" href="/atom.xml" title="风居者的街道" type="application/atom+xml">
   
@@ -157,120 +161,289 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-MySQL常用基础类型详解" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/22/leecode题解-二叉搜索树迭代器/" class="archive-article-date">
-  	<time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-22</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">leecode题解 二叉搜索树迭代器</a>
+    <h1 class="article-title" itemprop="name">
+      MySQL常用基础类型详解
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/08/19/MySQL常用基础类型详解/" class="archive-article-date">
+  	<time datetime="2018-08-19T08:41:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-19</time>
+</a>
+        
+      </header>
+    
+    <!-- 目录内容 -->
+
+    <p class="show-toc-btn" id="show-toc-btn" onclick="showToc();" style="display:none">
+          <span class="btn-bg"></span>
+          <span class="btn-text">文章导航</span>
+          </p>
+    <div id="toc-article" class="toc-article">
+        <span id="toc-close" class="toc-close" title="隐藏导航" onclick="showBtn();">×</span>
+        <strong class="toc-title">文章目录</strong>
+           <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#整数类型"><span class="toc-number">2.</span> <span class="toc-text">整数类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实数类型"><span class="toc-number">3.</span> <span class="toc-text">实数类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#浮点型-float和double"><span class="toc-number">3.1.</span> <span class="toc-text">浮点型(float和double)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#定点型-decimal"><span class="toc-number">3.2.</span> <span class="toc-text">定点型(decimal)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符串类型"><span class="toc-number">4.</span> <span class="toc-text">字符串类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#varchar"><span class="toc-number">4.1.</span> <span class="toc-text">varchar</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#char"><span class="toc-number">4.2.</span> <span class="toc-text">char</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#blob和text类型"><span class="toc-number">4.3.</span> <span class="toc-text">blob和text类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#日期和时间类型"><span class="toc-number">5.</span> <span class="toc-text">日期和时间类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#DATETIME的特点"><span class="toc-number">5.1.</span> <span class="toc-text">DATETIME的特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TIMESTAMP的特点"><span class="toc-number">5.2.</span> <span class="toc-text">TIMESTAMP的特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+         </div>
+   <script type="text/javascript">
+    function showToc(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:block");
+        show_toc_btn.setAttribute("style","display:none");
+        };
+    function showBtn(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:none");
+        show_toc_btn.setAttribute("style","display:block");
+        };
+   </script>
+             
+<!-- 目录内容结束 -->
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>以下是对《高性能MySQL》中MySQL基础类型的学习总结</p>
+<h2 id="整数类型"><a href="#整数类型" class="headerlink" title="整数类型"></a>整数类型</h2><p>有如下几种整数类型，以及它们相应的存储空间:</p>
+<ul>
+<li>TINYINT，8位存储空间</li>
+<li>SMALLINT，16位存储空间</li>
+<li>MEDIUMINT，24位存储空间</li>
+<li>INT，32位存储空间</li>
+<li>BIGINT，64位存储空间</li>
+</ul>
+<a id="more"></a>
+<p>以int类型为例，它的存储空间是32位，其可以存储的值的范围是从<code>-2^31</code>到<code>2^31-1</code>。<strong>整数类型有可选的unsigned属性，表示不允许负值</strong>，对于int来说，其unsigned可以存储范围是<code>0~2^32-1</code></p>
+<p>在MySQL中我们可以为整数类型指定宽度，例如int(11)。<strong>实际上这表示能够显示的数值中的数字的个数也就是宽度，它不会限制值的合法范围，int依旧是32位存储空间，这里只是规定了MySQL的一些交互工具(比如Navicat)用来显示字符的个数，对于存储和计算来说，int(1)和int(20)是相同的,因为整型的显示宽度，对数值大小无影响，只是当对类型设置了<code>zerofill</code>的时候，在显示的时候补0而已</strong>。</p>
+<p><strong>注意：这里的指定宽度不同于varchar类型中指定长度</strong></p>
+<h2 id="实数类型"><a href="#实数类型" class="headerlink" title="实数类型"></a>实数类型</h2><p>实数是带有小数部分的数字。然而，它们不只是为了存储小数部分，也可以使用DECIMAL存储比BIGINT还大的整数</p>
+<h3 id="浮点型-float和double"><a href="#浮点型-float和double" class="headerlink" title="浮点型(float和double)"></a>浮点型(float和double)</h3><table>
+<thead>
+<tr>
+<th>浮点型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float(m,d)</td>
+<td>单精度浮点型 8位精度(4字节) m表示浮点型数据总共位数，d表示小数位</td>
+</tr>
+<tr>
+<td>double(m,d)</td>
+<td>双精度浮点型    16位精度(8字节) m表示浮点型数据总共位数，d表示小数位</td>
+</tr>
+</tbody>
+</table>
+<p>比如设一个字段定义为float(5,3),插入一个数据12.3334，实际数据库存的是12.333</p>
+<h3 id="定点型-decimal"><a href="#定点型-decimal" class="headerlink" title="定点型(decimal)"></a>定点型(decimal)</h3><p>DECIMAL数据类型用于保留准确精确度的列，语法是 :<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">column_name  <span class="title">DECIMAL</span><span class="params">(M,D)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>上面的语法表示:</p>
+<ul>
+<li>M是表示有效数字数的精度。 P范围为1〜65。</li>
+<li>D是表示小数点后的位数。 D的范围是0~30,不得超过M</li>
+</ul>
+<p>对于decimal列，可以指定小数点前后所允许的最大位数，这会影响列的空间消耗，比如decimal(18,9)小数点两边将各存储9个数字，一共使用9个字节:小数点前的数字用4个字节，小数点后的数字用4个字节，小数点本身占1个字节。</p>
+<p>因为需要额外的空间和计算开销，所以应该尽量只对小数进行精确计算时才使用decimal——例如存储财务数据</p>
+<h2 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h2><h3 id="varchar"><a href="#varchar" class="headerlink" title="varchar"></a>varchar</h3><p><strong>varchar 用于存储可变字符串，它比定长类型更节省空间</strong>。</p>
+<p>varchar 的长度在 MySQL5.0.3 版本之前是0到255字节，在5.0.3和以后的版本中长度是0到65535字节，重要一点是，MySQL5.0.3 和以后的varchar的有效最长长度取决于最大行的大小(65535字节，所有列共享)和所使用的字符集。</p>
+<p>平时我们创建表时指定 varchar 的长度实际上是在我们数据库使用的字符集的基础上指定 varchar 能存储多少个字符，不管数字，字母，还是汉字。</p>
+<p><strong>举例说明</strong></p>
+<p>创建一个长度为5的varchar列<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; <span class="function">create table <span class="title">test1</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    -&gt; name varchar(<span class="number">5</span>)</span></span></span><br><span class="line"><span class="function">    -&gt; )</span>;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="function">rows <span class="title">affected</span> <span class="params">(<span class="number">0.12</span> sec)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>插入一个长度为6的英文和汉字，都报错提示数据长度太大<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; <span class="function">insert into <span class="title">test1</span><span class="params">(name)</span> <span class="title">values</span><span class="params">(<span class="string">"pjmike"</span>)</span></span>;</span><br><span class="line"><span class="number">1406</span> - Data too <span class="keyword">long</span> <span class="keyword">for</span> column <span class="string">'name'</span> at row <span class="number">1</span></span><br><span class="line">mysql&gt; <span class="function">insert into <span class="title">test1</span><span class="params">(name)</span> <span class="title">values</span><span class="params">(<span class="string">"你好呀大世界"</span>)</span></span>;</span><br><span class="line"><span class="number">1406</span> - Data too <span class="keyword">long</span> <span class="keyword">for</span> column <span class="string">'name'</span> at row <span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<p>插入长度小于等于5的字母和汉字，成功<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; <span class="function">insert into <span class="title">test1</span><span class="params">(name)</span> <span class="title">values</span><span class="params">(<span class="string">"pj"</span>)</span></span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="function">row <span class="title">affected</span> <span class="params">(<span class="number">0.08</span> sec)</span></span></span><br><span class="line"><span class="function">mysql&gt; insert into <span class="title">test1</span><span class="params">(name)</span> <span class="title">values</span><span class="params">(<span class="string">"你好呀世界"</span>)</span></span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="function">row <span class="title">affected</span> <span class="params">(<span class="number">0.08</span> sec)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>以上说明 varchar 类型字段的长度实际上表示容纳的最大字符数，而这个最大字符数是 <strong>「行定义长度不超过65535字节」和「数据库的字符集」</strong> 这两者通过公式运算得来的<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; <span class="function">create table <span class="title">test2</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    -&gt; name varchar(<span class="number">65535</span>)</span></span></span><br><span class="line"><span class="function">    -&gt; )</span>;</span><br><span class="line"><span class="number">1074</span> - Column length too big <span class="keyword">for</span> column <span class="string">'name'</span> (max = <span class="number">16383</span>); use BLOB or TEXT instead</span><br><span class="line">mysql&gt; show variables like <span class="string">"%char%"</span>;</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| Variable_name            | Value                      |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| character_set_client     | utf8mb4                    |</span><br><span class="line">| character_set_connection | utf8mb4                    |</span><br><span class="line">| character_set_database   | utf8mb4     </span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line"><span class="number">8</span> <span class="function">rows in <span class="title">set</span> <span class="params">(<span class="number">0.52</span> sec)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>由上面可以看出，该数据库的字符集为 <strong>「uft8mb4」</strong>对应的 varchar 最大<strong>字符数</strong>为16383</p>
+<p>varchar 还有一点需要注意的是: varchar需要使用1或2个额外字节记录字符串的长度，如果列的最大长度小于或等于255字节，则使用1个字节表示，否则使用2个字节。</p>
+<h3 id="char"><a href="#char" class="headerlink" title="char"></a>char</h3><p>char类型是定长的: MySQL 总是根据定义的字符串长度分配足够的空间。当定义 char 值时，MySQL 会删除所有的末尾空格，适合存储短字符。</p>
+<h3 id="blob和text类型"><a href="#blob和text类型" class="headerlink" title="blob和text类型"></a>blob和text类型</h3><p><strong>blob 和 text 都是为存储很大的数据而设计的字符串数据类型，分别采用二进制和字符方式存储</strong>。</p>
+<p>实际上，它们分别属于两组不同的数据类型家族: 字符类型是 TINYTEXT，SMALLTEXT，TEXT，MEDIUMTEXT，LONGTEXT；对应的二进制类型是 TINYBLOB，SMALLBLOB，BLOB，MEDIUMBLOB，LONGBLOB。BLOB 是 SMALLBLOB的同义词，TEXT 是 SMALLTEXT 的同义词。</p>
+<h2 id="日期和时间类型"><a href="#日期和时间类型" class="headerlink" title="日期和时间类型"></a>日期和时间类型</h2><p>表示时间值的日期和时间类型有DATETIME，DATE，TIMESTAMP，TIME和YEAR<br><img src="http://osvtz719h.bkt.clouddn.com/time.png" alt="time"></p>
+<h3 id="DATETIME的特点"><a href="#DATETIME的特点" class="headerlink" title="DATETIME的特点"></a>DATETIME的特点</h3><ul>
+<li>能保存大范围的值，精度为秒</li>
+<li>与时区无关，使用8个字节的存储空间</li>
+<li>默认情况下，MySQL以一种可排序的，无歧义的格式显示 DATETIME值</li>
+</ul>
+<h3 id="TIMESTAMP的特点"><a href="#TIMESTAMP的特点" class="headerlink" title="TIMESTAMP的特点"></a>TIMESTAMP的特点</h3><ul>
+<li>TIMESTAMP类型保存了从1970年1月1日午夜以来的秒数，它和Unix时间戳相同</li>
+<li>TIMESTAMP只使用4个字节存储空间，它的范围比DATETIME小的多，只能表示1970-2038年</li>
+<li>TIMESTAMP依赖于时区</li>
+<li>默认情况下，如果插入时没有指定第一个TIMESTAMP列的值，MySQL设置这个列的值为当前时间，并且有专有的自动更新特性</li>
+<li>默认为NOT NULL</li>
+<li>尽量使用TIMESTAMP,它比DATETIME空间效率更高</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://search.dangdang.com/?key=%E9%AB%98%E6%80%A7%E8%83%BDMySQL" target="_blank" rel="noopener">高性能MySQL第三版</a></li>
+<li><a href="http://www.runoob.com/mysql/mysql-data-types.html" target="_blank" rel="noopener">MySQL 数据类型-菜鸟教程</a></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构//" class="article-tag-list-link color5">数据结构</a>
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://pjmike.github.io/2018/08/19/MySQL常用基础类型详解/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/" class="archive-article-date">
-  	<time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-22</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2018/08/18/springboot系列文章之SpringBootApplication注解/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">springboot系列文章之SpringBootApplication注解</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">leetcode题解 98 验证二叉搜索树</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">leetcode</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/数据结构//" class="article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#整数类型"><span class="toc-number">2.</span> <span class="toc-text">整数类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实数类型"><span class="toc-number">3.</span> <span class="toc-text">实数类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#浮点型-float和double"><span class="toc-number">3.1.</span> <span class="toc-text">浮点型(float和double)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#定点型-decimal"><span class="toc-number">3.2.</span> <span class="toc-text">定点型(decimal)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符串类型"><span class="toc-number">4.</span> <span class="toc-text">字符串类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#varchar"><span class="toc-number">4.1.</span> <span class="toc-text">varchar</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#char"><span class="toc-number">4.2.</span> <span class="toc-text">char</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#blob和text类型"><span class="toc-number">4.3.</span> <span class="toc-text">blob和text类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#日期和时间类型"><span class="toc-number">5.</span> <span class="toc-text">日期和时间类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#DATETIME的特点"><span class="toc-number">5.1.</span> <span class="toc-text">DATETIME的特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TIMESTAMP的特点"><span class="toc-number">5.2.</span> <span class="toc-text">TIMESTAMP的特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -293,8 +466,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
