@@ -6,18 +6,25 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://pjmike.github.io">
-  <title>Archives: 2018/3 | 风居者的街道</title>
+  <title>BIO，NIO，AIO概览 | 风居者的街道</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="风居者的街道">
-<meta property="og:url" content="https://pjmike.github.io/archives/2018/03/index.html">
+  <meta name="description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BIO，NIO，AIO概览">
+<meta property="og:url" content="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="努力，不一定成功，成功却需努力">
+<meta property="og:description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/bio.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/NIO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/AIO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Multiplexing_IO.png">
+<meta property="og:updated_time" content="2018-08-24T02:49:14.492Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="风居者的街道">
-<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
+<meta name="twitter:title" content="BIO，NIO，AIO概览">
+<meta name="twitter:description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/bio.png">
   
     <link rel="alternative" href="/atom.xml" title="风居者的街道" type="application/atom+xml">
   
@@ -157,188 +164,132 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-BIO，NIO，AIO概览" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      BIO，NIO，AIO概览
+    </h1>
+  
+
+        
+        <a href="/2018/08/24/BIO，NIO，AIO概览/" class="archive-article-date">
+  	<time datetime="2018-08-24T02:49:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-24</time>
+</a>
+        
+      </header>
     
+    <!-- 目录内容 -->
+
+    <p class="show-toc-btn" id="show-toc-btn" onclick="showToc();" style="display:none">
+          <span class="btn-bg"></span>
+          <span class="btn-text">文章导航</span>
+          </p>
+    <div id="toc-article" class="toc-article">
+        <span id="toc-close" class="toc-close" title="隐藏导航" onclick="showBtn();">×</span>
+        <strong class="toc-title">文章目录</strong>
+           <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步与异步"><span class="toc-number">2.</span> <span class="toc-text">同步与异步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阻塞与非阻塞"><span class="toc-number">3.</span> <span class="toc-text">阻塞与非阻塞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO介绍"><span class="toc-number">4.</span> <span class="toc-text">BIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO介绍"><span class="toc-number">5.</span> <span class="toc-text">NIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AIO-NIO2"><span class="toc-number">6.</span> <span class="toc-text">AIO(NIO2)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O多路复用"><span class="toc-number">7.</span> <span class="toc-text">I/O多路复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">8.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">9.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+         </div>
+   <script type="text/javascript">
+    function showToc(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:block");
+        show_toc_btn.setAttribute("style","display:none");
+        };
+    function showBtn(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:none");
+        show_toc_btn.setAttribute("style","display:block");
+        };
+   </script>
+             
+<!-- 目录内容结束 -->
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念</p>
+<a id="more"></a>
+<h2 id="同步与异步"><a href="#同步与异步" class="headerlink" title="同步与异步"></a>同步与异步</h2><p>同步与异步关注的是<strong>消息通信机制</strong></p>
+<p><strong>同步</strong></p>
+<p>同步就是发起一个调用后，等待当前调用返回，没得到结果之前，调用不返回，就像做事一样，事情必须一件一件做完了，才能做下一件</p>
+<p><strong>异步</strong></p>
+<p>异步就是发起一个调用后，立刻得到回应，但没有返回结果，此时我们可以处理其他的请求，被调用者通常<strong>依靠事件，回调</strong>等机制来通知调用者其返回结果。</p>
+<p>举个通俗的例子，同步就像:</p>
+<blockquote>
+<p>你打电话问书店老板有没有《分布式系统》这本书，如果是同步通信机制，书店老板会说，你稍等，”我查一下”，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。</p>
+</blockquote>
+<p>异步就像:</p>
+<blockquote>
+<p>而异步通信机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调</p>
+</blockquote>
+<p>此处参照知乎上关于此问题的回答：<a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">https://www.zhihu.com/question/19732473</a></p>
+<h2 id="阻塞与非阻塞"><a href="#阻塞与非阻塞" class="headerlink" title="阻塞与非阻塞"></a><strong>阻塞与非阻塞</strong></h2><p>阻塞与非阻塞关注的是<strong>程序在等待调用结果(消息，返回值)时的状态</strong></p>
+<p><strong>阻塞</strong></p>
+<p>阻塞就是发起一个请求，在请求结果返回之前，当前线程会被挂起(被阻塞)，无法从事其他任务，只有当条件就绪才能继续。比如<code>ServerSocket</code>新连接建立完毕</p>
+<p><strong>非阻塞</strong></p>
+<p>非阻塞就是发起一个请求，在不能立刻得到返回结果之前，直接返回，不等待，函数不会阻塞当前线程。</p>
+<p>还是上面买书的例子:</p>
+<blockquote>
+<p>你打电话问书店老板有没有《分布式系统》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。</p>
+</blockquote>
+<h2 id="BIO介绍"><a href="#BIO介绍" class="headerlink" title="BIO介绍"></a>BIO介绍</h2><p>BIO也就是传统的同步阻塞IO模型，对应Java.io包，它提供了很多IO功能，比如输入输出流，对文件进行操作。在网络编程(Socket通信)中也同样进行IO操作。</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/bio.png" alt="bio"></p>
+<p>上图是从操作系统的角度上去阐述 BIO 的，程序发送请求给内核，然后由内核去进行通信，在内核准备好数据之前这个线程是被挂起的。</p>
+<h2 id="NIO介绍"><a href="#NIO介绍" class="headerlink" title="NIO介绍"></a>NIO介绍</h2><p>NIO是一种同步非阻塞的I/O模型，在Java 1.4 中引入了NIO框架，对应 java.nio 包，提供了 Channel , Selector，Buffer等抽象</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/NIO.png" alt="nio"></p>
+<p>与BIO的区别就是，发起第一次请求后，线程并没有被阻塞，它反复检查数据是否准备好，有点类似于”轮询”。</p>
+<h2 id="AIO-NIO2"><a href="#AIO-NIO2" class="headerlink" title="AIO(NIO2)"></a>AIO(NIO2)</h2><p>AIO 也就是 NIO 2。在 Java 7 中引入了 NIO 的改进版 NIO 2,它是异步非阻塞的IO方式</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/AIO.png" alt="AIO"></p>
+<p>AIO是异步非阻塞的IO模型，所以用户线程可以同时处理别的事情。应用程序发起一个系统调用过后，无需等待，立刻返回，等到数据准备好后，再通知应用程序</p>
+<h2 id="I-O多路复用"><a href="#I-O多路复用" class="headerlink" title="I/O多路复用"></a>I/O多路复用</h2><p>这个概念来自通信领域，指一个信道上传输多路信号的技术，在计算机里表示使用一个线程监视多个描述符的就绪状态。I/O 多路复用技术是由操作系统提供的功能，比如<a href="https://baike.baidu.com/item/POSIX/3792413" target="_blank" rel="noopener">POSIX标准</a>下的 select 或 linux 下的 epoll 以及 <a href="https://baike.baidu.com/item/BSD" target="_blank" rel="noopener">BSD</a> 特有的 kqueue 。首先向操作系统注册一个描述符集合的可读或者可写事件，如果某个或某些描述符就绪，操作系统就会通知，这样，多个描述符就能在一个线程内并发通信。<br><img src="http://osvtz719h.bkt.clouddn.com/Multiplexing_IO.png" alt="muti_io"></p>
+<p>从IO操作的角度来看，多路复用的特点就是用户进程能够同时等待多个IO请求，系统来监控状态，其中的任意一个进入读就绪的状态，系统就会向进程通知。再简单点说，<strong>I/O多路复用就是多个网络连接，共用一个线程</strong></p>
+<p><strong>I/O多路复用的应用场景</strong></p>
+<p>I/O 多路复用的主要应用场景如下：</p>
+<ul>
+<li>服务器需要同时处理多个处于监听状态或者多个连接状态的套接字</li>
+<li>服务器需要同时处理多种网络协议的套接字</li>
+</ul>
+<p>目前支持I/O 多路复用的系统调用有 select，pselect，poll，epoll。在Linux 网络编程中，很长一段时间都使用select 做轮询和网络事件通知。然而因为select的一些固有缺陷导致它的应用受到了很大的限制，比如select 单个进程打开的最大句柄数是有限的。最终Linux 选择epoll 替代了select。更多关于这些系统调用的介绍与使用，请参阅 <a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上关于 BIO，NIO，AIO 的说明参照了《UNIX网络编程》对 I/O 模型的分类，BIO，NIO，I/O的多路复用都是同步机制，AIO 是异步方式。本文只是简单介绍了一些概念，更多I/O 模型详细的原理和API介绍，可以阅读《UNIX网络编程》</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></li>
+<li><a href="http://loveshisong.cn/%E7%BC%96%E7%A8%8B%E6%8A%80%E6%9C%AF/2016-06-25-%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3BIO-NIO-AIO.html" target="_blank" rel="noopener">十分钟了解BIO、NIO、AIO</a></li>
+<li><a href="https://www.yanxurui.cc/posts/linux/2017-06-03-IO-multiplexing/" target="_blank" rel="noopener">IO多路复用漫谈(附epoll示例)</a></li>
+<li><a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">怎样理解阻塞非阻塞与同步异步的区别？——知乎</a></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/28/springboot属性配置/" class="archive-article-date">
-  	<time datetime="2018-03-28T13:09:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/28/springboot属性配置/">springboot属性配置</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">springboot</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/28/springboot实现跨域访问-CORS/" class="archive-article-date">
-  	<time datetime="2018-03-28T03:45:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/28/springboot实现跨域访问-CORS/">springboot实现跨域访问(CORS)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">springboot</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/28/springboot参数校验总结(一)/" class="archive-article-date">
-  	<time datetime="2018-03-28T02:37:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/28/springboot参数校验总结(一)/">springboot参数校验总结(一)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">springboot</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/26/过滤器与拦截器总结/" class="archive-article-date">
-  	<time datetime="2018-03-26T09:25:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/26/过滤器与拦截器总结/">过滤器与拦截器总结</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">spring</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" class="archive-article-date">
-  	<time datetime="2018-03-17T16:13:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/">项目中遇到的ExceptionInInitializerError异常引发的问题</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -350,19 +301,130 @@
 		</ul>
 	</div>
 
-          
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
+        		</li>
+      		
+		</ul>
+	</div>
 
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2018/08/21/探究MySQL中的日志文件/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">探究MySQL中的日志文件</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步与异步"><span class="toc-number">2.</span> <span class="toc-text">同步与异步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阻塞与非阻塞"><span class="toc-number">3.</span> <span class="toc-text">阻塞与非阻塞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO介绍"><span class="toc-number">4.</span> <span class="toc-text">BIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO介绍"><span class="toc-number">5.</span> <span class="toc-text">NIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AIO-NIO2"><span class="toc-number">6.</span> <span class="toc-text">AIO(NIO2)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O多路复用"><span class="toc-number">7.</span> <span class="toc-text">I/O多路复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">8.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">9.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -385,8 +447,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
