@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>一文读懂一个URL请求的过程是怎样的 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言当我们在浏览器中输入一个URL访问地址，然后浏览器返回给我们一个响应页面，这内部过程到底是怎样的呢？下面我将从以下几个方面阐述一个 WEB请求过程到底是怎样：  浏览器缓存 DNS域名解析 TCP连接 HTTP请求与响应">
+<meta name="keywords" content="DNS,TCP,HTTP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文读懂一个URL请求的过程是怎样的">
+<meta property="og:url" content="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="前言当我们在浏览器中输入一个URL访问地址，然后浏览器返回给我们一个响应页面，这内部过程到底是怎样的呢？下面我将从以下几个方面阐述一个 WEB请求过程到底是怎样：  浏览器缓存 DNS域名解析 TCP连接 HTTP请求与响应">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/cache.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/cache1.0.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/cache1.1.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/cache1.2.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/304.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/200.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/TYHrxqQt.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/cahce.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/DNS.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/tcp_open_close.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/tcp_header.JPG">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/tcp_open.JPG">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/tcp_close.JPG">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/three.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/four.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/http_client.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/header.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/header1.png">
+<meta property="og:updated_time" content="2018-08-27T08:21:04.646Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一文读懂一个URL请求的过程是怎样的">
+<meta name="twitter:description" content="前言当我们在浏览器中输入一个URL访问地址，然后浏览器返回给我们一个响应页面，这内部过程到底是怎样的呢？下面我将从以下几个方面阐述一个 WEB请求过程到底是怎样：  浏览器缓存 DNS域名解析 TCP连接 HTTP请求与响应">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/cache.jpg">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="検索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '投稿',
+            PAGES: 'Pages',
+            CATEGORIES: 'カテゴリ',
+            TAGS: 'タグ',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="検索" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">フォローする</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                25
+                <span>投稿</span>
+            </div>
+            <div class="article-info-block">
+                15
+                <span>タグ</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-一文读懂一个URL请求的过程是怎样的" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            一文读懂一个URL请求的过程是怎样的
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/08/27/一文读懂一个URL请求的过程是怎样的/">
+            <time datetime="2018-08-27T08:11:09.000Z" itemprop="datePublished">2018-08-27</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/web/">web</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/DNS/">DNS</a>, <a class="tag-link" href="/tags/HTTP/">HTTP</a>, <a class="tag-link" href="/tags/TCP/">TCP</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">カタログ</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#浏览器的缓存机制"><span class="toc-number">2.</span> <span class="toc-text">浏览器的缓存机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#强制缓存-也叫本地缓存"><span class="toc-number">2.1.</span> <span class="toc-text">强制缓存(也叫本地缓存)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#强制缓存的规则"><span class="toc-number">2.1.1.</span> <span class="toc-text">强制缓存的规则</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Expires"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">Expires</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Cache-Control"><span class="toc-number">2.1.1.2.</span> <span class="toc-text">Cache-Control</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#协商缓存"><span class="toc-number">2.2.</span> <span class="toc-text">协商缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#什么导致协商缓存生效或者失效"><span class="toc-number">2.2.1.</span> <span class="toc-text">什么导致协商缓存生效或者失效</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#浏览器缓存"><span class="toc-number">2.3.</span> <span class="toc-text">浏览器缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用户操作行为与缓存"><span class="toc-number">2.4.</span> <span class="toc-text">用户操作行为与缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#浏览器缓存机制小结"><span class="toc-number">2.5.</span> <span class="toc-text">浏览器缓存机制小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DNS域名解析"><span class="toc-number">3.</span> <span class="toc-text">DNS域名解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#分层式DNS域名服务器"><span class="toc-number">3.1.</span> <span class="toc-text">分层式DNS域名服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DNS域名解析过程"><span class="toc-number">3.2.</span> <span class="toc-text">DNS域名解析过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DNS域名解析过程中的查询方式"><span class="toc-number">3.3.</span> <span class="toc-text">DNS域名解析过程中的查询方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DNS中的缓存"><span class="toc-number">3.4.</span> <span class="toc-text">DNS中的缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DNS域名解析图解过程"><span class="toc-number">3.5.</span> <span class="toc-text">DNS域名解析图解过程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TCP连接"><span class="toc-number">4.</span> <span class="toc-text">TCP连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP报文段首部中的几个概念"><span class="toc-number">4.1.</span> <span class="toc-text">TCP报文段首部中的几个概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四次挥手"><span class="toc-number">4.2.</span> <span class="toc-text">四次挥手</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wireshell-简要抓包分析"><span class="toc-number">4.3.</span> <span class="toc-text">wireshell 简要抓包分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP请求与响应"><span class="toc-number">5.</span> <span class="toc-text">HTTP请求与响应</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP的请求报文与响应报文"><span class="toc-number">5.1.</span> <span class="toc-text">HTTP的请求报文与响应报文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP的常用请求方法"><span class="toc-number">5.2.</span> <span class="toc-text">HTTP的常用请求方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#返回结果的HTTP状态码"><span class="toc-number">5.3.</span> <span class="toc-text">返回结果的HTTP状态码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">6.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">7.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>当我们在浏览器中输入一个URL访问地址，然后浏览器返回给我们一个响应页面，这内部过程到底是怎样的呢？下面我将从以下几个方面阐述一个 WEB请求过程到底是怎样：</p>
+<ul>
+<li><strong>浏览器缓存</strong></li>
+<li><strong>DNS域名解析</strong></li>
+<li><strong>TCP连接</strong></li>
+<li><strong>HTTP请求与响应</strong></li>
+</ul>
+<a id="more"></a>
+<h2 id="浏览器的缓存机制"><a href="#浏览器的缓存机制" class="headerlink" title="浏览器的缓存机制"></a>浏览器的缓存机制</h2><blockquote>
+<p>这里将浏览器机制放在第一步是考虑如果浏览器中有了缓存数据，浏览器再次向目标URL发送请求时，在数据不过期的情况下，会直接使用浏览器缓存的数据，而不需要向服务端请求。下面的分析参考了<a href="https://heyingye.github.io/2018/04/16/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/" target="_blank" rel="noopener">彻底理解浏览器的缓存机制</a>的介绍，表示感谢。</p>
+</blockquote>
+<p>浏览器和服务器的通信方式是应答方式，即 <strong>浏览器发起HTTP请求 - 服务器响应该请求</strong> 。浏览器第一次向服务器发起该请求后拿到请求结果，会根据响应报文中的HTTP头的缓存标识，决定是否缓存结果，是则将请求结果和缓存标识存入浏览器缓存中，过程如下:<br><img src="http://osvtz719h.bkt.clouddn.com/cache.jpg" alt="cache"></p>
+<ul>
+<li>浏览器每次发起请求，都会先在浏览器缓存中查询该请求结果和缓存标识</li>
+<li>浏览器每次拿到返回的请求结果都会将该结果和缓存标识存入浏览器缓存中</li>
+</ul>
+<p>我们根据是否需要向服务器重新发起HTTP请求将缓存结果分为两个部分，分别是<strong>强制缓存(也叫本地缓存)</strong>和<strong>协商缓存</strong>，当然这只是两种叫法，有些人把缓存分为<strong>Expires/Cache-control</strong>和<strong>Last-Modifed/Etag</strong>这两种表现，本质上是一样的。至于浏览器的缓存到底是放在哪里，我们后面揭晓</p>
+<h3 id="强制缓存-也叫本地缓存"><a href="#强制缓存-也叫本地缓存" class="headerlink" title="强制缓存(也叫本地缓存)"></a>强制缓存(也叫本地缓存)</h3><p>强制缓存就是向浏览器缓存查找缓存结果和缓存标识，并根据该结果的缓存规则来决定是否使用该缓存结果的过程。强制缓存又分为以下几个方面:</p>
+<ul>
+<li>不存在该缓存结果和缓存标识，强制缓存失败，则直接向服务器再一次发送请求<br><img src="http://osvtz719h.bkt.clouddn.com/cache1.0.jpg" alt="cache1.0"></li>
+<li>存在请求结果和缓存标识，但是该结果已失效过期，强制缓存失败，则使用协商缓存(后续分析)<br><img src="http://osvtz719h.bkt.clouddn.com/cache1.1.jpg" alt="cache1.1"></li>
+<li>存在请求结果和缓存标识，而且结果未过期，强制缓存生效，直接返回结果<br><img src="http://osvtz719h.bkt.clouddn.com/cache1.2.jpg" alt="cache1.2"><h4 id="强制缓存的规则"><a href="#强制缓存的规则" class="headerlink" title="强制缓存的规则"></a>强制缓存的规则</h4>当浏览器向服务器发送请求时，服务器会将缓存规则放入HTTP响应报文的HTTP头中和请求结果一起返回给浏览器，控制强制缓存的字段分别是<strong>Expires</strong>和<strong>Cache-Control</strong>，其中<strong>Cache-Control</strong>比<strong>Expires</strong>优先级高，<strong>两个同时存在时，Cache-Control优先级高</strong></li>
+</ul>
+<h5 id="Expires"><a href="#Expires" class="headerlink" title="Expires"></a><strong>Expires</strong></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Expires: Wed, 21 Aug 2018 08:26:05 GMT</span><br></pre></td></tr></table></figure>
+<p>Expires 是 HTTP/1.0控制网页缓存的字段，其值为服务器返回该请求结果缓存的到期时间，这里是绝对日期，如果客户端的时间小于 Expires 的值时，直接使用缓存结果</p>
+<blockquote>
+<p>Expires是HTTP/1.0的字段，现在浏览器默认使用HTTP/1.1，Expires已经被Cache-Control替代</p>
+</blockquote>
+<h5 id="Cache-Control"><a href="#Cache-Control" class="headerlink" title="Cache-Control"></a><strong>Cache-Control</strong></h5><p>在HTTP/1.1中，Cache-Control主要用于控制网页缓存，其主要取值为:</p>
+<ul>
+<li>public : 所有内容都被缓存 (客户端和代理服务器都可缓存)</li>
+<li>private： 所有内容只有客户端可以缓存，Cache-Control的默认取值。</li>
+<li>no-cache: 客户端缓存内容，但是是否使用缓存则需要经过协商缓存来验证决定</li>
+<li>no-store: 所有内容都不会被缓存，即不使用强制缓存，也不使用协商缓存</li>
+<li>max-age=xxx (xxx is numeric): 缓存内容将在xxx秒后失效，<strong>这里是相对值</strong></li>
+</ul>
+<h3 id="协商缓存"><a href="#协商缓存" class="headerlink" title="协商缓存"></a>协商缓存</h3><p>协商缓存就是强制缓存失效后，浏览器携带缓存标识向服务器发起请求，由服务器根据<strong>缓存标识</strong>决定是否继续使用缓存的过程。主要分为以下两种情况:</p>
+<p><strong>第一种：协商缓存生效，返回304</strong></p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/304.jpg" alt="3o4"></p>
+<p><strong>注： 304状态码表示客户端发送附带条件 (附带条件包括If-Match,If-Modified-Since,If-None-Match等字段) 的请求时，服务器端允许请求访问资源，但未满足条件的情况。304状态码返回时，不包含任何响应的主体部分。</strong></p>
+<p><strong>第二种：协商缓存失效，返回200和请求结果结果</strong><br><img src="http://osvtz719h.bkt.clouddn.com/200.jpg" alt="200"></p>
+<h4 id="什么导致协商缓存生效或者失效"><a href="#什么导致协商缓存生效或者失效" class="headerlink" title="什么导致协商缓存生效或者失效"></a>什么导致协商缓存生效或者失效</h4><p>协商缓存的控制字段有 <strong>Last-Modified /If-Modified-Since 和 Etag/If-None-Match</strong>。 <strong>Etag/If-None-Match的优先级比Last-Modified /If-Modified-Since 高</strong></p>
+<ul>
+<li><strong>Last-Modified</strong></li>
+</ul>
+<p>表示一个服务器上的资源的最后修改时间，资源可以是静态的或者动态的内容。<strong>一般在第一次请求时服务器发给客户端的缓存标识</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">last-modified: Fri, 20 Apr 2018 10:10:50 GMT</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><strong>If-Modified-Since</strong></li>
+</ul>
+<p>客户端再次发送该请求时，携带上次请求返回的Last-Modified值,服务器收到该请求，发现 If-Modified-Since字段，<strong>如果服务器资源的最后修改时间大于If-Modified-Since的值，则重新返回新资源，状态码为200，此时则表明协商缓存失效，之前的缓存不再使用。否则，返回304，资源没有被更新，协商缓存生效，继续使用浏览器缓存。</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">if-Modified-Since: Fri, 20 Apr 2018 10:10:50 GMT</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><strong>Etag</strong></li>
+</ul>
+<p>Etag是服务器响应请求时，返回当前资源文件的唯一的编号</p>
+<ul>
+<li><strong>If-None-Match</strong></li>
+</ul>
+<p>客户端再次发起该请求时，携带上次请求返回的唯一编号，<strong>服务器收到请求后，将If-None-Match的字段值与该资源在服务器上的Etag值做对比，一致则返回304，说明资源无更新，协商缓存生效，继续使用缓存文件，不一致说明资源已更新，重新返回资源文件，状态码为200</strong></p>
+<h3 id="浏览器缓存"><a href="#浏览器缓存" class="headerlink" title="浏览器缓存"></a>浏览器缓存</h3><p>浏览器缓存分为<strong>内存缓存(from memory cache)</strong> 和<strong>硬盘缓存(from disk cache)</strong>:</p>
+<ul>
+<li><strong>内存缓存(from memory cache)</strong>:具有两个特点，分别是<strong>快速读取</strong>和<strong>时效性</strong>：<ul>
+<li><strong>快速读取</strong>： 内存缓存会将编译解析后的文件，直接存入该进程的内存中，占据该进程一定的内部资源，以方便下次运行使用时的快速读取</li>
+<li><strong>时效性</strong>：一旦进程关闭，则该进程的内存则会清空。</li>
+</ul>
+</li>
+<li><strong>硬盘缓存(from disk cache)</strong>: 硬盘缓存则是直接将缓存写入硬盘文件中，读取缓存需要对该缓存存放的硬盘文件进行I/O操作，然后重新解析该缓存内容，读取复杂，速度比内存缓存慢。</li>
+</ul>
+<h3 id="用户操作行为与缓存"><a href="#用户操作行为与缓存" class="headerlink" title="用户操作行为与缓存"></a>用户操作行为与缓存</h3><p><img src="http://osvtz719h.bkt.clouddn.com/TYHrxqQt.png" alt="chach"></p>
+<ul>
+<li>使用F5，浏览器将绕过本地缓存(强制缓存)，但是协商缓存还是有效的</li>
+<li>使用Ctrl + F5 强制刷新，浏览器将绕过 本地缓存和协商缓存，让服务器返回最新的资源<h3 id="浏览器缓存机制小结"><a href="#浏览器缓存机制小结" class="headerlink" title="浏览器缓存机制小结"></a>浏览器缓存机制小结</h3>强制缓存优先于协商缓存执行，下面这张图阐述了浏览器缓存的流程：<br><img src="http://osvtz719h.bkt.clouddn.com/cahce.png" alt="cahce"></li>
+</ul>
+<p><strong>注意： 当我们第一次访问一个请求时，浏览器中是没有缓存的，这时候就需要到服务器中去获取，而与服务器连接并获取资源的这个过程，涉及到下面将的 DNS域名解析，TCP连接，HTTP请求等内容。这里把浏览器缓存机制放在第一位，是考虑如果客户多次访问同一个请求，是先去检验浏览器的缓存的</strong></p>
+<h2 id="DNS域名解析"><a href="#DNS域名解析" class="headerlink" title="DNS域名解析"></a>DNS域名解析</h2><p>我们知道互联网都是通过URL来发布和请求资源的，而URL中的域名需要解析成IP地址才能与远程主机建立连接，如何将域名解析成IP地址就属于DNS解析的工作范畴。</p>
+<blockquote>
+<p>DNS(Domain Name System)是域名系统的英文缩写，是一种组织成域层次结构的计算机和网络服务命名系统，它用于TCP/IP网络，它所提供的服务是将主机名和域名转换为IP地址的工作</p>
+</blockquote>
+<h3 id="分层式DNS域名服务器"><a href="#分层式DNS域名服务器" class="headerlink" title="分层式DNS域名服务器"></a>分层式DNS域名服务器</h3><p>根据域名服务器所起的作用，可以把域名服务器分为以下几种类型:</p>
+<ul>
+<li><p><strong>根域名服务器</strong></p>
+<blockquote>
+<p>根域名服务器是最高层次的域名服务器，也是最重要的域名服务器。所有的根域名服务器都知道所有的顶级域名服务器的域名和IP地址。</p>
+</blockquote>
+</li>
+<li><p><strong>顶级域名服务器(即TLD服务器)</strong></p>
+<blockquote>
+<p>这些域名服务器负载管理在该顶级域名服务器注册的所有二级域名。</p>
+</blockquote>
+</li>
+<li><p><strong>权威域名服务器</strong></p>
+<blockquote>
+<p>例如：阿里万网提供的dns9.hichina.com，dns10.hichina.com等，腾讯DNSPod提供的 f1g1ns1.dnspod.net，f1g1ns2.dnspod.net等，自己申请搭建的权威域名服务器等</p>
+</blockquote>
+</li>
+<li><p><strong>本地域名服务器</strong></p>
+<blockquote>
+<p><strong>实际上本地域名服务器不属于域名服务器的层次结构</strong>，但是它对域名系统非常重要，当一台主机发出DNS查询请求时，这个查询请求报文首先是发送给本地域名服务器。每个ISP(当地网络接入商)都有一个本地域名服务器</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="DNS域名解析过程"><a href="#DNS域名解析过程" class="headerlink" title="DNS域名解析过程"></a>DNS域名解析过程</h3><p>DNS域名解析的请求过程分为以下几步:</p>
+<p><strong>第一步: 检查浏览器缓存中是否有这个域名对应的解析过的IP地址</strong></p>
+<blockquote>
+<p>浏览器会检查缓存中有没有这个域名对应的解析过的IP地址，如果缓存中有，这个解析过程就将结束。浏览器缓存域名也是有限制的，不仅浏览器缓存大小有限制，而且缓存时间也有限制，通常情况下为几分钟到几小时不等，域名被缓存的时间限制可以通过TTL属性来设置，时间要设置的合理。</p>
+</blockquote>
+<p><strong>第二步: 检查操作系统缓存中是否有这个域名对应的解析结果</strong></p>
+<blockquote>
+<p>如果用户的浏览器缓存没有，浏览器会查找操作系统缓存中是否有这个域名对应的DNS解析结果。其实操作系统也会有一个域名解析的过程，在Windows中可以通过<code>C:\Windows\System32\drivers\etc\hosts</code>文件来设置，在Linux中这个配置是 <code>/etc/hosts</code>。在这两个文件中，你可以将任何域名解析到任何能够访问的IP地址</p>
+</blockquote>
+<p><strong>第三步: 向本地服务器查询(LDNS)</strong></p>
+<blockquote>
+<p>如果前面两个过程都无法解析，操作系统会把这个域名发送给这里设置的LDNS,也就是本地区的的域名服务器。这个DNS通常都提供给你本地互联网接入的一个DNS解析服务。比如你在学校接入互联网，那么本地DNS服务器就在你的学校。实际上大约80%的域名服务解析都在这里就完成了，LDNS承担了主要的域名解析工作</p>
+</blockquote>
+<p><strong>第四步: LDNS没有命中，直接到Root Server域名服务器请求解析</strong></p>
+<blockquote>
+<p>根域名服务器是最高层次的域名服务器，也是最重要的域名服务器。所有的根域名服务器都知道所有的顶级域名服务器的域名和IP地址</p>
+</blockquote>
+<p><strong>第五步：根域名服务器返回给本地域名服务器一个所查询域的主域名服务器（gTLD Server)地址</strong></p>
+<blockquote>
+<p>gTLD就是前面说的国际顶级域名服务器，如.com,.cn等。</p>
+</blockquote>
+<p><strong>第六步: 本地域名服务器再向上一步返回的gTLD服务器发送请求</strong></p>
+<p><strong>第七步：接受请求的顶级域名服务器查询并返回此域名对应的权威服务器(Name Server)</strong></p>
+<blockquote>
+<p>这个权威服务器就是你注册的域名服务器，比如阿里万网的域名服务器，你这此申请的域名，那么域名的解析任务就由这个域名提供商的服务器来完成。</p>
+</blockquote>
+<p><strong>第八步：权威服务器会查询存储的域名和IP的映射关系表并返回</strong></p>
+<blockquote>
+<p>正常情况下都根据域名得到目标IP记录，连同一个TTL值返回给DNS Server域名服务器。对于返回的IP和TTL，本地域名服务器会缓存这个域名和IP的对应关系，缓存的时间由TTL值控制。</p>
+</blockquote>
+<p><strong>第九步：把解析的结果返回给用户，用户根据TTL值缓存在本地系统缓存中，域名解析过程结束</strong></p>
+<h3 id="DNS域名解析过程中的查询方式"><a href="#DNS域名解析过程中的查询方式" class="headerlink" title="DNS域名解析过程中的查询方式"></a>DNS域名解析过程中的查询方式</h3><ul>
+<li><p><strong>递归查询</strong></p>
+<blockquote>
+<p>主机向本地域名服务器的查询一般都是采用递归查询，所为递归查询就是：如果主机所访问的本地域名服务器不知道被查询域名的IP地址，那么本地域名就以DNS客户的身份，替代主机，向其他根域名服务器继续发出查询请求报文，而不是让主机自己进行下一步的查询。</p>
+</blockquote>
+</li>
+<li><p><strong>迭代查询</strong></p>
+<blockquote>
+<p>本地域名服务器向根域名服务器的查询通常是采用迭代查询。迭代查询就是：当根域名服务器收到本地域名服务器发出的迭代查询请求报文时，要么给出所要查询的IP地址，要么告诉本地域名服务器下一步应当向哪一个域名服务器查询，然后让本地域名服务器进行后续的查询。</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="DNS中的缓存"><a href="#DNS中的缓存" class="headerlink" title="DNS中的缓存"></a>DNS中的缓存</h3><p>DNS域名解析过程后会缓存解析结果，其中主要在两个地方缓存结果，一个是本地域名服务器，一个是用户的本地机器，这两个缓存都是TTL值和本机缓存大小控制的。</p>
+<h3 id="DNS域名解析图解过程"><a href="#DNS域名解析图解过程" class="headerlink" title="DNS域名解析图解过程"></a>DNS域名解析图解过程</h3><p>都说 「一图胜千言」，下面手画了这张图，具体阐述了DNS域名解析过程<br><img src="http://osvtz719h.bkt.clouddn.com/DNS.png" alt="dns"></p>
+<h2 id="TCP连接"><a href="#TCP连接" class="headerlink" title="TCP连接"></a>TCP连接</h2><p>在浏览器发送HTTP请求之前，需要在浏览器和服务器之间建立一条TCP/IP连接。<strong>每一条TCP连接唯一地被通信两端的两个端点(即两个套接字)所确定，TCP连接的端点叫做套接字(socket)</strong>。根据RFC 793的定义，端口号拼接到IP地址即构成了套接字。而一次TCP连接主要分为<strong>建立连接(三次握手)，数据传输，断开连接(四次挥手)</strong>，下图给出了TCP的通信过程<br><img src="http://osvtz719h.bkt.clouddn.com/tcp_open_close.jpg" alt="tcp_open_close"></p>
+<blockquote>
+<p>接下来的分析参考结合了《TCP/IP 详解 卷1》和《计算机网络-谢希仁版》关于TCP的分析</p>
+</blockquote>
+<h3 id="TCP报文段首部中的几个概念"><a href="#TCP报文段首部中的几个概念" class="headerlink" title="TCP报文段首部中的几个概念"></a>TCP报文段首部中的几个概念</h3><p><img src="http://osvtz719h.bkt.clouddn.com/tcp_header.JPG" alt="tcp_header"></p>
+<p>在具体讲TCP的三次握手和四次挥手之前，我们先来重点看下与TCP连接有关的报文段首部的几个控制位与初始序列号，它将有助于我们后续的分析，至于有关TCP报文段首部更详细的介绍请参阅《TCP/IP 详解 卷1》或者相关文章。</p>
+<p><strong>确认号</strong></p>
+<blockquote>
+<p>确认号是期望收到对方下一个报文段的<strong>第一个数据字节的序号</strong>。例如，B正确收到A发送过来的一个报文段，其序号字段值为501，而数据长度是200字节(序号501 ~ 700)，这表明B正确收到了A发送的到序号为 700 为止的数据。所以，B期望收到A的下一个数据序号是 701 ，于是B将确认号置为 701，表示为 ACK = 701。总之，**若确认号 = N，则表明 N - 1 为止的所有数据都已正确收到</p>
+</blockquote>
+<p><strong>确认ACK</strong></p>
+<blockquote>
+<p>ACK标志位用于确认收到</p>
+</blockquote>
+<p><strong>同步SYN</strong></p>
+<blockquote>
+<p>用来初始化一个连接的同步序列号，当建立一个新连接时，从客户机发送到服务器的第一个报文段的SYN位字段被启用。</p>
+</blockquote>
+<p><strong>终止FIN</strong></p>
+<blockquote>
+<p>用来释放一个连接，当FIN = 1时，表明此报文段的发送方的数据已发送完毕，并要求释放运输连接。</p>
+</blockquote>
+<p><strong>序列号</strong></p>
+<blockquote>
+<p>TCP是面向字节流的，在一个TCP连接中传送的字节流中的每一个字节都按顺序编号，整个要传送的字节流的<strong>起始序号</strong>必须在连接建立时设置，这里的<strong>起始序号</strong>就是TCP三次握手过程中的<strong>初始序列号(Initial Sequence Number，ISN)</strong>。在《TCP/IP详解 卷1:协议》中谈到，在一个连接中，TCP报文段在经过网络路后可能会存在延迟抵达与排序混乱的情况，为了解决这一问题，需要仔细选择初始序列号，现代系统通常采用半随机的方法选择初始序列号，保证一定的安全性</p>
+</blockquote>
+<p>这里强调一点，确认号是针对接收方而言，接收方希望收到发送方下一个报文段的第一个数据字节的序号，而SYN所初始化的序列号是针对发送方，在建立连接阶段，发送方和接收方都要发送自己的初始序列号。毕竟TCP协议可以实现客户端和服务端全双工通信。<br><img src="http://osvtz719h.bkt.clouddn.com/tcp_open.JPG" alt="tcp_open"></p>
+<p><strong>第一次握手</strong></p>
+<p>客户端在打算建立TCP连接时，向服务端发出 <strong>连接请求报文段(也就是SYN报文段，其SYN标志被置位)</strong> 设置首部中的同步位 SYN = 1 ,同时随机选择一个<strong>初始序号</strong> seq = x。<strong>TCP规定，SYN 报文段(即 SYN = 1 的报文段) 不能携带数据，但要消耗掉一个序号</strong>，这时，TCP客户进程进入 SYN-SENT (同步已发送) 状态</p>
+<p><strong>第二次握手</strong></p>
+<p>服务器收到连接请求报文段后，如同意建立连接，则向客户端发送确认，在确认报文段（SYN+ACK段）中应把 SYN 位和 ACK 位都置1，确认号是 <strong>ack = x + 1</strong>，表示服务端希望从客户端这边接收数据的序列号。同时也为自己随机选择一个初始序号 seq = y。<strong>请注意，这个报文段也不能携带数据，但同样要消耗掉一个序号</strong>。这时 TCP 服务器进程进入 <strong>SYN-RCVD(同步收到)状态</strong></p>
+<p><strong>第三次握手</strong></p>
+<p>客户端收到服务器发送的确认后，还要再次向服务端给出确认。确认报文段的ACK置1，确认号 <strong>ack = y + 1</strong>.而自己的序号 seq = x + 1,TCP的标准规定，ACK报文段可以携带数据，但如果不携带数据则不消息序号，在这种情况下，下一个数据报文段的序号仍是seq = x + 1。这是TCP连接已经建立，客户端进入ESTABLISHED(已建立连接)状态，服务端收到确认后，也进入 ESTABLISHED 状态。</p>
+<p><strong>TCP连接为什么是三次，而不是二次或者四次</strong></p>
+<p>知乎上对于这个问题点赞最多，而且比较通俗易懂的说法如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">三次握手：</span><br><span class="line">A:“喂，你听得到吗？”</span><br><span class="line">B:“我听得到呀，你听得到我吗？”</span><br><span class="line">A:“我能听到你，今天balabala……”</span><br><span class="line"></span><br><span class="line">两次握手：</span><br><span class="line">A:“喂，你听得到吗？”</span><br><span class="line">B:“我听得到呀”</span><br><span class="line">A:“喂喂，你听得到吗？”</span><br><span class="line">B:“草，我听得到呀！！！！”</span><br><span class="line">A:“你TM能不能听到我讲话啊！！喂！”</span><br><span class="line">B:“……”</span><br><span class="line"></span><br><span class="line">四次握手：</span><br><span class="line">A:“喂，你听得到吗？”</span><br><span class="line">B:“我听得到呀，你听得到我吗？”</span><br><span class="line">A:“我能听到你，你能听到我吗？”</span><br><span class="line">B:“……不想跟傻逼说话”</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>三次握手的目的是不仅在于通信双方了解一个连接正在建立，还在于利用数据包的选项来承载特殊的信息，确保通信双方信道是可靠的，需要三次握手，更多关于此问题的讨论参阅知乎链接:  <a href="https://www.zhihu.com/question/24853633" target="_blank" rel="noopener">https://www.zhihu.com/question/24853633</a></p>
+</blockquote>
+<h3 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h3><p><img src="http://osvtz719h.bkt.clouddn.com/tcp_close.JPG" alt="tcp_close"></p>
+<p><strong>第一次挥手</strong></p>
+<p>客户端向服务端发出<strong>连接释放报文段(即FIN标志置为1的报文段)</strong>，并停止再发送数据，客户端把连接释放的报文段首部的终止控制位FIN置1，其序号为 seq = u ,它等于前面已传送过的数据的最后一个字节的序号加1.这时客户端进入<strong>FIN-WAIT-1 (终止等待 1)状态</strong>，等待 B 的确认，请注意，TCP 规定，FIN 报文段即使不携带数据，它也消耗掉一个序号。</p>
+<p><strong>第二次挥手</strong></p>
+<p> 服务器端收到连接释放报文段后即发出确认，确认号是 ack = u + 1,而这个报文段自己的序号是 v ，等于服务端前面已传送过的数据的最后一个字节的序号加1.然后服务端进入CLOSE-WAIT(关闭等待)状态。这时的TCP连接处于 <strong>半关闭</strong>状态，即客户端已经没有数据要发送了，但服务端若发送数据，客户端仍要接收。服务端到客户端这个方向的连接并没有关闭，这个状态可能要持续一段时间。</p>
+<p>客户端收到来自服务端的确认后，就进入 <strong>FIN-WAIT-2(终止等待 2)</strong> 状态，等待 服务端发出的连接释放报文段</p>
+<p><strong>第三次挥手</strong></p>
+<p> 如果服务端已经没有向客户端发送的数据了，其应用进程就通知服务端释放连接。这时服务端发出的连接释放报文段必须使 FIN = 1。现假定服务端的序号为 w (在半关闭状态 B 可能又发送了一些数据)。服务端还必须重复上次已经发送过的确认号 ack = u + 1。这时 B 就进入 LAST-ACK (最后确认) 状态，等待 A 的确认。</p>
+<p><strong>第四次挥手</strong></p>
+<p>客户端收到服务端的连接释放报文后，必须对此发出确认。在确认报文段中把 ACK 置为 1，确认号 ack = w + 1。而自己的序号是 seq = u + 1 (根据TCP标准，前面已经发送过的 FIN 报文段要消耗一个序号)。然后进入<strong>TIME-WAIT(时间等待)状态</strong>。这时，TCP连接还没有释放掉，等待时间计数器设置的时间 2MSL后，客户端才进入到CLOSED状态</p>
+<p><strong>为什么是四次挥手</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">A: hi,我要关闭连接了</span><br><span class="line">B: 好的，我收到了，我不接受你的数据了</span><br><span class="line">B: hi,我也想关闭连接了</span><br><span class="line">A: 好的，我不接收你的数据了。</span><br></pre></td></tr></table></figure></p>
+<p>客户端先向服务端发送关闭请求，表示客户端不再发送数据了，服务端确认，但是，此时服务端还可以接着向客户端发送消息，待服务端没有数据传送时，此时服务端也向客户端发送关闭请求，然后客户端确认</p>
+<p><strong>TCP的半关闭</strong></p>
+<blockquote>
+<p>就像上面所说，TCP存在半关闭的状态，虽然一些应用需要此功能，但它并不常见。TCP的半关闭就是指当一方已经完成了数据的发送工作，并发送了一个FIN给对方，但是它仍然希望接收来自对方的数据，直到对方发送一个FIN给它，这种情况下它就处于TCP的半关闭状态。</p>
+</blockquote>
+<p><strong>为什么客户端要在TIME-WAIT状态必须等待2MSL的状态</strong></p>
+<blockquote>
+<p>TIME_WAIT状态也称为 2MSL 等待状态。在该状态下，TCP 将会等待两倍于最大段生存期(MSL)的时间，有时也被称作加倍等待。这样就能够让TCP重新发送最终的ACK 以避免出现丢失的情况，重新发送最终的 ACK 并不是因为TCP重传了 ACK (它们不消耗序列号，也不会被TCP重传)，而是因为通信另一方重传了它的 FIN (它消耗一个序列号)</p>
+</blockquote>
+<h3 id="wireshell-简要抓包分析"><a href="#wireshell-简要抓包分析" class="headerlink" title="wireshell 简要抓包分析"></a>wireshell 简要抓包分析</h3><p>下面利用wireshell 简要抓包分析，这里只是简单给出三次握手和四次挥手的过程，更多关于抓包的知识请参阅相关文章。以 IP地址 <code>192.168.43.187</code> 和 <code>54.190.14.101</code>为例分析。</p>
+<p><strong>三次握手过程</strong><br><img src="http://osvtz719h.bkt.clouddn.com/three.png" alt="three"></p>
+<p><strong>四次挥手过程</strong><br><img src="http://osvtz719h.bkt.clouddn.com/four.png" alt="four"></p>
+<h2 id="HTTP请求与响应"><a href="#HTTP请求与响应" class="headerlink" title="HTTP请求与响应"></a>HTTP请求与响应</h2><p><strong>浏览器与服务器建立TCP连接以后，然后就可以开始发起HTTP请求了，客户端按照指定格式开始向服务器发送HTTP请求，服务端接收请求后，解析HTTP请求，处理完业务逻辑，返回一个HTTP响应给客户端</strong>，如下图所示:<br><img src="http://osvtz719h.bkt.clouddn.com/http_client.png" alt="http"></p>
+<h3 id="HTTP的请求报文与响应报文"><a href="#HTTP的请求报文与响应报文" class="headerlink" title="HTTP的请求报文与响应报文"></a>HTTP的请求报文与响应报文</h3><p>HTTP的请求报文与响应报文结构一样，都是分为报文首部和报文主体部分，请求报文中的主体部分主要发送给服务端的数据，而响应报文中的主体则是客户端需要的响应数据</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/header.png" alt="header"></p>
+<p>而请求报文和响应报文的首部内容又由以下内容组成：</p>
+<ul>
+<li>请求行：包含用于请求的方法，请求URI和HTTP版本</li>
+<li>状态行: 包含表明响应结果的状态码，原因短语和HTTP版本</li>
+<li>首部字段: 包含表示请求和响应的各种条件和属性的各类首部。</li>
+<li>其他: 包含HTTP的RFC里未定义的首部(Cookie)等</li>
+</ul>
+<p><img src="http://osvtz719h.bkt.clouddn.com/header1.png" alt="header1"></p>
+<p>PS:更多关于HTTP首部字段的内容请参阅 <a href="https://book.douban.com/subject/25863515/" target="_blank" rel="noopener">《图解HTTP》</a></p>
+<h3 id="HTTP的常用请求方法"><a href="#HTTP的常用请求方法" class="headerlink" title="HTTP的常用请求方法"></a>HTTP的常用请求方法</h3><p>HTTP中用的比较多的请求方法主要包括：GET , POST，PUT，DELETE这四种</p>
+<ul>
+<li>GET:  从指定的资源请求数据</li>
+<li>POST:  用来传输实体的主体，创建资源</li>
+<li>PUT: 用来创建或更新资源</li>
+<li>DELETE: 用来删除指定资源</li>
+</ul>
+<h3 id="返回结果的HTTP状态码"><a href="#返回结果的HTTP状态码" class="headerlink" title="返回结果的HTTP状态码"></a>返回结果的HTTP状态码</h3><p>以下列举一些常见的状态码：</p>
+<ul>
+<li><strong>2XX成功</strong>：<ul>
+<li>200 OK客户端请求被服务器正常处理</li>
+<li>204 No Content :请求处理成功，但没有资源可返回</li>
+</ul>
+</li>
+<li><strong>3XX重定向</strong><ul>
+<li>302Found 临时重定向，请求的资源已被分配到新的URI。希望用户能使用新的URI访问。</li>
+<li>304Not Modified:客户端发送附带条件的请求时，服务器允许请求访问资源，但因发生请求后未满足条件的情况下，直接返回304,返回时不包含任何响应的主体部分。</li>
+</ul>
+</li>
+<li><strong>4XX客户端错误</strong><ul>
+<li>400 Bad Request 请求报文存在语法错误。</li>
+<li>401 发送的请求需要有通过HTTP的认证</li>
+<li>403 Forbidden 服务器拒绝对请求资源的访问</li>
+<li>404 Not Found 服务器上无该资源。网页不存在。</li>
+</ul>
+</li>
+<li><strong>5XX 服务器错误</strong><ul>
+<li>500：服务器内部出现错误</li>
+<li>503：服务器暂时处于超负载或正在进行停机维护，现在无法处理请求。</li>
+<li>504：（网关超时）服务器作为网关或代理，但是没有及时从上游服务器收到请求。</li>
+</ul>
+</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>上面阐述了浏览器中的URL请求过程，从 <strong>浏览器缓存——&gt;DNS域名解析——&gt;TCP连接——&gt;HTTP请求与响应</strong> 这4个阶段进行了分析，一个web请求大致就分为这么几个过程，当然其中肯定有很多细节问题没注意到，有问题欢迎指出。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://heyingye.github.io/2018/04/16/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E7%BC%93%E5%AD%98%E6%9C%BA%E5%88%B6/" target="_blank" rel="noopener">彻底理解浏览器的缓存机制</a></li>
+<li><a href="http://ju.outofmemory.cn/entry/114197" target="_blank" rel="noopener">笔记: Data Retrieval over DNS in SQL Injection Attac</a></li>
+<li><a href="https://book.douban.com/subject/25953851/" target="_blank" rel="noopener">深入分析Java Web技术内幕（修订版）</a></li>
+<li><a href="https://item.jd.com/12025317.html" target="_blank" rel="noopener">计算机网络谢希仁版</a></li>
+<li><a href="https://book.douban.com/subject/1088054/" target="_blank" rel="noopener">TCP/IP详解 卷1：协议</a></li>
+<li><a href="https://www.zhihu.com/question/24853633" target="_blank" rel="noopener">TCP 为什么是三次握手，而不是两次或四次？-知乎</a></li>
+<li><a href="https://book.douban.com/subject/25863515/" target="_blank" rel="noopener">图解HTTP</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/" data-id="cjlc0ka8j0018xkr9mt8bp0dw" class="article-share-link"><i class="fas fa-share"></i>共有</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/08/24/BIO，NIO，AIO概览/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">古い記事</strong>
+            <div class="article-nav-title">BIO，NIO，AIO概览</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">カテゴリ</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">アーカイブ</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">タグ</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">タグクラウド</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 13.33px;">leetcode</a> <a href="/tags/spring/" style="font-size: 13.33px;">spring</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">リンク</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
