@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://pjmike.github.io/2018/08/30/springboot%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B9%8B%E6%95%B4%E5%90%88mybatis/</loc>
+    
+    <lastmod>2018-08-30T08:52:54.573Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://pjmike.github.io/2018/08/30/springboot%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B9%8B%E6%95%B4%E5%90%88Spring-Data-JPA/</loc>
     
-    <lastmod>2018-08-30T02:04:05.790Z</lastmod>
+    <lastmod>2018-08-30T05:14:40.041Z</lastmod>
     
   </url>
   
