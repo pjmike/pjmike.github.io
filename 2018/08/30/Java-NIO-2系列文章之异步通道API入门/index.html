@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>Java NIO.2系列文章之异步通道API入门 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="NIO.2概览NIO.2也就是人们常说的 AIO，在Java 7中引入了NIO的改进版NIO 2，它是异步非阻塞的IO方式。 AIO的核心概念就是发起非阻塞方式的I/O操作，立即响应，却不立即返回结果，当I/O操作完成时通知。 这篇文章主要介绍NIO 2的异步通道API的一些内容，后续文章再分析NIO.2的其他特性">
+<meta name="keywords" content="Java,NIO.2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java NIO.2系列文章之异步通道API入门">
+<meta property="og:url" content="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="NIO.2概览NIO.2也就是人们常说的 AIO，在Java 7中引入了NIO的改进版NIO 2，它是异步非阻塞的IO方式。 AIO的核心概念就是发起非阻塞方式的I/O操作，立即响应，却不立即返回结果，当I/O操作完成时通知。 这篇文章主要介绍NIO 2的异步通道API的一些内容，后续文章再分析NIO.2的其他特性">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-30T14:22:01.557Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java NIO.2系列文章之异步通道API入门">
+<meta name="twitter:description" content="NIO.2概览NIO.2也就是人们常说的 AIO，在Java 7中引入了NIO的改进版NIO 2，它是异步非阻塞的IO方式。 AIO的核心概念就是发起非阻塞方式的I/O操作，立即响应，却不立即返回结果，当I/O操作完成时通知。 这篇文章主要介绍NIO 2的异步通道API的一些内容，后续文章再分析NIO.2的其他特性">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                28
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                18
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-Java-NIO-2系列文章之异步通道API入门" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            Java NIO.2系列文章之异步通道API入门
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/08/30/Java-NIO-2系列文章之异步通道API入门/">
+            <time datetime="2018-08-30T14:22:01.000Z" itemprop="datePublished">2018-08-30</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/NIO-2/">NIO.2</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO-2概览"><span class="toc-number">1.</span> <span class="toc-text">NIO.2概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异步通道API"><span class="toc-number">2.</span> <span class="toc-text">异步通道API</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Future"><span class="toc-number">2.1.</span> <span class="toc-text">Future</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CompletionHandler"><span class="toc-number">2.2.</span> <span class="toc-text">CompletionHandler</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异步通道API实例"><span class="toc-number">3.</span> <span class="toc-text">异步通道API实例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#服务端-with-Future"><span class="toc-number">3.1.</span> <span class="toc-text">服务端 (with Future)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#服务端-With-CompletionHandler"><span class="toc-number">3.2.</span> <span class="toc-text">服务端(With CompletionHandler)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#AsynchronousChannelGroup类"><span class="toc-number">3.2.1.</span> <span class="toc-text">AsynchronousChannelGroup类</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#客户端"><span class="toc-number">3.3.</span> <span class="toc-text">客户端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测试结果"><span class="toc-number">3.4.</span> <span class="toc-text">测试结果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java-NIO-2异步IO的体现"><span class="toc-number">4.</span> <span class="toc-text">Java NIO 2异步IO的体现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">6.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="NIO-2概览"><a href="#NIO-2概览" class="headerlink" title="NIO.2概览"></a>NIO.2概览</h2><p>NIO.2也就是人们常说的 AIO，在Java 7中引入了NIO的改进版NIO 2，它是异步非阻塞的IO方式。</p>
+<p>AIO的核心概念就是发起非阻塞方式的I/O操作，立即响应，却不立即返回结果，当I/O操作完成时通知。</p>
+<p>这篇文章主要介绍NIO 2的异步通道API的一些内容，后续文章再分析NIO.2的其他特性</p>
+<a id="more"></a>
+<h2 id="异步通道API"><a href="#异步通道API" class="headerlink" title="异步通道API"></a>异步通道API</h2><p>从Java 7开始，java.nio.channel包中新增加4个异步通道：</p>
+<ul>
+<li>AsynchronousSocketChannel</li>
+<li>AsynchronousServerSocketChannel</li>
+<li>AsynchronousFileChannel</li>
+<li>AsynchronousDatagramChannel</li>
+</ul>
+<p>这些类在风格上与NIO 通道API相似，他们共享相同的方法与参数结构体，并且大多数对于NIO通道类可用的参数，对于新的异步版本仍然可用。</p>
+<p>异步通道API提供了两种对已启动异步操作的监测与控制机制:</p>
+<ul>
+<li>第一种通过返回一个 <strong>java.util.concurrent.Future对象</strong>来表示异步操作的结果</li>
+<li>第二种是通过传递给操作一个新类的对象<strong>java.nio.channels.CompletionHandler</strong>来完成，它会定义在操作完毕后所执行的处理程序方法。</li>
+</ul>
+<h3 id="Future"><a href="#Future" class="headerlink" title="Future"></a>Future</h3><p><strong>从Java 1.5开始，引入了Future接口，使用该接口可以在任务执行完毕之后得到任务执行结果</strong>。在NIO 2中，Future对象表示异步操作的结果，假设我们要创建一个服务器来监听客户端连接，打开AsynchronousServerSocketChannel 并将其绑定到类似于 ServerSocketChannel的地址:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AsynchronousServerSocketChannel server </span><br><span class="line">  = AsynchronousServerSocketChannel.open().bind(<span class="keyword">null</span>);</span><br></pre></td></tr></table></figure></p>
+<p>方法bind() 将一个套接字地址作为其参数，这里传递了一个Null地址，它会自动将套接字绑定到本地主机地址，并使用空闲的临时端口，就像传统的 ServerSocket设置 0端口一样，也是使用操作系统随机分配的临时端口。<br>然后调用服务器的accept()方法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;AsynchronousSocketChannel&gt; future = server.accept();</span><br></pre></td></tr></table></figure></p>
+<p>当我们在NIO中调用 ServerSocketChannel的accept()方法时，它会阻塞，直到从客户端收到传入连接。但是AsynchronousServerSocketChannel 的accept() 方法会立即返回 Future 对象。</p>
+<p>Future对象的泛型类型是操作的返回类型，在上面的例子，它是 AsynchronousSocketChannel ，但它也可以是Integer或String ,具体取决于操作的最终返回类型。</p>
+<p>我们可以使用Future对象来查询操作的状态<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">future.isDone();</span><br></pre></td></tr></table></figure></p>
+<p>如果基础操作已经完成，则此API返回 true,请注意，在这种情况下，完成可能意味着正常终止，异常，或者取消。</p>
+<p>我们还可以明确检查操作是否被取消,如果操作在正常完成之前被取消，则它返回true。如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">future.isCancelled();</span><br></pre></td></tr></table></figure></p>
+<p>实际的取消操作，如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">future.cancel(true)</span><br></pre></td></tr></table></figure></p>
+<p>cancel()方法可利用一个布尔标志来指出执行接受的线程是否可被中断。</p>
+<p>要检索操作结果，我们使用get()方法，该方法将阻塞等待结果的返回:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AsynchronousSocketChannel client= future.get();</span><br></pre></td></tr></table></figure></p>
+<p>另外，我们也可以设置阻塞时间,下例设置为10s:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AsynchronousSocketChannel worker = future.get(10, TimeUnit.SECONDS);</span><br></pre></td></tr></table></figure></p>
+<h3 id="CompletionHandler"><a href="#CompletionHandler" class="headerlink" title="CompletionHandler"></a>CompletionHandler</h3><p>使用 Future 来处理操作的替代方法是使用 CompletionHandler 类的回调机制。异步通道允许指定完成处理程序以使用操作的结果:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">AsynchronousServerSocketChannel listener</span><br><span class="line">  = AsynchronousServerSocketChannel.open().bind(<span class="keyword">null</span>);</span><br><span class="line"> </span><br><span class="line">listener.accept(</span><br><span class="line">  attachment, <span class="keyword">new</span> CompletionHandler&lt;AsynchronousSocketChannel, Object&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">completed</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">      AsynchronousSocketChannel client, Object attachment)</span> </span>&#123;</span><br><span class="line">          <span class="comment">// do whatever with client</span></span><br><span class="line">      &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">failed</span><span class="params">(Throwable exc, Object attachment)</span> </span>&#123;</span><br><span class="line">          <span class="comment">// handle failure</span></span><br><span class="line">      &#125;</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>I/O操作成功完成时，将调用已完成的回调 API。如果操作失败，则调用失败的API.</p>
+<h2 id="异步通道API实例"><a href="#异步通道API实例" class="headerlink" title="异步通道API实例"></a>异步通道API实例</h2><h3 id="服务端-with-Future"><a href="#服务端-with-Future" class="headerlink" title="服务端 (with Future)"></a>服务端 (with Future)</h3><p>下面是使用 Future的方式构建服务端。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AsyncEchoServer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> AsynchronousServerSocketChannel server;</span><br><span class="line">    <span class="keyword">private</span> Future&lt;AsynchronousSocketChannel&gt; future;</span><br><span class="line">    <span class="keyword">private</span> AsynchronousSocketChannel worker;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AsyncEchoServer</span><span class="params">()</span> <span class="keyword">throws</span> IOException, ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Open Server Channel"</span>);</span><br><span class="line">        server = AsynchronousServerSocketChannel.open().bind(<span class="keyword">new</span> InetSocketAddress(<span class="string">"127.0.0.1"</span>, <span class="number">9090</span>));</span><br><span class="line">        future = server.accept();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">runServer</span><span class="params">()</span> <span class="keyword">throws</span> ExecutionException, InterruptedException, IOException, TimeoutException </span>&#123;</span><br><span class="line">        <span class="comment">//获取操作结果</span></span><br><span class="line">        worker = future.get();</span><br><span class="line">        <span class="keyword">if</span> (worker != <span class="keyword">null</span> &amp;&amp; worker.isOpen()) &#123;</span><br><span class="line">            ByteBuffer buffer = ByteBuffer.allocate(<span class="number">100</span>);</span><br><span class="line">            <span class="comment">//将通道中的数据写入缓冲区</span></span><br><span class="line">            worker.read(buffer).get(<span class="number">10</span>,TimeUnit.SECONDS);</span><br><span class="line">            System.out.println(<span class="string">"received from client: "</span> + <span class="keyword">new</span> String(buffer.array()));</span><br><span class="line">        &#125;</span><br><span class="line">        server.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException, ExecutionException, IOException, TimeoutException </span>&#123;</span><br><span class="line">        AsyncEchoServer server = <span class="keyword">new</span> AsyncEchoServer();</span><br><span class="line">        server.runServer();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="服务端-With-CompletionHandler"><a href="#服务端-With-CompletionHandler" class="headerlink" title="服务端(With CompletionHandler)"></a>服务端(With CompletionHandler)</h3><p>下面我们将了解如何使用 CompletionHandler 方法而不是 Future 方法实现相同的服务端代码。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AsyncEchoServerWithCallBack</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> AsynchronousServerSocketChannel server;</span><br><span class="line">    <span class="keyword">private</span> AsynchronousSocketChannel worker;</span><br><span class="line">    <span class="keyword">private</span> AsynchronousChannelGroup group;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AsyncEchoServerWithCallBack</span><span class="params">()</span> <span class="keyword">throws</span> IOException, ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Open Server Channel"</span>);</span><br><span class="line">        group = AsynchronousChannelGroup.withFixedThreadPool(<span class="number">10</span>, Executors.defaultThreadFactory());</span><br><span class="line">        server = AsynchronousServerSocketChannel.open(group).bind(<span class="keyword">new</span> InetSocketAddress(<span class="string">"127.0.0.1"</span>, <span class="number">9090</span>));</span><br><span class="line">        <span class="comment">//当有新连接建立时会调用 CompletionHandler接口实现对象中的 completed()方法</span></span><br><span class="line">        server.accept(<span class="keyword">null</span>, <span class="keyword">new</span> CompletionHandler&lt;AsynchronousSocketChannel, Object&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">completed</span><span class="params">(AsynchronousSocketChannel result, Object attachment)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (server.isOpen()) &#123;</span><br><span class="line">                    server.accept(<span class="keyword">null</span>, <span class="keyword">this</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                worker = result;</span><br><span class="line">                <span class="keyword">if</span> ((worker != <span class="keyword">null</span>) &amp;&amp; (worker.isOpen())) &#123;</span><br><span class="line">                    ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">100</span>);</span><br><span class="line">                    worker.read(byteBuffer);</span><br><span class="line">                    System.out.println(<span class="string">"received the client: "</span>+<span class="keyword">new</span> String(byteBuffer.array()));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">failed</span><span class="params">(Throwable exc, Object attachment)</span> </span>&#123;</span><br><span class="line">                <span class="comment">//TODO</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException, ExecutionException, IOException, TimeoutException </span>&#123;</span><br><span class="line">        AsyncEchoServerWithCallBack server = <span class="keyword">new</span> AsyncEchoServerWithCallBack();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当有新连接建立时会调用 CompletionHandler接口实现对象中的 completed()方法，当出现错误时，会调用 failed方法。</p>
+<p>accept方法的第一个参数可以是一个任意类型的对象，称为调用时的” 附加对象”。附件对象在 accept()方法调用时传入，可以在 CompletionHandler 接口的实现对象中从 completed 和 failed 方法的参数(attachment)中获取，这样就可以进行数据的传递。使用 CompletionHandler接口的方法都支持使用附件对象来传递数据。</p>
+<h4 id="AsynchronousChannelGroup类"><a href="#AsynchronousChannelGroup类" class="headerlink" title="AsynchronousChannelGroup类"></a>AsynchronousChannelGroup类</h4><p><strong>异步通道在处理 I/O请求时，需要使用一个AsynchronousChannelGroup类，该类的对象表示的是一个异步通道的分组，每一个分组都有一个线程池与之对应</strong>，需要使用AsynchronousChannelGroup类的静态工厂方法 withFixedThreadPool,withCachedThreadPool或者 withThreaPool设置线程池。这个线程池中的线程用来处理 I/O 事件。多个异步通道可以共用一个分组的线程池资源。</p>
+<p>调用AsynchronousSocketChannel 和 AsynchronousServerSocketChannel 类的 open 方法 打开异步套接字通道时，可以传入一个AsynchronousChannelGroup类的对象。如果调用的 open 方法没有传入 AsynchronousChannelGroup 类的对象，默认使用系统提供的分组，系统分组对应的线程池中的线程是<strong>守护线程</strong>，如果使用默认分组，程序启动之后很快就退出了，<strong>因为系统分组使用的守护线程不会阻止虚拟机的退出。</strong></p>
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AsyncEchoClient</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> AsynchronousSocketChannel client;</span><br><span class="line">    <span class="keyword">private</span> Future&lt;Void&gt; future;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AsyncEchoClient</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">//打开一个异步channel</span></span><br><span class="line">        System.out.println(<span class="string">"Open client channel"</span>);</span><br><span class="line">        client = AsynchronousSocketChannel.open();</span><br><span class="line">        <span class="comment">//连接本地端口和地址,在连接成功后不返回任何内容，但是，我们仍然可以使用Future对象来监视异步操作的状态</span></span><br><span class="line">        System.out.println(<span class="string">"Connect to server"</span>);</span><br><span class="line">        future = client.connect(<span class="keyword">new</span> InetSocketAddress(<span class="string">"127.0.0.1"</span>, <span class="number">9090</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 向服务端发送消息</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> message</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendMessage</span><span class="params">(String message)</span> <span class="keyword">throws</span> ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!future.isDone()) &#123;</span><br><span class="line">            future.cancel(<span class="keyword">true</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//将一个字节数组封装到ByteBuffer中</span></span><br><span class="line">        ByteBuffer byteBuffer = ByteBuffer.wrap(message.getBytes());</span><br><span class="line">        System.out.println(<span class="string">"Sending message to the server"</span>);</span><br><span class="line">        <span class="comment">//将数据写入通道</span></span><br><span class="line">        <span class="keyword">int</span> numberBytes = client.write(byteBuffer).get();</span><br><span class="line">        byteBuffer.clear();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        AsyncEchoClient client = <span class="keyword">new</span> AsyncEchoClient();</span><br><span class="line">        client.sendMessage(<span class="string">"hello world"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h3><p>客户端:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Open client channel</span><br><span class="line">Connect to server</span><br></pre></td></tr></table></figure></p>
+<p>服务端:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Open Server Channel</span><br><span class="line">received the client: hello world</span><br></pre></td></tr></table></figure></p>
+<h2 id="Java-NIO-2异步IO的体现"><a href="#Java-NIO-2异步IO的体现" class="headerlink" title="Java NIO 2异步IO的体现"></a>Java NIO 2异步IO的体现</h2><p>我们都知道由 JDK 1.7提供的NIO 2.0 新增了异步的套接字通道，它是真正的异步 IO，在异步IO操作的时候可以传递变量，当操作完成之后会回调相关的方法。那么NIO 2的异步非阻塞特性是如何体现的呢？从之前的描述就可以窥见很多细节:</p>
+<p><strong>异步的体现</strong></p>
+<p>以 <code>AsynchronousServerSocketChannel</code>为例，当调用该类的对象的 accept()方法时，其返回了一个 <code>Future&lt;AsynchronousSocketChannel&gt;</code>对象，调用accept()方法就像调用传统I/O中的<code>ServerSocket的accept()</code>一样，本质上都是接收客户端连接请求，只不过<code>AsynchronousServerSocketChannel</code>对象没有一直阻塞等待，而是立马返回一个<code>Future</code>对象，利用<code>Future</code>的<code>get</code>方法去获取连接结果，<code>Future</code>对象就是异步操作的结果，我们还可以利用Future的<code>isDone</code>方法查询操作完成的状态，这就是异步的体现。</p>
+<p>当然在使用 CompletionHandler 方法中一样的道理，有新连接建立时会回调 CompletionHandler接口实现对象中的 completed()方法，当出现错误时，会调用 failed方法。</p>
+<p><strong>非阻塞的体现</strong></p>
+<p>当调用<code>AsynchronousServerSocketChannel</code>对象的 accept()方法后，返回Future对象，此时线程可以接着干其他事情，这是非阻塞的，要想获得操作结果，就调用 Future的 <code>isDone</code>方法查询操作是否完毕，使用 <code>get()</code>去获取结果，典型的非阻塞操作。而在传统 I/O模型中，套接字类对象的 <code>accept</code>方法会一直阻塞等待，直到有新连接接入进来才停止阻塞。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>NIO.2,也叫AIO,了解其异步通道API,也能更好地帮助我们去理解异步IO操作。当我们学习NIO2的API时，也可以对照NIO中的通道API进行学习，它们还是有很多相似的地方。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://www.ibm.com/developerworks/cn/java/j-nio2-1/index.html" target="_blank" rel="noopener">NIO.2 入门，第 1 部分 异步通道 API</a></li>
+<li><a href="https://www.baeldung.com/java-nio2-async-socket-channel" target="_blank" rel="noopener">A Guide to NIO2 Asynchronous Socket Channel</a></li>
+<li><a href="https://book.douban.com/subject/10734875/" target="_blank" rel="noopener">《深入理解Java 7:核心技术与最佳实践》</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/" data-id="cjlgntzh90004aor9lgllhwo2" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/08/30/springboot系列文章之整合mybatis/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">springboot系列文章之整合mybatis</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">20</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 12.5px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+        
+  <div class="widget-wrap">
+    <h3 class="widget-title">浏览数目</h3>
+    <div class="widget">
+      <ul class="popularlist">
+      </ul>
+    </div>
+  </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/';
+        
+        this.page.identifier = 'Java-NIO-2系列文章之异步通道API入门';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
