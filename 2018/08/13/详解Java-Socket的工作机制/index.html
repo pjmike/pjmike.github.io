@@ -90,14 +90,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -109,11 +109,11 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Pos',
-            PAGES: 'Halaman',
-            CATEGORIES: 'Kategori',
-            TAGS: 'Tag',
-            UNTITLED: 'Tanpa Judul',
+            POSTS: 'Entradas',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
+            UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
@@ -139,7 +139,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
     </div>
 
                 </td>
@@ -159,16 +159,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 30
-                <span>pos</span>
+                <span>Entradas</span>
             </div>
             <div class="article-info-block">
                 19
-                <span>tag</span>
+                <span>Etiquetas</span>
             </div>
         </div>
         
@@ -259,7 +259,7 @@
         
             
                 <div id="toc" class="toc-article">
-                <strong class="toc-title">カタログ</strong>
+                <strong class="toc-title">Catálogo</strong>
                     <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Socket的来龙去脉"><span class="toc-number">1.</span> <span class="toc-text">Socket的来龙去脉</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-系统调用"><span class="toc-number">1.1.</span> <span class="toc-text">1. 系统调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-应用编程接口API"><span class="toc-number">1.2.</span> <span class="toc-text">2. 应用编程接口API</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-套接字"><span class="toc-number">1.3.</span> <span class="toc-text">3. 套接字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-套接字描述符"><span class="toc-number">1.4.</span> <span class="toc-text">4. 套接字描述符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Socket通信图示"><span class="toc-number">2.</span> <span class="toc-text">Socket通信图示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Socket通信协议分析"><span class="toc-number">3.</span> <span class="toc-text">Socket通信协议分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#UDP协议"><span class="toc-number">3.1.</span> <span class="toc-text">UDP协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP协议"><span class="toc-number">3.2.</span> <span class="toc-text">TCP协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#两种协议区别及选择"><span class="toc-number">3.3.</span> <span class="toc-text">两种协议区别及选择</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基于TCP协议的Java-Socket编程实例"><span class="toc-number">4.</span> <span class="toc-text">基于TCP协议的Java Socket编程实例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#服务端编写"><span class="toc-number">4.1.</span> <span class="toc-text">服务端编写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#客户端程序"><span class="toc-number">4.2.</span> <span class="toc-text">客户端程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测试"><span class="toc-number">4.3.</span> <span class="toc-text">测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
                 </div>
             
@@ -312,7 +312,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/13/详解Java-Socket的工作机制/" data-id="cjlhs9h6a003veor9imiegli5" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/08/13/详解Java-Socket的工作机制/" data-id="cjlhsb90s0026ccr9xkojgeks" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -380,7 +380,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/13/详解Java-Socket的工作机制/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/13/详解Java-Socket的工作机制/">Komentar</a>
+        <a href="https://pjmike.github.io/2018/08/13/详解Java-Socket的工作机制/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/13/详解Java-Socket的工作机制/">Comentarios</a>
     
 
         </footer>
@@ -390,7 +390,7 @@
 <nav id="article-nav">
     
         <a href="/2018/08/16/springboot系列文章之启动时初始化数据/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Lebih baru</strong>
+            <strong class="article-nav-caption">Más nuevo</strong>
             <div class="article-nav-title">
                 
                     springboot系列文章之启动时初始化数据
@@ -400,7 +400,7 @@
     
     
         <a href="/2018/08/09/二叉搜索树的增删查/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Lebih lama</strong>
+            <strong class="article-nav-caption">Más viejo</strong>
             <div class="article-nav-title">二叉搜索树的增删查</div>
         </a>
     
@@ -427,7 +427,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Kategori</h3>
+        <h3 class="widget-title">Categorias</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
         </div>
@@ -436,7 +436,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Arsip</h3>
+        <h3 class="widget-title">Archivos</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
         </div>
@@ -445,7 +445,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag</h3>
+        <h3 class="widget-title">Etiquetas</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -454,7 +454,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">awan tag</h3>
+        <h3 class="widget-title">Nube de etiquetas</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 12.5px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
         </div>
@@ -463,7 +463,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">tautan</h3>
+        <h3 class="widget-title">Links</h3>
         <div class="widget">
             <ul>
                 
