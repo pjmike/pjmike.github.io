@@ -155,7 +155,7 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                29
+                30
                 <span>pos</span>
             </div>
             <div class="article-info-block">
@@ -208,6 +208,141 @@
 
             
             <section id="main">
+    <article id="post-动态代理的原理及其应用" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2018/08/07/动态代理的原理及其应用/">动态代理的原理及其应用</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/08/07/动态代理的原理及其应用/">
+            <time datetime="2018-08-06T16:39:58.000Z" itemprop="datePublished">2018-08-07</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/代理/">代理</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/代理/">代理</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            <p><h2 id="动态代理的介绍"><a href="#动态代理的介绍" class="headerlink" title="动态代理的介绍"></a>动态代理的介绍</h2><p>动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。</p>
+<p>实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用</p>
+<h2 id="与静态代理的比较"><a href="#与静态代理的比较" class="headerlink" title="与静态代理的比较"></a>与静态代理的比较</h2><h3 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a><strong>静态代理</strong></h3><p>提前写好代理类，每个业务类都要对应一个代理类,不灵活<br><img src="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg" alt=""></p></p>
+            <p class="article-more-link">
+                <a href="/2018/08/07/动态代理的原理及其应用/#more">Read More</a>
+            </p>
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/08/07/动态代理的原理及其应用/" data-id="cjlhs9gd4001meor9eohz6vyp" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/08/07/动态代理的原理及其应用/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/07/动态代理的原理及其应用/">Komentar</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-MySQL常用语句-一" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -253,7 +388,7 @@
             <p><h2 id="关于Show语句"><a href="#关于Show语句" class="headerlink" title="关于Show语句"></a>关于Show语句</h2><p>show语句可以用来查询数据库，表，列和服务器状态信息，<strong>show后面还可以跟like操作符</strong>，甚至有的还可以跟where语句</p>
 <h3 id="show-variables-查看系统变量"><a href="#show-variables-查看系统变量" class="headerlink" title="show variables 查看系统变量"></a>show variables 查看系统变量</h3><p>show variables 显示MySQL系统变量的值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &quot;%char%&quot;;</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| Variable_name            | Value                      |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| character_set_client     | utf8mb4                    |</span><br><span class="line">| character_set_connection | utf8mb4                    |</span><br><span class="line">| character_set_database   | utf8                       |</span><br><span class="line">| character_set_filesystem | binary                     |</span><br><span class="line">| character_set_results    | utf8mb4                    |</span><br><span class="line">| character_set_server     | latin1                     |</span><br><span class="line">| character_set_system     | utf8                       |</span><br><span class="line">| character_sets_dir       | /usr/share/mysql/charsets/ |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">8 rows in set (0.07 sec)</span><br></pre></td></tr></table></figure></p></p>
             <p class="article-more-link">
-                <a href="/2018/08/05/MySQL常用语句-一/#more">Ler Mais</a>
+                <a href="/2018/08/05/MySQL常用语句-一/#more">Read More</a>
             </p>
         
         </div>
@@ -264,7 +399,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/" data-id="cjlhgerl5000orkr934124gv7" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/" data-id="cjlhs9gc9000xeor9f3fqdbzh" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -391,7 +526,7 @@
 <li>节点的右子树只包含<strong>大于</strong>当前节点的数。</li>
 <li>所有左子树和右子树自身必须也是二叉搜索树</p>
             <p class="article-more-link">
-                <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/#more">Ler Mais</a>
+                <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/#more">Read More</a>
             </p>
         
         </div>
@@ -402,7 +537,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/" data-id="cjlhgerli000vrkr9ab57jrgc" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/" data-id="cjlhs9gck0013eor97cwxpdkk" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -527,7 +662,7 @@
 <p><strong>注意</strong>: <code>next()</code> 和<code>hasNext()</code> 操作的时间复杂度是O(1)，并使用 <em>O(h)</em>内存，其中 <em>h</em>是树的高度。</p>
 <p>原题地址：<a href="https://leetcode.com/problems/binary-search-tree-iterator/" target="_blank" rel="noopener">https://leetcode.com/problems/binary-search-tree-iterator/</a></p></p>
             <p class="article-more-link">
-                <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/#more">Ler Mais</a>
+                <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/#more">Read More</a>
             </p>
         
         </div>
@@ -538,7 +673,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/" data-id="cjlhgerl2000jrkr9bfqc3el7" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/" data-id="cjlhs9gcd000zeor9760q6uh7" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -655,7 +790,7 @@
         
             <p><p>今天写一篇关于JWT学习的记录，虽然网上有很多介绍JWT用法和特性的文章博客，但是还是想自己写一点JWT的总结，其中参照很多优秀的博文。更重要是加深自己的理解。</p></p>
             <p class="article-more-link">
-                <a href="/2018/04/15/JWT的介绍与使用/#more">Ler Mais</a>
+                <a href="/2018/04/15/JWT的介绍与使用/#more">Read More</a>
             </p>
         
         </div>
@@ -666,7 +801,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/04/15/JWT的介绍与使用/" data-id="cjlhgerko000arkr9y3mgbg4z" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/04/15/JWT的介绍与使用/" data-id="cjlhs9gbr000oeor90bkvc5uz" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -783,7 +918,7 @@
         
             <p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><code>@ConfigurationProperties</code> 和 <code>@Value</code> 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/28/springboot属性配置/#more">Ler Mais</a>
+                <a href="/2018/03/28/springboot属性配置/#more">Read More</a>
             </p>
         
         </div>
@@ -794,7 +929,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot属性配置/" data-id="cjlhgerlr0016rkr943e8hzhl" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot属性配置/" data-id="cjlhs9gcp0019eor9kbfsq9uc" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -912,7 +1047,7 @@
             <p><h1 id="CORS概念"><a href="#CORS概念" class="headerlink" title="CORS概念"></a>CORS概念</h1><p>CORS（Cross-Origin Resource Sharing 跨源资源共享），当一个请求url的协议、域名、端口三者之间任意一与当前页面地址不同即为跨域。</p>
 <p>例如最常见的，在一个域名下的网页中，调用另一个域名中的资源。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/28/springboot实现跨域访问-CORS/#more">Ler Mais</a>
+                <a href="/2018/03/28/springboot实现跨域访问-CORS/#more">Read More</a>
             </p>
         
         </div>
@@ -923,7 +1058,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot实现跨域访问-CORS/" data-id="cjlhgerlk000yrkr9rmpmkywi" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot实现跨域访问-CORS/" data-id="cjlhs9gcm0014eor9406jid2o" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1040,7 +1175,7 @@
         
             <p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>我们在练习项目的时候，往往会涉及参数校验的问题，有时候是前端进行大部分校验，如用户名唯一性，生日格式，邮箱格式校验等等常用的校验。但是为了避免用户绕过浏览器，使用http工具直接向后端请求一些违法数据，服务端的数据校验也是必要的，可以防止脏数据落到数据库中，如果数据库中出现一个非法的邮箱格式，也会让运维人员头疼不已，所以后端校验也是有必要的。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/28/springboot参数校验总结(一)/#more">Ler Mais</a>
+                <a href="/2018/03/28/springboot参数校验总结(一)/#more">Read More</a>
             </p>
         
         </div>
@@ -1051,7 +1186,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" data-id="cjlhgerlx001drkr9yg4vq9no" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" data-id="cjlhs9gda001seor978ty102g" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1168,7 +1303,7 @@
         
             <p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在学习过程中，我们总会遇到过滤器和拦截器的使用，因为对于他们之间的关系和区别不是很清楚，所以每次用的时候都感觉模棱两可的。所以今天特意写一篇文章总结之前用的过滤器与拦截器它们<strong>拦截请求的处理过程</strong>，不仅要知其然，还要知其所以然。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/26/过滤器与拦截器总结/#more">Ler Mais</a>
+                <a href="/2018/03/26/过滤器与拦截器总结/#more">Read More</a>
             </p>
         
         </div>
@@ -1179,7 +1314,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlhgern4002orkr9z1gt566i" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlhs9h6c003weor9j10osfzp" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1296,7 +1431,7 @@
         
             <p><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前在集成第三方即时通信系统-融云的时候，我直接clone它的服务端源码，然后导入我的项目，我在测试它连接融云服务器案例时，发现一直不成功，始终报一个 ExceptionInInitializerError 的异常。后来通过网上查资料才发现，这个异常是静态变量初始化时出现异常时，JVM会抛出<strong>java.lang.ExceptionInInitializerError</strong>的异常。由此，我对这个异常做了进一步探究。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/#more">Ler Mais</a>
+                <a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/#more">Read More</a>
             </p>
         
         </div>
@@ -1307,7 +1442,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" data-id="cjlhgern0002krkr9yun2bo7e" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" data-id="cjlhs9ge0002heor9a1wfe6pd" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1397,7 +1532,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">Kategori</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -1406,7 +1541,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">Arsip</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">21</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
         </div>
     </div>
 
@@ -1415,7 +1550,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tag</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
         </div>
     </div>
 
