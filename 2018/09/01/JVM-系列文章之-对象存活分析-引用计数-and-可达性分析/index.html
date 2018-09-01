@@ -3,18 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Tag: Java | 风居者的街道</title>
+    <title>JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="风居者的街道">
-<meta property="og:url" content="https://pjmike.github.io/tags/Java/index.html">
+    <meta name="description" content="前言在垃圾回收器回收对象时，我们如何判断哪些对象是”活”的，哪些是”死”的，关于判断对象存活的方法主要分为两类: 引用计数法 和 可达性分析算法 引用计数法引用计数器就是: 给对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加1；当引用失效时，计数器值就减一;任何时刻计数器为 0 的对象就是不可能再被使用的，可以此时进行回收。 但是引用计数法有一个很大的缺陷，就是它很难解决对象之间相互">
+<meta name="keywords" content="JVM,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="努力，不一定成功，成功却需努力">
+<meta property="og:description" content="前言在垃圾回收器回收对象时，我们如何判断哪些对象是”活”的，哪些是”死”的，关于判断对象存活的方法主要分为两类: 引用计数法 和 可达性分析算法 引用计数法引用计数器就是: 给对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加1；当引用失效时，计数器值就减一;任何时刻计数器为 0 的对象就是不可能再被使用的，可以此时进行回收。 但是引用计数法有一个很大的缺陷，就是它很难解决对象之间相互">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/gcroots.png">
+<meta property="og:updated_time" content="2018-09-01T13:21:57.237Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="风居者的街道">
-<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
+<meta name="twitter:title" content="JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析">
+<meta name="twitter:description" content="前言在垃圾回收器回收对象时，我们如何判断哪些对象是”活”的，哪些是”死”的，关于判断对象存活的方法主要分为两类: 引用计数法 和 可达性分析算法 引用计数法引用计数器就是: 给对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加1；当引用失效时，计数器值就减一;任何时刻计数器为 0 的对象就是不可能再被使用的，可以此时进行回收。 但是引用计数法有一个很大的缺陷，就是它很难解决对象之间相互">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/gcroots.png">
     
 
     
@@ -207,25 +211,21 @@
 </aside>
 
             
-            <section id="main">
-<div class="timeline timeline-wrap">
-    <div class="timeline-row timeline-row-major">
-        <span class="node"><i class="fas fa-tag"></i></span>
-        <h1 class="title">#Java</h1>
-    </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+            <section id="main"><article id="post-JVM-系列文章之-对象存活分析-引用计数-and-可达性分析" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
                 
     
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析</a>
+        <h1 class="article-title" itemprop="name">
+            JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析
         </h1>
     
 
-                <div class="article-meta">
-                    
+                
+                    <div class="article-meta">
+                        
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
         <a href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">
@@ -234,270 +234,164 @@
     </div>
 
 
-                    
+                        
     <div class="article-category">
     	<i class="fas fa-folder"></i>
         <a class="article-category-link" href="/categories/Java/">Java</a>
     </div>
 
-                    
+                        
     <div class="article-tag">
         <i class="fas fa-tag"></i>
         <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
     </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+                    </div>
                 
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/09/01/JVM-系列文章之-Java-的内存区域/">JVM 系列文章之 Java 的内存区域</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/09/01/JVM-系列文章之-Java-的内存区域/">
-            <time datetime="2018-09-01T08:53:59.000Z" itemprop="datePublished">2018-09-01</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
-    </div>
-
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catálogo</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引用计数法"><span class="toc-number">2.</span> <span class="toc-text">引用计数法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#可达性分析算法"><span class="toc-number">3.</span> <span class="toc-text">可达性分析算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java可达性分析算法会不会出现循环引用问题？"><span class="toc-number">3.1.</span> <span class="toc-text">Java可达性分析算法会不会出现循环引用问题？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">4.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
-            </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在垃圾回收器回收对象时，我们如何判断哪些对象是”活”的，哪些是”死”的，关于判断对象存活的方法主要分为两类: 引用计数法 和 可达性分析算法</p>
+<h2 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h2><p>引用计数器就是: 给对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加1；当引用失效时，计数器值就减一;任何时刻计数器为 0 的对象就是不可能再被使用的，可以此时进行回收。</p>
+<p>但是引用计数法有一个很大的缺陷，就是它很难解决对象之间相互循环引用的问题。</p>
+<a id="more"></a>
+<h2 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h2><p>在主流的商用程序语言(Java,C#等)的主流实现中，都是称<strong>通过可达性分析来判断对象是否存活的</strong>。</p>
+<p>这个算法是基于图论分析方法，通过一系列称为 “GC Roots”的对象作为初始点，也可以说是根节点，从根节点往下搜索，搜索结束后如果发现某个对象不可达(即 GC roots到这个对象没有路径)，则证明此对象是不可用的。如下图所示:<br><img src="http://osvtz719h.bkt.clouddn.com/gcroots.png" alt="gcroots"><br>对象obj4，obj5,obj6虽然相互有关联，但是它们到 GC Roots是不可达的，所以它们将会判定为可回收的对象</p>
+<p>在《深入理解Java虚拟机》中谈到， GC Roots的对象包括下面几种:</p>
+<ul>
+<li>虚拟机栈(栈帧中的本地变量表)中引用的对象</li>
+<li>方法区中类静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>本地方法栈中 JNI(即一般说的 Native方法)引用的对象。</li>
+</ul>
+<h3 id="Java可达性分析算法会不会出现循环引用问题？"><a href="#Java可达性分析算法会不会出现循环引用问题？" class="headerlink" title="Java可达性分析算法会不会出现循环引用问题？"></a><strong>Java可达性分析算法会不会出现循环引用问题？</strong></h3><p>从上图中我们就可以看出 GC Roots是单独出来的，在对象图之外，以下摘自 <strong>R大的回答</strong>：</p>
+<blockquote>
+<p>GC Root在对象图之外，是特别定义的”起点”,不可能被对象图内的对象所引用。<br>一个常见的误解就是 以为GC Root是一组对象，实际上GC Root通常是一组特别管理的指针，这些指针是 tracing GC 的trace 的起点，它们不是对象图里对象，对象也不可能引用到这些”外部”的指针，另外，tracing GC能够正确处理循环引用。保证每个活对象只会被访问一次就能确定其存活性，对象图里是否存在循环引用，tracing GC都能判断对象的存活与否。</p>
+</blockquote>
+<p>这里概念可能有点混淆了，GC Roots到底是指针还是对象，官方的解释是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">garbage collection root</span><br><span class="line"></span><br><span class="line">A pointer into the Java object heap from outside the heap. These come up, e.g., from static fields of classes, local references in activation frames, etc.</span><br></pre></td></tr></table></figure></p>
+<p>官方的意思是由heap外部执向 heap内的对象的指针。有时候对象就是所谓的”指针”，比如全局性的引用(静态变量和常量)。个人看法是不必要太过较真。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a></li>
+<li><a href="https://www.zhihu.com/question/29218534/answer/43580432" target="_blank" rel="noopener">Java可达性分析算法会不会出现循环引用问题？ - RednaxelaFX的回答 - 知乎</a></li>
+<li><a href="https://www.yourkit.com/docs/java/help/gc_roots.jsp" target="_blank" rel="noopener">GC roots</a></li>
+</ul>
+
+        
         </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/08/31/JDK自带的反编译工具-javap/">JDK自带的反编译工具 javap</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/31/JDK自带的反编译工具-javap/">
-            <time datetime="2018-08-31T09:14:13.000Z" itemprop="datePublished">2018-08-31</time>
-        </a>
-    </div>
+        <footer class="article-footer">
+            <div class="share-container">
 
 
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
-    </div>
 
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/">Java NIO 系列文章 (一) Buffer，Channel，Selector入门</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/">
-            <time datetime="2018-08-31T03:35:40.000Z" itemprop="datePublished">2018-08-31</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/NIO/">NIO</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/08/30/Java-NIO-2系列文章之异步通道API入门/">Java NIO.2系列文章之异步通道API入门</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/30/Java-NIO-2系列文章之异步通道API入门/">
-            <time datetime="2018-08-30T14:22:01.000Z" itemprop="datePublished">2018-08-30</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/NIO-2/">NIO.2</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/08/24/BIO，NIO，AIO概览/">BIO，NIO，AIO概览</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/24/BIO，NIO，AIO概览/">
-            <time datetime="2018-08-24T02:49:14.000Z" itemprop="datePublished">2018-08-24</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/08/13/详解Java-Socket的工作机制/">详解Java Socket的工作机制</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/13/详解Java-Socket的工作机制/">
-            <time datetime="2018-08-12T16:28:34.000Z" itemprop="datePublished">2018-08-13</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/Socket/">Socket</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
-                
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/">项目中遇到的ExceptionInInitializerError异常引发的问题</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/">
-            <time datetime="2018-03-17T16:13:12.000Z" itemprop="datePublished">2018-03-18</time>
-        </a>
-    </div>
-
-
-                    
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
 </div>
+
+    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" data-id="cjljgm7w100033gr9y2keqjvi" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">Komentar</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/01/JVM-系列文章之-Java-的内存区域/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Lebih lama</strong>
+            <div class="article-nav-title">JVM 系列文章之 Java 的内存区域</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
 </section>
             
                 
@@ -584,11 +478,13 @@
     <script>
     var disqus_config = function () {
         
-        this.page.identifier = '';
+            this.page.url = 'https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/';
+        
+        this.page.identifier = 'JVM-系列文章之-对象存活分析-引用计数-and-可达性分析';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'pjmike' + '.disqus.com/count.js';
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();

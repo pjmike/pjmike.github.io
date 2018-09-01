@@ -82,14 +82,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -101,11 +101,11 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Entradas',
-            PAGES: 'Pages',
-            CATEGORIES: 'Categorias',
-            TAGS: 'Etiquetas',
-            UNTITLED: '(Untitled)',
+            POSTS: 'Pos',
+            PAGES: 'Halaman',
+            CATEGORIES: 'Kategori',
+            TAGS: 'Tag',
+            UNTITLED: 'Tanpa Judul',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
@@ -131,7 +131,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
     </div>
 
                 </td>
@@ -151,16 +151,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                31
-                <span>Entradas</span>
+                32
+                <span>pos</span>
             </div>
             <div class="article-info-block">
                 20
-                <span>Etiquetas</span>
+                <span>tag</span>
             </div>
         </div>
         
@@ -208,6 +208,141 @@
 
             
             <section id="main">
+    <article id="post-JVM-系列文章之-对象存活分析-引用计数-and-可达性分析" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">
+            <time datetime="2018-09-01T13:21:57.000Z" itemprop="datePublished">2018-09-01</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            <p><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在垃圾回收器回收对象时，我们如何判断哪些对象是”活”的，哪些是”死”的，关于判断对象存活的方法主要分为两类: 引用计数法 和 可达性分析算法</p>
+<h2 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h2><p>引用计数器就是: 给对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加1；当引用失效时，计数器值就减一;任何时刻计数器为 0 的对象就是不可能再被使用的，可以此时进行回收。</p>
+<p>但是引用计数法有一个很大的缺陷，就是它很难解决对象之间相互循环引用的问题。</p></p>
+            <p class="article-more-link">
+                <a href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/#more">Read More</a>
+            </p>
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" data-id="cjljgm7w100033gr9y2keqjvi" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">Komentar</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-JVM-系列文章之-Java-的内存区域" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -273,7 +408,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/" data-id="cjlj72mpd000390r9sflf5gtk" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/" data-id="cjljgm7yf000b3gr9ue7y09lv" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -341,7 +476,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/">Komentar</a>
     
 
         </footer>
@@ -407,7 +542,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/31/JDK自带的反编译工具-javap/" data-id="cjlj72mrd000g90r9ybz24uje" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/31/JDK自带的反编译工具-javap/" data-id="cjljgm7yc000a3gr9f8bz8uh8" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -475,7 +610,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/31/JDK自带的反编译工具-javap/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/31/JDK自带的反编译工具-javap/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/31/JDK自带的反编译工具-javap/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/31/JDK自带的反编译工具-javap/">Komentar</a>
     
 
         </footer>
@@ -549,7 +684,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/" data-id="cjlj72o0g000t90r9tzejkh86" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/" data-id="cjljgm9bu000m3gr9rtsvhyc5" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -617,7 +752,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/31/Java-NIO-系列文章-一-Buffer，Channel，Selector入门/">Komentar</a>
     
 
         </footer>
@@ -684,7 +819,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/" data-id="cjlj72o0c000r90r9s978u3e8" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/" data-id="cjljgm9cv00133gr9yd2ur1fx" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -752,7 +887,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/Java-NIO-2系列文章之异步通道API入门/">Komentar</a>
     
 
         </footer>
@@ -820,7 +955,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合mybatis/" data-id="cjlj72o2v002990r9wk7zycyo" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合mybatis/" data-id="cjljgm9h700343gr977vr9amq" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -888,7 +1023,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/30/springboot系列文章之整合mybatis/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合mybatis/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/30/springboot系列文章之整合mybatis/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合mybatis/">Komentar</a>
     
 
         </footer>
@@ -954,7 +1089,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合Spring-Data-JPA/" data-id="cjlj72o2c001v90r97bx54zs1" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合Spring-Data-JPA/" data-id="cjljgm9h400323gr9zhz79ajy" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1022,7 +1157,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/30/springboot系列文章之整合Spring-Data-JPA/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合Spring-Data-JPA/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/30/springboot系列文章之整合Spring-Data-JPA/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/30/springboot系列文章之整合Spring-Data-JPA/">Komentar</a>
     
 
         </footer>
@@ -1093,7 +1228,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/" data-id="cjlj72o28001r90r9eefpvpp4" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/" data-id="cjljgm9dt001s3gr982nqhk0v" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1161,7 +1296,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/27/一文读懂一个URL请求的过程是怎样的/">Komentar</a>
     
 
         </footer>
@@ -1226,7 +1361,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjlj72mpl000490r943k0n25z" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjljgm9bj000h3gr9poeifnt2" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1294,7 +1429,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/">Komentar</a>
     
 
         </footer>
@@ -1359,7 +1494,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/21/探究MySQL中的日志文件/" data-id="cjlj72o2i001z90r9dmgougk1" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/21/探究MySQL中的日志文件/" data-id="cjljgm9gq002t3gr92k00b1vy" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1427,141 +1562,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/21/探究MySQL中的日志文件/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/21/探究MySQL中的日志文件/">Comentarios</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
-    <article id="post-springboot系列文章之编写七牛云的自定义starter" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2018/08/21/springboot系列文章之编写七牛云的自定义starter/">springboot系列文章之编写七牛云的自定义starter</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/21/springboot系列文章之编写七牛云的自定义starter/">
-            <time datetime="2018-08-21T02:47:39.000Z" itemprop="datePublished">2018-08-21</time>
-        </a>
-    </div>
-
-
-                        
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/springboot/">springboot</a>
-    </div>
-
-                        
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/springboot/">springboot</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            <p><h2 id="springboot的自动配置"><a href="#springboot的自动配置" class="headerlink" title="springboot的自动配置"></a>springboot的自动配置</h2><p>编写自定义starter之前，先来简要介绍下springboot的自动配置的相关特征。</p>
-<h3 id="spring-boot-autoconfigure-依赖"><a href="#spring-boot-autoconfigure-依赖" class="headerlink" title="spring-boot-autoconfigure 依赖"></a>spring-boot-autoconfigure 依赖</h3><p>spring-boot-autoconfigure 依赖,是Spring Boot实现自动配置的核心Starter组件，它的工作原理很简单，通过<code>@EnableAutoConfiguration</code>让SpringBoot根据类路径中的jar包依赖为当前项目进行自动配置，例如，添加了<code>spring-boot-starter-web</code> 依赖，会自动添加Tomcat和Spring MVC的依赖，那么Spring Boot会对Tomcat和Spring MVC进行自动配置</p></p>
-            <p class="article-more-link">
-                <a href="/2018/08/21/springboot系列文章之编写七牛云的自定义starter/#more">Read More</a>
-            </p>
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="https://pjmike.github.io/2018/08/21/springboot系列文章之编写七牛云的自定义starter/" data-id="cjlj72o3n002x90r9axmkt6rv" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="https://pjmike.github.io/2018/08/21/springboot系列文章之编写七牛云的自定义starter/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/21/springboot系列文章之编写七牛云的自定义starter/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/21/探究MySQL中的日志文件/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/21/探究MySQL中的日志文件/">Komentar</a>
     
 
         </footer>
@@ -1572,7 +1573,7 @@
 
 
     <nav id="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Siguiente  &raquo;</a>
+        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Berikutnya &raquo;</a>
     </nav>
 </section>
             
@@ -1581,43 +1582,43 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Categorias</h3>
+        <h3 class="widget-title">Kategori</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Archivos</h3>
+        <h3 class="widget-title">Arsip</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Etiquetas</h3>
+        <h3 class="widget-title">tag</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Nube de etiquetas</h3>
+        <h3 class="widget-title">awan tag</h3>
         <div class="widget tagcloud">
-            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 12.5px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 12.5px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
         </div>
     </div>
 
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">Links</h3>
+        <h3 class="widget-title">tautan</h3>
         <div class="widget">
             <ul>
                 
