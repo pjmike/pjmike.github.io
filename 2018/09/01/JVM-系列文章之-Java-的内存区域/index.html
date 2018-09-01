@@ -5,23 +5,23 @@
     
     <title>JVM 系列文章之 Java 的内存区域 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区">
+    <meta name="description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区   程序计数器 程序计数器">
 <meta name="keywords" content="JVM,Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM 系列文章之 Java 的内存区域">
 <meta property="og:url" content="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区">
+<meta property="og:description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区   程序计数器 程序计数器">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/jvm05.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/native.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/permanent_jdk8.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/changliang.png">
-<meta property="og:updated_time" content="2018-09-01T08:53:59.954Z">
+<meta property="og:updated_time" content="2018-09-01T14:39:47.239Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM 系列文章之 Java 的内存区域">
-<meta name="twitter:description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区">
+<meta name="twitter:description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区   程序计数器 程序计数器">
 <meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/jvm05.png">
     
 
@@ -259,12 +259,12 @@
         
             
                 <div id="toc" class="toc-article">
-                <strong class="toc-title">Catálogo</strong>
+                <strong class="toc-title">Catalogue</strong>
                     <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行时数据区域"><span class="toc-number">2.</span> <span class="toc-text">运行时数据区域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#程序计数器"><span class="toc-number">3.</span> <span class="toc-text">程序计数器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java虚拟机栈"><span class="toc-number">4.</span> <span class="toc-text">Java虚拟机栈</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#本地方法栈"><span class="toc-number">5.</span> <span class="toc-text">本地方法栈</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是-Native-Method"><span class="toc-number">5.1.</span> <span class="toc-text">什么是 Native Method</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么使用Native-Method"><span class="toc-number">5.2.</span> <span class="toc-text">为什么使用Native Method</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java堆"><span class="toc-number">6.</span> <span class="toc-text">Java堆</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM中堆和栈的区别"><span class="toc-number">6.1.</span> <span class="toc-text">JVM中堆和栈的区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方法区"><span class="toc-number">7.</span> <span class="toc-text">方法区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行时常量池"><span class="toc-number">8.</span> <span class="toc-text">运行时常量池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">9.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">10.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
             
             <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
-<p>下面关于 Java 的内存区域介绍大部分参考<a href="">深入理解Java虚拟机</a>，也参考了网上很多资料，以下图片均摘自网络</p>
+<p>下面关于 Java 的内存区域介绍大部分参考<a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a>，也参考了网上很多资料，以下图片均摘自网络</p>
 </blockquote>
 <h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><p>Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:</p>
 <ul>
@@ -274,7 +274,6 @@
 <li>Java堆</li>
 <li>方法区</li>
 </ul>
-<a id="more"></a>
 <p><img src="http://osvtz719h.bkt.clouddn.com/jvm05.png" alt="jvm_data"></p>
 <h2 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h2><blockquote>
 <p>程序计数器 ，也称作 PC寄存器或者指令地址寄存器。在汇编语言中，它保存的是程序当前执行的指令的地址(或者说是保存一条)，当CPU需要执行指令时，需要从程序计数器中得到当前需要执行的指令所在存储单元的地址，然后根据得到的地址获取指令，在得到指令之后，程序计数器便自动加1或者根据转移指针得到下一条指令的地址，如此循环，直至执行完所有的指令。</p>
@@ -352,7 +351,8 @@
 <li>符号引用迁移至系统堆内存 (Native Heap)</li>
 <li>字符串字面量迁移至 Java堆(Java Heap)</li>
 </ul>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上的分析参考了<a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a>这本书，同时也参考了很多优秀的文章。在此过程中，我们要注意JDK版本变化带来的问题，比如在 JDK 8版本中，永久代被彻底移除了。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上的分析部分参考了<a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a>这本书，同时也参考了很多优秀作者的相关文章，比如R大等。在此过程中，我们要注意JDK版本变化带来的问题，比如在 JDK 8版本中，永久代被彻底移除了。</p>
+<p>上面提到一个JVM的巨牛级别的人物——<a href="https://www.zhihu.com/people/rednaxelafx/activities" target="_blank" rel="noopener">R大</a>，R大是国内JVM巨牛级人物，他的回答都是非常权威的，所以学习 JVM的知识可以多参考 R大的分析。目前本人对 JVM也是一枚渣渣级选手，现在输出对JVM的一些学习笔记。如有错误之处，欢迎指出。</p>
 <h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
 <li><a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a></li>
 <li><a href="https://www.sczyh30.com/posts/Java/jvm-memory/" target="_blank" rel="noopener">深入探究JVM | Java的内存区域解析</a></li>
@@ -371,7 +371,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/" data-id="cjljgm7yf000b3gr9ue7y09lv" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/" data-id="cjljjad7i0003zwr9ai1w37ys" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
