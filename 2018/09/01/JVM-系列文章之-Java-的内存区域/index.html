@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>JVM 系列文章之 Java 的内存区域 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区">
+<meta name="keywords" content="JVM,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM 系列文章之 Java 的内存区域">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/jvm05.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/native.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/permanent_jdk8.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/changliang.png">
+<meta property="og:updated_time" content="2018-09-01T08:53:59.954Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM 系列文章之 Java 的内存区域">
+<meta name="twitter:description" content="前言 下面关于 Java 的内存区域介绍大部分参考深入理解Java虚拟机，也参考了网上很多资料，以下图片均摘自网络  运行时数据区域Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:  程序计数器 Java虚拟机栈 本地方法栈 Java堆 方法区">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/jvm05.png">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Entradas',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                31
+                <span>Entradas</span>
+            </div>
+            <div class="article-info-block">
+                20
+                <span>Etiquetas</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-JVM-系列文章之-Java-的内存区域" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            JVM 系列文章之 Java 的内存区域
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/01/JVM-系列文章之-Java-的内存区域/">
+            <time datetime="2018-09-01T08:53:59.000Z" itemprop="datePublished">2018-09-01</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catálogo</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行时数据区域"><span class="toc-number">2.</span> <span class="toc-text">运行时数据区域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#程序计数器"><span class="toc-number">3.</span> <span class="toc-text">程序计数器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java虚拟机栈"><span class="toc-number">4.</span> <span class="toc-text">Java虚拟机栈</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#本地方法栈"><span class="toc-number">5.</span> <span class="toc-text">本地方法栈</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是-Native-Method"><span class="toc-number">5.1.</span> <span class="toc-text">什么是 Native Method</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么使用Native-Method"><span class="toc-number">5.2.</span> <span class="toc-text">为什么使用Native Method</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java堆"><span class="toc-number">6.</span> <span class="toc-text">Java堆</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM中堆和栈的区别"><span class="toc-number">6.1.</span> <span class="toc-text">JVM中堆和栈的区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方法区"><span class="toc-number">7.</span> <span class="toc-text">方法区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行时常量池"><span class="toc-number">8.</span> <span class="toc-text">运行时常量池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">9.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">10.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>下面关于 Java 的内存区域介绍大部分参考<a href="">深入理解Java虚拟机</a>，也参考了网上很多资料，以下图片均摘自网络</p>
+</blockquote>
+<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><p>Java虚拟机在执行 Java 程序的过程中会把它管理的内存划分为若干个不同的数据区域。根据《Java 虚拟机规范》将 Java虚拟机所管理的内存分为以下几个运行时数据区域:</p>
+<ul>
+<li>程序计数器</li>
+<li>Java虚拟机栈</li>
+<li>本地方法栈</li>
+<li>Java堆</li>
+<li>方法区</li>
+</ul>
+<a id="more"></a>
+<p><img src="http://osvtz719h.bkt.clouddn.com/jvm05.png" alt="jvm_data"></p>
+<h2 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h2><blockquote>
+<p>程序计数器 ，也称作 PC寄存器或者指令地址寄存器。在汇编语言中，它保存的是程序当前执行的指令的地址(或者说是保存一条)，当CPU需要执行指令时，需要从程序计数器中得到当前需要执行的指令所在存储单元的地址，然后根据得到的地址获取指令，在得到指令之后，程序计数器便自动加1或者根据转移指针得到下一条指令的地址，如此循环，直至执行完所有的指令。</p>
+</blockquote>
+<p><strong>在JVM中，程序计数器是一块较小的内存空间，它可以看做是当前线程所执行的字节码的行号指示器，字节码解释器工作时就是通过改变这个计数器的值来选取吓一跳需要执行的字节码指令</strong>。</p>
+<p>由于Java 虚拟机的多线程是通过线程轮流切换并分配处理器执行时间的方式来实现的，在任何一个确定的时间，一个处理器(对于多核处理器来说是一个内核)都只会执行一条线程中的指令。<strong>因此，为了线程切换后能够恢复到正确的执行位置，每条线程都需要有一个独立的程序计数器</strong>，各条线程之间计数器互不影响，独立存储，这是 <strong>“线程私有的”</strong>。</p>
+<p>如果线程正在执行的是一个 Java方法，这个计数器记录的是正在执行的虚拟机字节码指令的地址;如果正在执行的是 Native方法，计数器值为空，<strong>此内存区域是唯一一个在 Java虚拟机规范中没有规定任何 <code>OutOfMemoryError</code> 情况的区域</strong>。</p>
+<h2 id="Java虚拟机栈"><a href="#Java虚拟机栈" class="headerlink" title="Java虚拟机栈"></a>Java虚拟机栈</h2><p><strong>Java虚拟机栈也是线程私有的</strong>，它的生命周期与线程相同，它描述的是 Java 方法执行的内存模型: 每个方法在执行的同时都会创建一个栈帧( Stack Frame)用于存储<strong>局部变量表，操作数栈，动态链接，方法出口</strong>等信息。每一个方法从调用直至执行完成的过程，就对应着一个栈帧在虚拟机栈中<strong>入栈到出栈</strong>的过程。至于关于栈帧的具体介绍后续文章再分析。</p>
+<p>因为除了栈帧的出栈和入栈之外，Java虚拟机栈不会再受其他因素的影响，所以 栈帧可以在<strong>系统的堆</strong>中分配(注意，是系统的Heap而不是Java 堆)</p>
+<blockquote>
+<p>JVM保留了两个内存区:Java 堆和本机(或系统堆)。这个堆具有不同的用途，并使用不同的机制进行维护，Java堆就是我下面要将的包含对象实例的”堆”,而系统的堆使用操作系统的底层 <code>malloc</code> 和 free机制进行分配，且用于底层实施特定的Java对象。</p>
+</blockquote>
+<p>Java虚拟机栈所使用的内存不需要保证是连续的。</p>
+<p>Java虚拟机栈可能发生如下异常情况:</p>
+<ul>
+<li>如果线程请求的栈深度大于虚拟机所允许的深度，将抛出 <code>StackOverflowError</code> 异常</li>
+<li>如果虚拟机栈可以动态扩展(当前大部分的Java虚拟机都可以动态扩展，只不过Java虚拟机规范中也允许固定长度的虚拟机栈)，如果扩展时无法申请到足够的内存，就会抛出 <code>OutOfMemoryError</code> 异常。</li>
+</ul>
+<p><strong>注意：</strong> Java虚拟机栈就是栈，也可以成为”堆栈”,只是堆栈这种说法容易让人混淆。关于<a href="https://www.zhihu.com/question/29833675" target="_blank" rel="noopener">Java虚拟机的堆，栈，堆栈如何去理解</a>这类问题，<strong>JVM专家R大</strong>也在知乎上对其进行了详细的解答，传送门:  <a href="https://www.zhihu.com/question/29833675/answer/82661572" target="_blank" rel="noopener">Java虚拟机的堆、栈、堆栈如何去理解？ - RednaxelaFX的回答 - 知乎</a></p>
+<h2 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h2><p>本地方法栈(Native Method Stack)与虚拟机栈所发挥的作用是非常相似的，它们之间的区别不过是虚拟机栈为虚拟机执行 Java方法(也就是字节码)服务，而<strong>本地方法栈则为虚拟机使用到的是 <code>Native</code>方法服务</strong>。在虚拟机规范中对本地方法栈中方法使用的语言，使用方法与数据结构并没有强制规定，因此具体的虚拟机可以自由实现它。</p>
+<p>看到这个本地方法栈，总是对本地方法有些疑惑，下面简单说下<strong>Native Method</strong>：</p>
+<h3 id="什么是-Native-Method"><a href="#什么是-Native-Method" class="headerlink" title="什么是 Native Method"></a>什么是 Native Method</h3><p>一个Natvie Method就是一个Java调用非Java代码的接口，它由非Java语言实现，比如C语言</p>
+<p>在定义一个 Native Method时，并不提供实现体(有些像定义一个 Java Interface),因为其实现体是由非Java语言在外面实现的,比如:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IHaveNatives</span></span></span><br><span class="line"><span class="class">    </span>&#123;</span><br><span class="line">      <span class="function"><span class="keyword">native</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Native1</span><span class="params">( <span class="keyword">int</span> x )</span> </span>;</span><br><span class="line">      <span class="function"><span class="keyword">native</span> <span class="keyword">static</span> <span class="keyword">public</span> <span class="keyword">long</span> <span class="title">Native2</span><span class="params">()</span> </span>;</span><br><span class="line">      <span class="function"><span class="keyword">native</span> <span class="keyword">synchronized</span> <span class="keyword">private</span> <span class="keyword">float</span> <span class="title">Native3</span><span class="params">( Object o )</span> </span>;</span><br><span class="line">      <span class="function"><span class="keyword">native</span> <span class="keyword">void</span> <span class="title">Native4</span><span class="params">( <span class="keyword">int</span>[] ary )</span> <span class="keyword">throws</span> Exception </span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>native方法可以返回任何 Java类型，也能够实现异常控制。</p>
+<h3 id="为什么使用Native-Method"><a href="#为什么使用Native-Method" class="headerlink" title="为什么使用Native Method"></a>为什么使用Native Method</h3><p>Java对一些层次的任务用 Java实现不容易，对某些程序效率不高:</p>
+<ul>
+<li>Java与Java外的环境交互:<blockquote>
+<p>Java与一些底层系统如操作系统或某些硬件交换信息，native方法提供一个非常简洁的接口，无需了解Java应用之外的细节。</p>
+</blockquote>
+</li>
+<li>与操作系统交互<blockquote>
+<p>通过使用本地方法让 Java实现 JRE与底层系统的交互</p>
+</blockquote>
+</li>
+<li>Sun’Java<blockquote>
+<p>Sun的解释器是用 C实现的，JRE 大部分用 Java实现，其通过一些本地方法与外界交互</p>
+</blockquote>
+</li>
+</ul>
+<p>所以对于本地方法栈来说，它本质是为本地方法服务的，如果某个虚拟机实现的本地方法接口是使用 C连接模型的话，那么它的本地方法栈就是 C栈。下图展示了一个Java栈和本地方法栈之间的跳转,(图片摘自网络):<br><img src="http://osvtz719h.bkt.clouddn.com/native.png" alt="native"></p>
+<h2 id="Java堆"><a href="#Java堆" class="headerlink" title="Java堆"></a>Java堆</h2><p>对于大多数应用来说，Java 堆(Java Heap)是Java 虚拟机所管理的内存中最大的一块。<strong>Java 堆是被所有线程共享的一块内存区域，在虚拟机启动时创建。此内存区域的唯一目的就是存放对象实例，几乎所有的对象实例都在这里分配内存</strong></p>
+<p>Java堆是垃圾收集器管理的主要区域，因此很多时候也被称作为 <strong>“GC堆”</strong>。从内存回收的角度看，由于现在收集器基本采用分代收集算法，(关于垃圾算法的介绍后续文章分析)，所以 <strong>Java 堆中还可以细分为: 新生代和老年代，再细致一点有 Eden空间，From Survivor空间，To Survivor 空间等</strong></p>
+<p>根据 Java 虚拟机规范的规定， Java 堆可以处于物理不连续的内存空间中，只要逻辑是连续的即可，就像我们的磁盘空间一样。在实现时，即可以实现成固定大小的，也可以是可扩展的，不过当前主流的虚拟机都是按照可扩展来实现的 (<strong>通过 -Xmx 和 -Xms 控制</strong>)。</p>
+<p><strong>如果堆上没有内存完成实例分配，并且 堆也无法再扩展时，将会抛出 <code>OutOfMemoryError</code>异常。</strong></p>
+<h3 id="JVM中堆和栈的区别"><a href="#JVM中堆和栈的区别" class="headerlink" title="JVM中堆和栈的区别"></a>JVM中堆和栈的区别</h3><p>这里简单说说JVM中堆和栈的区别:</p>
+<ul>
+<li>功能不同<ul>
+<li>栈内存用来存储局部变量，操作数栈等信息</li>
+<li>堆内存用来存储Java中的对象</li>
+</ul>
+</li>
+<li>共享性不同<ul>
+<li>栈内存是线程私有的</li>
+<li>堆内存是所有线程共有的</li>
+</ul>
+</li>
+<li>空间大小<ul>
+<li>栈的空间大小远远小于堆的</li>
+</ul>
+</li>
+<li>异常错误不同<ul>
+<li>栈有两种异常情况，如果线程请求的栈深度大于虚拟机所允许的深度，将抛出 <code>StackOverflowError</code> 异常，如果虚拟机栈动态扩展时无法申请到足够的内存，就会抛出 <code>OutOfMemoryError</code> 异常。</li>
+<li>堆一般在堆中没有内存完成实例分配，并且堆也无法进行扩展时，抛出 <code>OutOfMemoryError</code> 异常。</li>
+</ul>
+</li>
+</ul>
+<h2 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h2><p>方法区(Method Area) 与 Java堆一样，是<strong>各个线程共享的内存区域</strong>，它用于存储已被<strong>虚拟机加载的类信息，常量，静态变量，即时编译器编译后的代码等数据</strong>。虽然Java虚拟机规范把方法区描述为 堆的一个逻辑部分，但是它有一个别名叫做 “非堆”.</p>
+<p>对于HotSpot虚拟机来讲，方法区域又被称为 “永久代”，本质上两者并不等价，<strong>仅仅是因为HotSpot虚拟机的设计团队选择把 GC 分代收集扩展至方法区，或者说使用 永久代来实现方法区而已，这样的HotSpot的垃圾收集器可以像 管理 Java堆一样管理这部分内存，能够省去专门为方法区编写内存管理代码的工作</strong>。对于其他虚拟机(如 BEA JRockit,IBM J9等)来说是不存在永久代的概念的。</p>
+<p>在JDK 1.7及以前的HotSpot JVM中，方法区位于永久代(Permanent Generation,PermGen) 中。如下图，是<strong>JDK 1.7及以前的 Java堆内存的结构图，里面包含了  Permanent Generation</strong>:<br><img src="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg" alt="permanent"></p>
+<p>由于 永久代内可能发生内存泄漏或溢出的问题(永久代有 -XX:MaxPermSize的上限)而导致的 <code>java.lang.OutOfMemoryError: PermGen space</code>,JEP小组从JDK 1.7 开始就筹划移除永久代 (<a href="http://openjdk.java.net/jeps/122" target="_blank" rel="noopener">JEP 122: Remove the Permanent Generation</a>,并且在 JDK 1.7 中把字符串常量，符号引用等移除了永久代。到了Java 8 ,永久代被彻底地移除了 JVM,取而代之的是<strong>元空间 (Metaspace)</strong>：<br><img src="http://osvtz719h.bkt.clouddn.com/permanent_jdk8.png" alt="permanent generation remove"><br>JDK 8开始将类的元数据放到本地堆内存(native heap)中，这一块区域就叫 Metaspace,关于 <code>Metaspace</code> 的介绍请参考 <a href="https://java-latte.blogspot.com/2014/03/metaspace-in-java-8.html" target="_blank" rel="noopener">Metaspace in Java 8</a></p>
+<h2 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h2><p>前面讲 方法区的时候就提到，运行时常量池是方法区的一部分，它是 class文件中每一个类或接口的<strong>常量池表的运行时表示形式</strong>。它包括了若干种不同的常量，常量池表存放 编译器生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。<br><img src="http://osvtz719h.bkt.clouddn.com/changliang.png" alt="changliang"><br>运行时常量池具有动态性，运行期间也可以将新的量放到运行时常量池中，典型的应用是 String 类的 intern方法:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">native</span> String <span class="title">intern</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></p>
+<p><code>String</code>类的 <code>intern</code>方法会从字符串常量池中查询当前字符串是否存在，如果存在，就会直接返回当前字符串，若不存在就会将当前字符串放入常量池中，再返回。关于<code>String.intern()</code>更为详尽的分析，请参阅文章: <a href="https://tech.meituan.com/in_depth_understanding_string_intern.html" target="_blank" rel="noopener">深入解析String#intern</a></p>
+<p><strong>而从JDK 1.7开始，字符串常量和符号引用等被移除永久代</strong>:</p>
+<ul>
+<li>符号引用迁移至系统堆内存 (Native Heap)</li>
+<li>字符串字面量迁移至 Java堆(Java Heap)</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上的分析参考了<a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a>这本书，同时也参考了很多优秀的文章。在此过程中，我们要注意JDK版本变化带来的问题，比如在 JDK 8版本中，永久代被彻底移除了。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a></li>
+<li><a href="https://www.sczyh30.com/posts/Java/jvm-memory/" target="_blank" rel="noopener">深入探究JVM | Java的内存区域解析</a></li>
+<li><a href="http://openjdk.java.net/jeps/122" target="_blank" rel="noopener">JEP 122: Remove the Permanent Generation</a></li>
+<li><a href="https://blogs.oracle.com/poonam/about-g1-garbage-collector%2c-permanent-generation-and-metaspace" target="_blank" rel="noopener">About G1 Garbage Collector, Permanent Generation and Metaspace</a></li>
+<li><a href="https://csming1995.github.io/2017/03/12/JVM%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-1/" target="_blank" rel="noopener">JVM学习——Native方法</a></li>
+<li><a href="https://www.zhihu.com/question/29833675/answer/82661572" target="_blank" rel="noopener">Java虚拟机的堆、栈、堆栈如何去理解？ - RednaxelaFX的回答 - 知乎</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/" data-id="cjlj72mpd000390r9sflf5gtk" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/">Comentarios</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/08/31/JDK自带的反编译工具-javap/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Más viejo</strong>
+            <div class="article-nav-title">JDK自带的反编译工具 javap</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Categorias</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archivos</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">5</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Etiquetas</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nube de etiquetas</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 12.5px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+        
+  <div class="widget-wrap">
+    <h3 class="widget-title">浏览数目</h3>
+    <div class="widget">
+      <ul class="popularlist">
+      </ul>
+    </div>
+  </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/09/01/JVM-系列文章之-Java-的内存区域/';
+        
+        this.page.identifier = 'JVM-系列文章之-Java-的内存区域';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
