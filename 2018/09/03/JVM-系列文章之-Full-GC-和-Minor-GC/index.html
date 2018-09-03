@@ -3,25 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>BIO，NIO，AIO概览 | 风居者的街道</title>
+    <title>JVM 系列文章之 Full GC 和 Minor GC | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
-<meta name="keywords" content="Java">
+    <meta name="description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
+<meta name="keywords" content="Java,JVM">
 <meta property="og:type" content="article">
-<meta property="og:title" content="BIO，NIO，AIO概览">
-<meta property="og:url" content="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/index.html">
+<meta property="og:title" content="JVM 系列文章之 Full GC 和 Minor GC">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
+<meta property="og:description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/bio.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/NIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/AIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Multiplexing_IO.png">
-<meta property="og:updated_time" content="2018-08-30T16:34:08.500Z">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/YGCcross.png">
+<meta property="og:updated_time" content="2018-09-03T12:38:44.199Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="BIO，NIO，AIO概览">
-<meta name="twitter:description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/bio.png">
+<meta name="twitter:title" content="JVM 系列文章之 Full GC 和 Minor GC">
+<meta name="twitter:description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/YGCcross.png">
     
 
     
@@ -214,7 +211,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-BIO，NIO，AIO概览" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-JVM-系列文章之-Full-GC-和-Minor-GC" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -222,7 +219,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            BIO，NIO，AIO概览
+            JVM 系列文章之 Full GC 和 Minor GC
         </h1>
     
 
@@ -231,8 +228,8 @@
                         
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/24/BIO，NIO，AIO概览/">
-            <time datetime="2018-08-24T02:49:14.000Z" itemprop="datePublished">2018-08-24</time>
+        <a href="/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/">
+            <time datetime="2018-09-03T12:38:44.000Z" itemprop="datePublished">2018-09-03</time>
         </a>
     </div>
 
@@ -246,7 +243,7 @@
                         
     <div class="article-tag">
         <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>
+        <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
     </div>
 
                     </div>
@@ -259,58 +256,72 @@
             
                 <div id="toc" class="toc-article">
                 <strong class="toc-title">Catalogue</strong>
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步与异步"><span class="toc-number">2.</span> <span class="toc-text">同步与异步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阻塞与非阻塞"><span class="toc-number">3.</span> <span class="toc-text">阻塞与非阻塞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO介绍"><span class="toc-number">4.</span> <span class="toc-text">BIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO介绍"><span class="toc-number">5.</span> <span class="toc-text">NIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AIO-NIO2"><span class="toc-number">6.</span> <span class="toc-text">AIO(NIO2)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O多路复用"><span class="toc-number">7.</span> <span class="toc-text">I/O多路复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">8.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">9.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Full-GC"><span class="toc-number">1.</span> <span class="toc-text">Full GC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Full-GC的触发条件"><span class="toc-number">1.1.</span> <span class="toc-text">Full GC的触发条件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Minor-GC"><span class="toc-number">2.</span> <span class="toc-text">Minor GC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#触发条件"><span class="toc-number">2.1.</span> <span class="toc-text">触发条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Minor-GC的过程"><span class="toc-number">2.2.</span> <span class="toc-text">Minor GC的过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Survivor区对象晋升位老年代对象的条件"><span class="toc-number">2.3.</span> <span class="toc-text">Survivor区对象晋升位老年代对象的条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Minor-GC的问题与卡表分析"><span class="toc-number">2.4.</span> <span class="toc-text">Minor GC的问题与卡表分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JVM如何避免Minor-GC扫描全堆"><span class="toc-number">2.4.1.</span> <span class="toc-text">JVM如何避免Minor GC扫描全堆</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于-Major-GC的说明"><span class="toc-number">3.</span> <span class="toc-text">关于 Major GC的说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">5.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
             
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念</p>
+            <h2 id="Full-GC"><a href="#Full-GC" class="headerlink" title="Full GC"></a>Full GC</h2><p><strong>Full GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式</strong></p>
+<p><strong>RednaxelaFX大</strong>在<a href="https://www.zhihu.com/question/41922036/answer/93079526" target="_blank" rel="noopener">Major GC和Full GC的区别是什么？触发条件呢？- 知乎</a>这个问题有关于 GC分类的回答：</p>
 <a id="more"></a>
-<h2 id="同步与异步"><a href="#同步与异步" class="headerlink" title="同步与异步"></a>同步与异步</h2><p>同步与异步关注的是<strong>消息通信机制</strong></p>
-<p><strong>同步</strong></p>
-<p>同步就是发起一个调用后，等待当前调用返回，没得到结果之前，调用不返回，就像做事一样，事情必须一件一件做完了，才能做下一件</p>
-<p><strong>异步</strong></p>
-<p>异步就是发起一个调用后，立刻得到回应，但没有返回结果，此时我们可以处理其他的请求，被调用者通常<strong>依靠事件，回调</strong>等机制来通知调用者其返回结果。</p>
-<p>举个通俗的例子，同步就像:</p>
-<blockquote>
-<p>你打电话问书店老板有没有《分布式系统》这本书，如果是同步通信机制，书店老板会说，你稍等，”我查一下”，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。</p>
-</blockquote>
-<p>异步就像:</p>
-<blockquote>
-<p>而异步通信机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调</p>
-</blockquote>
-<p>此处参照知乎上关于此问题的回答：<a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">https://www.zhihu.com/question/19732473</a></p>
-<h2 id="阻塞与非阻塞"><a href="#阻塞与非阻塞" class="headerlink" title="阻塞与非阻塞"></a><strong>阻塞与非阻塞</strong></h2><p>阻塞与非阻塞关注的是<strong>程序在等待调用结果(消息，返回值)时的状态</strong></p>
-<p><strong>阻塞</strong></p>
-<p>阻塞就是发起一个请求，在请求结果返回之前，当前线程会被挂起(被阻塞)，无法从事其他任务，只有当条件就绪才能继续。比如<code>ServerSocket</code>新连接建立完毕</p>
-<p><strong>非阻塞</strong></p>
-<p>非阻塞就是发起一个请求，在不能立刻得到返回结果之前，直接返回，不等待，函数不会阻塞当前线程。</p>
-<p>还是上面买书的例子:</p>
-<blockquote>
-<p>你打电话问书店老板有没有《分布式系统》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。</p>
-</blockquote>
-<h2 id="BIO介绍"><a href="#BIO介绍" class="headerlink" title="BIO介绍"></a>BIO介绍</h2><p>BIO也就是传统的同步阻塞IO模型，对应Java.io包，它提供了很多IO功能，比如输入输出流，对文件进行操作。在网络编程(Socket通信)中也同样进行IO操作。</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/bio.png" alt="bio"></p>
-<p>上图是从操作系统的角度上去阐述 BIO 的，程序发送请求给内核，然后由内核去进行通信，在内核准备好数据之前这个线程是被挂起的。</p>
-<h2 id="NIO介绍"><a href="#NIO介绍" class="headerlink" title="NIO介绍"></a>NIO介绍</h2><p>NIO是一种同步非阻塞的I/O模型，在Java 1.4 中引入了NIO框架，对应 java.nio 包，提供了 Channel , Selector，Buffer等抽象</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/NIO.png" alt="nio"></p>
-<p>与BIO的区别就是，发起第一次请求后，线程并没有被阻塞，它反复检查数据是否准备好，有点类似于”轮询”。</p>
-<h2 id="AIO-NIO2"><a href="#AIO-NIO2" class="headerlink" title="AIO(NIO2)"></a>AIO(NIO2)</h2><p>AIO 也就是 NIO 2。在 Java 7 中引入了 NIO 的改进版 NIO 2,它是异步非阻塞的IO方式</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/AIO.png" alt="AIO"></p>
-<p>AIO是异步非阻塞的IO模型，所以用户线程可以同时处理别的事情。应用程序发起一个系统调用过后，无需等待，立刻返回，等到数据准备好后，再通知应用程序</p>
-<h2 id="I-O多路复用"><a href="#I-O多路复用" class="headerlink" title="I/O多路复用"></a>I/O多路复用</h2><p>这个概念来自通信领域，指一个信道上传输多路信号的技术，在计算机里表示使用一个线程监视多个描述符的就绪状态。I/O 多路复用技术是由操作系统提供的功能，比如<a href="https://baike.baidu.com/item/POSIX/3792413" target="_blank" rel="noopener">POSIX标准</a>下的 select 或 linux 下的 epoll 以及 <a href="https://baike.baidu.com/item/BSD" target="_blank" rel="noopener">BSD</a> 特有的 kqueue 。首先向操作系统注册一个描述符集合的可读或者可写事件，如果某个或某些描述符就绪，操作系统就会通知，这样，多个描述符就能在一个线程内并发通信。<br><img src="http://osvtz719h.bkt.clouddn.com/Multiplexing_IO.png" alt="muti_io"></p>
-<p>从IO操作的角度来看，多路复用的特点就是用户进程能够同时等待多个IO请求，系统来监控状态，其中的任意一个进入读就绪的状态，系统就会向进程通知。再简单点说，<strong>I/O多路复用就是多个网络连接，共用一个线程</strong></p>
-<p><strong>I/O多路复用的应用场景</strong></p>
-<p>I/O 多路复用的主要应用场景如下：</p>
+<p>针对 HotSpot VM的实现，它里面的GC其实准确分类有两种:</p>
 <ul>
-<li>服务器需要同时处理多个处于监听状态或者多个连接状态的套接字</li>
-<li>服务器需要同时处理多种网络协议的套接字</li>
+<li><strong>Partial GC(局部 GC)</strong>: 并不收集整个 GC 堆的模式<ul>
+<li>Young GC: 只收集young gen的GC，<strong>Young GC还有种说法就叫做 “Minor GC”</strong></li>
+<li>Old GC: 只收集old gen的GC。只有垃圾收集器CMS的concurrent collection 是这个模式</li>
+<li>Mixed GC: 收集整个young gen 以及部分old gen的GC。只有垃圾收集器 G1有这个模式</li>
 </ul>
-<p>目前支持I/O 多路复用的系统调用有 select，pselect，poll，epoll。在Linux 网络编程中，很长一段时间都使用select 做轮询和网络事件通知。然而因为select的一些固有缺陷导致它的应用受到了很大的限制，比如select 单个进程打开的最大句柄数是有限的。最终Linux 选择epoll 替代了select。更多关于这些系统调用的介绍与使用，请参阅 <a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上关于 BIO，NIO，AIO 的说明参照了《UNIX网络编程》对 I/O 模型的分类，BIO，NIO，I/O的多路复用都是同步机制，AIO 是异步方式。本文只是简单介绍了一些概念，更多I/O 模型详细的原理和API介绍，可以阅读《UNIX网络编程》</p>
+</li>
+<li><strong>Full GC</strong>: 收集整个堆，包括 新生代，老年代，永久代(在 JDK 1.8及以后，永久代被移除，换为metaspace 元空间)等所有部分的模式</li>
+</ul>
+<h3 id="Full-GC的触发条件"><a href="#Full-GC的触发条件" class="headerlink" title="Full GC的触发条件"></a>Full GC的触发条件</h3><p>针对不同的垃圾收集器，Full GC的触发条件可能不都一样。<strong>按HotSpot VM的serial GC的实现来看</strong>，触发条件是:</p>
+<ul>
+<li><blockquote>
+<p><strong>当准备要触发一次 young GC时，如果发现统计数据说之前 young GC的平均晋升大小比目前的 old gen剩余的空间大，则不会触发young GC而是转为触发 full GC</strong> (因为HotSpot VM的GC里，除了垃圾回收器 CMS的concurrent collection 之外，其他能收集old gen的GC都会同时收集整个GC堆，包括young gen，所以不需要事先准备一次单独的young GC)</p>
+</blockquote>
+</li>
+<li><blockquote>
+<p><strong>如果有永久代(perm gen),要在永久代分配空间但已经没有足够空间时，也要触发一次 full GC</strong></p>
+</blockquote>
+</li>
+<li><blockquote>
+<p><strong>System.gc()，heap dump带GC,其默认都是触发 full GC.</strong></p>
+</blockquote>
+</li>
+</ul>
+<p>HotSpot VM里其他非并发GC的触发条件复杂一些，不过大致原理与上面说的其实一样。</p>
+<p>而<strong>在 Parallel Scavenge 收集器下，默认是在要触发 full GC前先执行一次 young GC</strong>,并且两次GC之间能让应用程序稍微运行一小下，以期降低 full GC的暂停时间 (因为 young GC 会尽量清理了young gen的死对象，减少了 full GC的工作量)。<strong>控制这个行为的VM参数是: -XX:+ScavengeBeforeFullGC</strong>。</p>
+<p>并发GC的触发条件就不一样，<strong>以 CMS GC为例，它主要是定时去检查old gen的使用量，但使用量超过了触发比例就会启动一次 CMS GC，对old gen做并发收集</strong>。</p>
+<h2 id="Minor-GC"><a href="#Minor-GC" class="headerlink" title="Minor GC"></a>Minor GC</h2><p>Minor GC 是俗称，<strong>新生代(新生代分为一个 Eden区和两个Survivor区)的垃圾收集叫做 Minor GC</strong>。在 Oracle 高级研究员郑雨迪的<a href="https://time.geekbang.org/column/intro/108" target="_blank" rel="noopener">极客时间专栏 《深入拆解Java虚拟机》</a>中也谈到 <strong>Minor GC</strong>，内容如下:</p>
+<h3 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h3><blockquote>
+<p>当 Eden 区的空间耗尽了怎么办？这个时候 Java虚拟机便会触发一次 <strong>Minor GC</strong>来收集新生代的垃圾，存活下来的对象，则会被送到 Survivor区。</p>
+</blockquote>
+<p><strong>简单说就是当新生代的Eden区满的时候触发 Minor GC</strong></p>
+<h3 id="Minor-GC的过程"><a href="#Minor-GC的过程" class="headerlink" title="Minor GC的过程"></a>Minor GC的过程</h3><blockquote>
+<p>前面提到，<strong>新生代共有 两个 Survivor区，我们分别用 from 和 to来指代</strong>。其中 to 指向的Survivor区是空的。</p>
+</blockquote>
+<blockquote>
+<p>当发生 Minor GC时，Eden 区和 from 指向的 Survivor 区中的存活对象会被复制(此处采用标记 - 复制算法)到 to 指向的 Survivor区中，然后<strong>交换 from 和 to指针，以保证下一次 Minor GC时，to 指向的 Survivor区还是空的</strong>。</p>
+</blockquote>
+<p><strong>注意: from与to只是两个指针，它们变动的，to指针指向的Survivor区是空的</strong></p>
+<h3 id="Survivor区对象晋升位老年代对象的条件"><a href="#Survivor区对象晋升位老年代对象的条件" class="headerlink" title="Survivor区对象晋升位老年代对象的条件"></a>Survivor区对象晋升位老年代对象的条件</h3><blockquote>
+<p>Java虚拟机会记录 Survivor区中的对象一共被来回复制了几次。<strong>如果一个对象被复制的次数为 15 (对应虚拟机参数 -XX:+MaxTenuringThreshold),那么该对象将被晋升为至老年代</strong>，(至于为什么是 15次，原因是 HotSpot会在对象头的中的标记字段里记录年龄，分配到的空间只有4位，所以最多只能记录到15)。另外，<strong>如果单个 Survivor 区已经被占用了 50% (对应虚拟机参数: -XX:TargetSurvivorRatio)，那么较高复制次数的对象也会被晋升至老年代。</strong></p>
+</blockquote>
+<p><strong>当Survivor区的部分对象晋升到老年代后，老年代的占用量通常会升高。</strong></p>
+<h3 id="Minor-GC的问题与卡表分析"><a href="#Minor-GC的问题与卡表分析" class="headerlink" title="Minor GC的问题与卡表分析"></a>Minor GC的问题与卡表分析</h3><p><strong>Minor GC存在一个问题就是，老年代的对象可能引用新生代的对象</strong>，在标记存活对象的时候，就需要扫描老年代的对象，如果该对象拥有对新生代对象的引用，那么这个引用也会被作为 GC Roots。这相当于就做了<strong>全堆扫描</strong>。</p>
+<h4 id="JVM如何避免Minor-GC扫描全堆"><a href="#JVM如何避免Minor-GC扫描全堆" class="headerlink" title="JVM如何避免Minor GC扫描全堆"></a>JVM如何避免Minor GC扫描全堆</h4><p>HotSpot 给出的解决方案是 一项叫做 <strong>卡表</strong> 的技术。如下图所示:<br><img src="http://osvtz719h.bkt.clouddn.com/YGCcross.png" alt="card table"></p>
+<p>卡表的具体策略是<strong>将老年代的空间分成大小为 512B的若干张卡，并且维护一个卡表，卡表本省是字节数组，数组中的每个元素对应着一张卡，其实就是一个标识位，这个标识位代表对应的卡是否可能存有指向新生代对象的引用</strong>，如果可能存在，那么我们认为这张卡是脏的，即<strong>脏卡</strong>。如上图所示，卡表3被标记为脏。</p>
+<p><strong>在进行Minor GC的时候，我们便可以不用扫描整个老年代，而是在卡表中寻找脏卡，并将脏卡中的老年代指向新生代的引用加入到 Minor GC的GC Roots里，当完成所有脏卡的扫描之后，Java 虚拟机便会将所有脏卡的标识位清零。这样虚拟机以空间换时间，避免了全表扫描</strong></p>
+<h2 id="关于-Major-GC的说明"><a href="#关于-Major-GC的说明" class="headerlink" title="关于 Major GC的说明"></a>关于 Major GC的说明</h2><p>除了Full GC和Minor GC外，还有一种说法叫做 “Major GC”：</p>
+<blockquote>
+<p>Major GC通常是跟full GC是等价的，收集整个GC堆，但因为 HotSpot VM发展这么多年，外界对各种名词的解读已经完全混乱了，当有人说”Major GC”的时候一定要问清楚他想要指的是上面的 full GC还是 old GC</p>
+</blockquote>
+<p>以上是 R大关于 Major GC的说法，比较权威的。在网上还流行着<strong>另外一种说法就是 Major GC是对老年代的垃圾回收</strong>。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上的内容基本上是从 R大的知乎回答与<a href="https://time.geekbang.org/column/intro/108" target="_blank" rel="noopener">极客时间专栏 《深入拆解Java虚拟机》</a>总结来的，在总结过程中，也算是对 Full GC 与 Minor GC 有了一个基本的认识。</p>
+<p>取之网络，再回馈之网络，本人对于JVM是渣渣级选手，如有错误之处，欢迎指教</p>
 <h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
-<li><a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></li>
-<li><a href="http://loveshisong.cn/%E7%BC%96%E7%A8%8B%E6%8A%80%E6%9C%AF/2016-06-25-%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3BIO-NIO-AIO.html" target="_blank" rel="noopener">十分钟了解BIO、NIO、AIO</a></li>
-<li><a href="https://www.yanxurui.cc/posts/linux/2017-06-03-IO-multiplexing/" target="_blank" rel="noopener">IO多路复用漫谈(附epoll示例)</a></li>
-<li><a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">怎样理解阻塞非阻塞与同步异步的区别？——知乎</a></li>
+<li><a href="https://www.zhihu.com/question/41922036/answer/93079526" target="_blank" rel="noopener">Major GC和Full GC的区别是什么？触发条件呢？- 知乎-RednaxelaFX的回答</a></li>
+<li><a href="https://time.geekbang.org/column/intro/108" target="_blank" rel="noopener">极客时间专栏 《深入拆解Java虚拟机》</a></li>
+<li><a href="https://tech.meituan.com/jvm_optimize.html" target="_blank" rel="noopener">从实际案例聊聊Java应用的GC优化-美团技术团队</a></li>
+<li><a href="https://segmentfault.com/a/1190000007723051" target="_blank" rel="noopener">译文-Minor GC vs Major GC vs Full GC</a></li>
 </ul>
 
         
@@ -322,7 +333,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjlm9w9hq0007a0r9nhj7m82b" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" data-id="cjlm9w9hd0003a0r9e6bcuyjt" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -390,7 +401,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/">Comments</a>
     
 
         </footer>
@@ -399,19 +410,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2018/08/27/一文读懂一个URL请求的过程是怎样的/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    一文读懂一个URL请求的过程是怎样的
-                
-            </div>
-        </a>
     
-    
-        <a href="/2018/08/21/探究MySQL中的日志文件/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2018/09/03/JVM-系列文章之-GC-算法浅析/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">探究MySQL中的日志文件</div>
+            <div class="article-nav-title">JVM 系列文章之 GC 算法浅析</div>
         </a>
     
 </nav>
@@ -516,9 +518,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/';
+            this.page.url = 'https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/';
         
-        this.page.identifier = 'BIO，NIO，AIO概览';
+        this.page.identifier = 'JVM-系列文章之-Full-GC-和-Minor-GC';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
