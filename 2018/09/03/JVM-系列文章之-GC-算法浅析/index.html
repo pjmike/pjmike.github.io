@@ -3,19 +3,26 @@
 <head>
     <meta charset="utf-8">
     
-    <title>tags | 风居者的街道</title>
+    <title>JVM 系列文章之 GC 算法浅析 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="tags">
-<meta property="og:url" content="https://pjmike.github.io/tags/index.html">
+    <meta name="description" content="Java的堆结构再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”。">
+<meta name="keywords" content="Java,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM 系列文章之 GC 算法浅析">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="努力，不一定成功，成功却需努力">
+<meta property="og:description" content="Java的堆结构再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-06-28T07:41:28.537Z">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E5%A0%86%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B2.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/mark_sweep.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/copy.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/mark_compact.png">
+<meta property="og:updated_time" content="2018-09-03T07:44:56.250Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tags">
-<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
+<meta name="twitter:title" content="JVM 系列文章之 GC 算法浅析">
+<meta name="twitter:description" content="Java的堆结构再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”。">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg">
     
 
     
@@ -208,7 +215,7 @@
 </aside>
 
             
-            <section id="main"><article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-JVM-系列文章之-GC-算法浅析" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -216,10 +223,34 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            tags
+            JVM 系列文章之 GC 算法浅析
         </h1>
     
 
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/03/JVM-系列文章之-GC-算法浅析/">
+            <time datetime="2018-09-03T07:44:28.000Z" itemprop="datePublished">2018-09-03</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
+    </div>
+
+                    </div>
                 
             </header>
         
@@ -227,7 +258,73 @@
         <div class="article-entry" itemprop="articleBody">
         
             
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Java的堆结构"><span class="toc-number">1.</span> <span class="toc-text">Java的堆结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标记-清除算法"><span class="toc-number">2.</span> <span class="toc-text">标记 - 清除算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#复制算法"><span class="toc-number">3.</span> <span class="toc-text">复制算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标记-整理算法"><span class="toc-number">4.</span> <span class="toc-text">标记 - 整理算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分代收集"><span class="toc-number">5.</span> <span class="toc-text">分代收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JVM堆内存设置参数"><span class="toc-number">6.</span> <span class="toc-text">JVM堆内存设置参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用堆参数"><span class="toc-number">6.1.</span> <span class="toc-text">常用堆参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">7.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
             
+            <h2 id="Java的堆结构"><a href="#Java的堆结构" class="headerlink" title="Java的堆结构"></a>Java的堆结构</h2><p>再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。<strong>JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”</strong>。</p>
+<a id="more"></a>
+<p>在Java 中，堆被分为两个不同的区域: 新生代(Young),老年代(Old)。新生代又被划分为三个区域: Eden，From Survivor，To Survivor。在 JDK 1.7及以前，堆的内存模型大致为:<br><img src="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg" alt="jvm_heap"></p>
+<ul>
+<li>新生代：Young Generation，主要用来存放新生的对象</li>
+<li>老年代: Old Generation，主要存放应用程序声明周期长的内存对象</li>
+<li>永久代: 在Hotspot中，永久代又称为方法区，主要存放Class和Meta信息。</li>
+</ul>
+<p>在JDK 1.8及以后，永久代被彻底移除，堆的内存模型大致如下:<br><img src="http://osvtz719h.bkt.clouddn.com/%E5%A0%86%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B2.png" alt="heap"></p>
+<p>这种情况下，堆大小 = 新生代 + 老年代。其中堆的大小可以通过参数 <code>-Xms，-Xmx</code>来指定。</p>
+<p>默认的，新生代(Young) 与老年代(Old)的比例的值是 1:2 (该值可以通过参数 -XX: NewRatio来指定)，即: <strong>新生代(Young) = 1/3的堆空间大小，老年代(Old) = 2/3的堆空间大小。</strong></p>
+<p>其中，新生代(Young)被细分为 Eden 和 两个 Survivor区域，这两个 Survivor区域分别被命名为 from 和 to，以示区分。</p>
+<p>默认的，Eden:from:to = 8:1:1 (可以通过参数 -XX: SurvivorRatio来设定)，即: <strong>Eden = 8/10 的新生代空间大小，from = to = 1/10 的新生代空间大小。</strong></p>
+<p>JVM每次只会使用 Eden和其中的一块 Survivor区域来为对象服务，所以无论什么时候，总有一块 Survivor区域是空闲着的，新生代实际可用的内存空间为 90% 的新生代空间。</p>
+<h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记 - 清除算法"></a>标记 - 清除算法</h2><p>在GC算法中，最简单的就是 <strong>“标记-清除”(Mark-Sweep)算法</strong>。它的原理比较简单，首先根据可达性分析算法对不可达对象进行标记，在标记完成后统一回收所有被标记的对象。标记-清除算法的执行过程如下图:<br><img src="http://osvtz719h.bkt.clouddn.com/mark_sweep.png" alt="mark_sweep"><br>标记-清除算法有两个缺点:</p>
+<ul>
+<li>效率问题，标记和清除两个过程的效率都不高</li>
+<li>空间问题，标记清除之后产生大量不连续的内存碎片，如果这时候有大对象需要连续的内存空间进行分配时，很可能会因为没有足够的连续内存空间而又触发一次 GC</li>
+</ul>
+<p><strong>基于Mark-Sweep的GC 多用于老年代</strong></p>
+<h2 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h2><p>复制算法的思路是它将可用内存按容量划分为大小相等的两块，每次只用其中的一块。当这块内存用完了，就将还存活的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉。</p>
+<p>这样每次都是<strong>对半区进行内存回收，内存分配时也就不用考虑内存碎片等复杂情况，只要移动堆顶指针，按顺序分配内存即可</strong>。但是这种算法是用空间换时间，代价是将内存缩小为原来的一半，代价很高。而新生代的对象一般是存活时间较短的对象，GC频率较高，占内存较少，因此<strong>新生代一般都采用基于复制的GC</strong>。复制算法过程如下:<br><img src="http://osvtz719h.bkt.clouddn.com/copy.png" alt="copy"></p>
+<p>HotSpot 虚拟<strong>机将新生代内存分为 一块较大的 Eden空间和两块较小的 Survivor空间，Eden和Survivor的大小比例是8:1</strong>。每次新生代中可用内存空间为整个新生代容量的 90%。我们没有办法保证每次回收都只有不多于 10%的对象存活，<strong>当 Survvivor 空间不够用时，需要依赖老年代进行分配担保</strong>。</p>
+<h2 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记 - 整理算法"></a>标记 - 整理算法</h2><p>复制收集算法在对象存活率较高时就要进行较多的复制操作，效率会变低，它比较适合收集新生代对象，至于老年代这种一般不选用复制算法。<strong>根据老年代的特点，可以使用 “标记-整理”算法或者”标记-清除”算法</strong>。</p>
+<p>标记 - 整理算法<strong>可以解决内存碎片的问题</strong>，而且思路也比较简单，它的思想就是，让所有存活的对象都向一端移动，然后直接清理掉边界以外的内存,如下图所示:</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/mark_compact.png" alt="mark-compact"></p>
+<h2 id="分代收集"><a href="#分代收集" class="headerlink" title="分代收集"></a>分代收集</h2><p>当前商业虚拟机的垃圾收集都采用”分代收集”,将堆分为新生代和老年代，根据各个年代的特点采用最适当的收集算法:</p>
+<ul>
+<li><strong>新生代</strong><ul>
+<li>复制收集算法</li>
+</ul>
+</li>
+<li><strong>老年代</strong><ul>
+<li>标记 - 清理算法</li>
+<li>标记 - 整理算法</li>
+</ul>
+</li>
+</ul>
+<h2 id="JVM堆内存设置参数"><a href="#JVM堆内存设置参数" class="headerlink" title="JVM堆内存设置参数"></a>JVM堆内存设置参数</h2><ul>
+<li>-XX:+<option> 启用选项 例如：-XX:+PrintGCDetails启动打印GC信息的选项，其中+号表示true，开启的意思</option></li>
+<li>-XX:-<option>不启用选项 ,例如：-XX:-PrintGCDetails关闭启动打印GC信息的选项，其中-号表示false，关闭的意思</option></li>
+<li>-XX:<option>=<number> </number></option></li>
+<li>-XX:<option>=<string></string></option></li>
+</ul>
+<h3 id="常用堆参数"><a href="#常用堆参数" class="headerlink" title="常用堆参数"></a>常用堆参数</h3><ul>
+<li>-Xms: 初始堆大小</li>
+<li>-Xmx: 最大堆大小,默认为物理内存的1/4</li>
+<li>-Xmn: 新生代大小，通常为 Xmx的 1/3或1/4。新生代 = Eden + 2个Survivor空间。实际可用空间为 = Eden + 1个 Survivor，即90%</li>
+<li>-XX:NewSize = n:设置新生代大小</li>
+<li>-XX:NewRatio = n: 设置新生代和老年代的比值，如 n = 3,表示新生代:老年代 = 1:3。</li>
+<li>-XX:SurvivorRatio： 新生代中 Eden与Survivor的比值，默认值为 8。即Eden占新生代空间的 8/10,另外两个 Survivor各占 1/10</li>
+<li>-XX:PermSize： 永久代(方法区)的初始大小，(前提是永久代存在的情况下，在JDK 1.8及以后，永久代被移除了)</li>
+<li>-XX:MaxPermSize:永久代(方法区)的最大值</li>
+<li>-XX:+PrintGCDetails：打印 GC 信息</li>
+<li>-XX:+HeapDumpOnOutOfMemoryError：让虚拟机在发生内存溢出时 Dump 出当前的内存堆转储快照，以便分析用</li>
+</ul>
+<p>更多JVM参数选项设置，请参考Oracle官方网站给出的相关信息: <a href="http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html" target="_blank" rel="noopener">http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html</a></p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="http://www.blogjava.net/fancydeepin/archive/2013/09/29/jvm_heep.html" target="_blank" rel="noopener">Java 堆内存</a></li>
+<li><a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a></li>
+</ul>
+
         
         </div>
         <footer class="article-footer">
@@ -237,7 +334,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/tags/index.html" data-id="cjllzdoud004eqsr9pfa9j66i" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjllzdnlg0005qsr9ngdggwt4" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -305,13 +402,23 @@
 
             
     
-        <a href="https://pjmike.github.io/tags/index.html#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/tags/index.html">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Comments</a>
     
 
         </footer>
     </div>
     
         
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析</div>
+        </a>
+    
+</nav>
+
 
     
 </article>
@@ -412,9 +519,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'https://pjmike.github.io/tags/index.html';
+            this.page.url = 'https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/';
         
-        this.page.identifier = '';
+        this.page.identifier = 'JVM-系列文章之-GC-算法浅析';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
