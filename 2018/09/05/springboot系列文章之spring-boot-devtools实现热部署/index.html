@@ -3,18 +3,24 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Arsip: 2018/7 | 风居者的街道</title>
+    <title>springboot系列文章之spring-boot-devtools实现热部署 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="风居者的街道">
-<meta property="og:url" content="https://pjmike.github.io/archives/2018/07/index.html">
+    <meta name="description" content="前言实际开发过程中，修改应用的业务逻辑时常常需要重启应用，这显得非常繁琐，降低了开发效率，所以热部署对于开发来说显得十分必要了">
+<meta name="keywords" content="springboot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot系列文章之spring-boot-devtools实现热部署">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="努力，不一定成功，成功却需努力">
+<meta property="og:description" content="前言实际开发过程中，修改应用的业务逻辑时常常需要重启应用，这显得非常繁琐，降低了开发效率，所以热部署对于开发来说显得十分必要了">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/devtools.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/registry.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/compiler.png">
+<meta property="og:updated_time" content="2018-09-05T15:16:03.323Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="风居者的街道">
-<meta name="twitter:description" content="努力，不一定成功，成功却需努力">
+<meta name="twitter:title" content="springboot系列文章之spring-boot-devtools实现热部署">
+<meta name="twitter:description" content="前言实际开发过程中，修改应用的业务逻辑时常常需要重启应用，这显得非常繁琐，降低了开发效率，所以热部署对于开发来说显得十分必要了">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/devtools.png">
     
 
     
@@ -207,86 +213,188 @@
 </aside>
 
             
-            <section id="main"><div class="timeline timeline-wrap">
-    
-            <div class="timeline-row timeline-row-major">
-                <span class="node"><i class="fas fa-calendar-alt"></i></span>
-                <h1 class="title">2018</h1>
-            </div>
+            <section id="main"><article id="post-springboot系列文章之spring-boot-devtools实现热部署" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
         
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+        
+            <header class="article-header">
                 
     
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">leecode题解 二叉搜索树迭代器</a>
+        <h1 class="article-title" itemprop="name">
+            springboot系列文章之spring-boot-devtools实现热部署
         </h1>
     
 
-                <div class="article-meta">
-                    
+                
+                    <div class="article-meta">
+                        
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/">
-            <time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished">2018-07-22</time>
+        <a href="/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/">
+            <time datetime="2018-09-05T15:16:03.000Z" itemprop="datePublished">2018-09-05</time>
         </a>
     </div>
 
 
-                    
+                        
     <div class="article-category">
     	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/数据结构/">数据结构</a>
+        <a class="article-category-link" href="/categories/springboot/">springboot</a>
     </div>
 
-                    
+                        
     <div class="article-tag">
         <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/leetcode/">leetcode</a>
+        <a class="tag-link" href="/tags/springboot/">springboot</a>
     </div>
 
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+                    </div>
                 
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">leetcode题解 98 验证二叉搜索树</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">
-            <time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished">2018-07-22</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/数据结构/">数据结构</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/leetcode/">leetcode</a>
-    </div>
-
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是热部署"><span class="toc-number">2.</span> <span class="toc-text">什么是热部署?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#spring-boot-devtools实现热部署"><span class="toc-number">3.</span> <span class="toc-text">spring-boot-devtools实现热部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#在pom-xml-里添加-spring-boot-devtools依赖"><span class="toc-number">3.1.</span> <span class="toc-text">在pom.xml 里添加 spring-boot-devtools依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#打开-IDEA-的自动编译功能"><span class="toc-number">3.2.</span> <span class="toc-text">打开 IDEA 的自动编译功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#排除静态资源文件"><span class="toc-number">3.3.</span> <span class="toc-text">排除静态资源文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭自动重启"><span class="toc-number">3.4.</span> <span class="toc-text">关闭自动重启</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li></ol>
                 </div>
-            </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>实际开发过程中，修改应用的业务逻辑时常常需要重启应用，这显得非常繁琐，降低了开发效率，所以热部署对于开发来说显得十分必要了</p>
+<a id="more"></a>
+<h2 id="什么是热部署"><a href="#什么是热部署" class="headerlink" title="什么是热部署?"></a>什么是热部署?</h2><blockquote>
+<p>应用启动后会把编译好的Class文件加载到虚拟机中，正常情况下载项目修改了源文件是需要全部重新编译并加载(需要重启应用)，而热部署就是监听 Class 文件的变动，只把发生修改的Class重新加载，而不是重启应用。</p>
+</blockquote>
+<h2 id="spring-boot-devtools实现热部署"><a href="#spring-boot-devtools实现热部署" class="headerlink" title="spring-boot-devtools实现热部署"></a>spring-boot-devtools实现热部署</h2><h3 id="在pom-xml-里添加-spring-boot-devtools依赖"><a href="#在pom-xml-里添加-spring-boot-devtools依赖" class="headerlink" title="在pom.xml 里添加 spring-boot-devtools依赖"></a><strong>在pom.xml 里添加 <code>spring-boot-devtools</code>依赖</strong></h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--热部署依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-devtools<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">optional</span>&gt;</span>true<span class="tag">&lt;/<span class="name">optional</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>注意这一点: <code>&lt;optional&gt;true&lt;/optional&gt;</code>。官网的解释如下:</p>
+<blockquote>
+<p>Developer tools are automatically disabled when running a fully packaged application. If your application is launched from java -jar or if it is started from a special classloader, then it is considered a “production application”. Flagging the dependency as optional in Maven or using compileOnly in Gradle is a best practice that prevents devtools from being transitively applied to other modules that use your project</p>
+</blockquote>
+<p><strong>将依赖项标记为 Maven 中的可选项是为了防止 devtools 传递性地应用于项目的其他模块</strong></p>
+<h3 id="打开-IDEA-的自动编译功能"><a href="#打开-IDEA-的自动编译功能" class="headerlink" title="打开 IDEA 的自动编译功能"></a><strong>打开 IDEA 的自动编译功能</strong></h3><p>如下图所示，在自动编译的那个位置打上勾<br><img src="http://osvtz719h.bkt.clouddn.com/devtools.png" alt="devtools"></p>
+<p><strong>按下 <code>Ctrl+Shift+Alt+/</code></strong>,如下图步骤:<br><img src="http://osvtz719h.bkt.clouddn.com/registry.png" alt="registry"><br><img src="http://osvtz719h.bkt.clouddn.com/compiler.png" alt="compile"></p>
+<p>通过以上步骤就打开了 IDEA 的自动编译功能。每修改一次 源文件，IDEA就会自动编译。当然我们还可以选择手动进行编译，<strong>使用 <code>Ctrl+F9</code>快捷键进行手动编译</strong>。</p>
+<h3 id="排除静态资源文件"><a href="#排除静态资源文件" class="headerlink" title="排除静态资源文件"></a>排除静态资源文件</h3><p>静态资源文件在改变之后有时候没必要触发应用程序重启，例如 thymeleaf 模板文件就可以实时编辑，默认情况下，更改 /META-INF/maven，/META-INF/resources，/resources，/static,<br>/public或 /tempates下的资源不会触发重启，而是触发 live reload。</p>
+<p>可以使用 <code>spring.devtools.restart.exclude</code>属性配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring.devtools.restart.exclude=static/**,public/**</span><br></pre></td></tr></table></figure></p>
+<h3 id="关闭自动重启"><a href="#关闭自动重启" class="headerlink" title="关闭自动重启"></a>关闭自动重启</h3><ul>
+<li><p>application.properties中设置属性:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring.devtools.restart.enabled = false</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在 <code>main</code>方法中设置环境变量:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    System.setProperty(<span class="string">"spring.devtools.restart.enabled"</span>, <span class="string">"false"</span>);</span><br><span class="line">    SpringApplication.run(App.class, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>通过以上步骤就可以实现 热部署功能了，非常利于开发。</p>
+
+        
         </div>
-    
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
 </div>
+
+    <a data-url="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/" data-id="cjlpaeoi1001lx0r9l3fq4hw2" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/">Komentar</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Lebih lama</strong>
+            <div class="article-nav-title">JVM 系列文章之 Full GC 和 Minor GC</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
 </section>
             
                 
@@ -373,11 +481,13 @@
     <script>
     var disqus_config = function () {
         
-        this.page.identifier = '';
+            this.page.url = 'https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/';
+        
+        this.page.identifier = 'springboot系列文章之spring-boot-devtools实现热部署';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'pjmike' + '.disqus.com/count.js';
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
