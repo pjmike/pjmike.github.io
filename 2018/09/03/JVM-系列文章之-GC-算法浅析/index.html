@@ -90,14 +90,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -109,11 +109,11 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Pos',
-            PAGES: 'Halaman',
-            CATEGORIES: 'Kategori',
-            TAGS: 'Tag',
-            UNTITLED: 'Tanpa Judul',
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
@@ -139,7 +139,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
     </div>
 
                 </td>
@@ -159,16 +159,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 35
-                <span>pos</span>
+                <span>posts</span>
             </div>
             <div class="article-info-block">
                 20
-                <span>tag</span>
+                <span>tags</span>
             </div>
         </div>
         
@@ -260,7 +260,7 @@
             
                 <div id="toc" class="toc-article">
                 <strong class="toc-title">Catalogue</strong>
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Java的堆结构"><span class="toc-number">1.</span> <span class="toc-text">Java的堆结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标记-清除算法"><span class="toc-number">2.</span> <span class="toc-text">标记 - 清除算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#复制算法"><span class="toc-number">3.</span> <span class="toc-text">复制算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标记-整理算法"><span class="toc-number">4.</span> <span class="toc-text">标记 - 整理算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分代收集"><span class="toc-number">5.</span> <span class="toc-text">分代收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JVM堆内存设置参数"><span class="toc-number">6.</span> <span class="toc-text">JVM堆内存设置参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用堆参数"><span class="toc-number">6.1.</span> <span class="toc-text">常用堆参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">7.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Java的堆结构"><span class="toc-number">1.</span> <span class="toc-text">Java的堆结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标记-清除算法"><span class="toc-number">2.</span> <span class="toc-text">标记 - 清除算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#复制算法"><span class="toc-number">3.</span> <span class="toc-text">复制算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标记-整理算法"><span class="toc-number">4.</span> <span class="toc-text">标记 - 整理算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分代收集"><span class="toc-number">5.</span> <span class="toc-text">分代收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单对比三种基本算法"><span class="toc-number">6.</span> <span class="toc-text">简单对比三种基本算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JVM堆内存设置参数"><span class="toc-number">7.</span> <span class="toc-text">JVM堆内存设置参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用堆参数"><span class="toc-number">7.1.</span> <span class="toc-text">常用堆参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">8.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
             
             <h2 id="Java的堆结构"><a href="#Java的堆结构" class="headerlink" title="Java的堆结构"></a>Java的堆结构</h2><p>再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。<strong>JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”</strong>。</p>
@@ -301,6 +301,63 @@
 </ul>
 </li>
 </ul>
+<h2 id="简单对比三种基本算法"><a href="#简单对比三种基本算法" class="headerlink" title="简单对比三种基本算法"></a>简单对比三种基本算法</h2><blockquote>
+<p>下面的分析参照 R大对于GC算法的分析：<a href="http://hllvm.group.iteye.com/group/topic/44381#post-272188" target="_blank" rel="noopener">http://hllvm.group.iteye.com/group/topic/44381#post-272188</a></p>
+</blockquote>
+<p>分代式 GC里，老年代常用 <code>mark-sweep</code>(标记 - 清除算法)，或者是 mark-sweep /mark-compact 的混合方式，一般情况下用 mark-sweep，统计估算碎片量达到一定程度时用 mark-compact(标记 - 整理)。这是因为传统上大家认为老年代的对象可能会长时间存活且存活率高，或者是比较大，这样拷贝起来不划算，还不如采用就地收集的方式。 <code>Mark-Sweep</code>,<code>Mark-compact</code>,<code>copying</code>这三种基本算法里，只有mark-sweep是不移动对象的(也就是不拷贝的)，所以老年代常选用 mark-sweep。当然针对不同的垃圾收集器，GC 算法是有区别的</p>
+<p>以下是三种算法的比较：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>mark-sweep</th>
+<th>mark-compact</th>
+<th>copying</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>速度</td>
+<td>中等</td>
+<td>最慢</td>
+<td>最快</td>
+</tr>
+<tr>
+<td>空间开销</td>
+<td>少(但会堆积碎片)</td>
+<td>少(但不会堆积碎片)</td>
+<td>少(不堆积碎片)\</td>
+<td>通常需要活对象的2倍大小(不堆积碎片)</td>
+</tr>
+<tr>
+<td>移动对象?</td>
+<td>否\</td>
+<td></td>
+<td>是</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关于时间开销</strong>：</p>
+<ul>
+<li>mark-sweep: mark阶段与<strong>活对象的数量</strong>成正比，sweep阶段与<strong>整堆大小</strong>成正比</li>
+<li>mark-compact: mark阶段与活对象的<strong>数量</strong>成正比，compact阶段与活对象的<strong>大小</strong>成正比</li>
+<li>copy:与<strong>活对象的大小</strong>成正比</li>
+</ul>
+<p>如果把 mark,sweep,compact,copying这几种动作的耗时放在一起看，大致有这样的关系:</p>
+<blockquote>
+<p>compaction &gt;= copying &gt; marking &gt; sweeping<br>marking + sweeping &gt; copying</p>
+</blockquote>
+<p>总结一下：</p>
+<blockquote>
+<p>在分代式假设中，年轻代中对象在 minor GC 时的存活率应该很低，这样用copying算法就是最合算的，因为其时间开销与活对象的大小成正比，如果没多少活对象，它就非常快。而且 young GC 本身应该比较小，就算需要2倍空间也只会浪费不太多的空间</p>
+</blockquote>
+<blockquote>
+<p>而老年代被 GC 时对象存活率可能会很高，而且假定可用剩余空间不太多，这样copying 算法就不太合适，于是更可能选用另两种算法，特别是不用移动对象的 Mark-Sweep算法</p>
+</blockquote>
+<blockquote>
+<p>不过 HotSpot VM中除了CMS收集器之外的其他收集器都是会移动对象的，也就是要么是 copying,要么是mark-compact的变种</p>
+</blockquote>
 <h2 id="JVM堆内存设置参数"><a href="#JVM堆内存设置参数" class="headerlink" title="JVM堆内存设置参数"></a>JVM堆内存设置参数</h2><ul>
 <li>-XX:+<option> 启用选项 例如：-XX:+PrintGCDetails启动打印GC信息的选项，其中+号表示true，开启的意思</option></li>
 <li>-XX:-<option>不启用选项 ,例如：-XX:-PrintGCDetails关闭启动打印GC信息的选项，其中-号表示false，关闭的意思</option></li>
@@ -334,7 +391,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjlq8x7n30009k4r94vlapjnk" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjlrpdpwr0004t8r9fnvc7pox" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -402,7 +459,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Komentar</a>
+        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Comments</a>
     
 
         </footer>
@@ -412,7 +469,7 @@
 <nav id="article-nav">
     
         <a href="/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Lebih baru</strong>
+            <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
                     JVM 系列文章之 Full GC 和 Minor GC
@@ -422,7 +479,7 @@
     
     
         <a href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Lebih lama</strong>
+            <strong class="article-nav-caption">Older</strong>
             <div class="article-nav-title">JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析</div>
         </a>
     
@@ -449,7 +506,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Kategori</h3>
+        <h3 class="widget-title">categories</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
         </div>
@@ -458,7 +515,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Arsip</h3>
+        <h3 class="widget-title">archives</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">4</span></li></ul>
         </div>
@@ -467,7 +524,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag</h3>
+        <h3 class="widget-title">tags</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -476,7 +533,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">awan tag</h3>
+        <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 16.67px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 13.33px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 13.33px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a>
         </div>
@@ -485,7 +542,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">tautan</h3>
+        <h3 class="widget-title">links</h3>
         <div class="widget">
             <ul>
                 
