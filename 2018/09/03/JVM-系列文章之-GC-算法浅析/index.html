@@ -18,7 +18,7 @@
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/mark_sweep.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/copy.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/mark_compact.png">
-<meta property="og:updated_time" content="2018-09-03T07:53:04.343Z">
+<meta property="og:updated_time" content="2018-09-07T10:42:19.679Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM 系列文章之 GC 算法浅析">
 <meta name="twitter:description" content="Java的堆结构再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”。">
@@ -326,13 +326,11 @@
 <td>空间开销</td>
 <td>少(但会堆积碎片)</td>
 <td>少(但不会堆积碎片)</td>
-<td>少(不堆积碎片)\</td>
 <td>通常需要活对象的2倍大小(不堆积碎片)</td>
 </tr>
 <tr>
 <td>移动对象?</td>
-<td>否\</td>
-<td></td>
+<td>否</td>
 <td>是</td>
 <td>是</td>
 </tr>
@@ -359,10 +357,10 @@
 <p>不过 HotSpot VM中除了CMS收集器之外的其他收集器都是会移动对象的，也就是要么是 copying,要么是mark-compact的变种</p>
 </blockquote>
 <h2 id="JVM堆内存设置参数"><a href="#JVM堆内存设置参数" class="headerlink" title="JVM堆内存设置参数"></a>JVM堆内存设置参数</h2><ul>
-<li>-XX:+<option> 启用选项 例如：-XX:+PrintGCDetails启动打印GC信息的选项，其中+号表示true，开启的意思</option></li>
-<li>-XX:-<option>不启用选项 ,例如：-XX:-PrintGCDetails关闭启动打印GC信息的选项，其中-号表示false，关闭的意思</option></li>
-<li>-XX:<option>=<number> </number></option></li>
-<li>-XX:<option>=<string></string></option></li>
+<li><code>-XX:+&lt;option&gt;</code> 启用选项 例如：-XX:+PrintGCDetails启动打印GC信息的选项，其中+号表示true，开启的意思</li>
+<li><code>-XX:-&lt;option&gt;</code>不启用选项 ,例如：-XX:-PrintGCDetails关闭启动打印GC信息的选项，其中-号表示false，关闭的意思</li>
+<li><code>-XX:&lt;option&gt;=&lt;number&gt;</code></li>
+<li><code>-XX:&lt;option&gt;=&lt;string&gt;</code></li>
 </ul>
 <h3 id="常用堆参数"><a href="#常用堆参数" class="headerlink" title="常用堆参数"></a>常用堆参数</h3><ul>
 <li>-Xms: 初始堆大小</li>
@@ -391,7 +389,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjlrpdpwr0004t8r9fnvc7pox" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjlrvgwph0003bkr9596hpa20" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
