@@ -208,142 +208,6 @@
 
             
             <section id="main">
-    <article id="post-leecode题解-二叉搜索树迭代器" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">leecode题解 二叉搜索树迭代器</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/">
-            <time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished">2018-07-22</time>
-        </a>
-    </div>
-
-
-                        
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/数据结构/">数据结构</a>
-    </div>
-
-                        
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/leetcode/">leetcode</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            <p><h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>实现一个二叉搜索树迭代器。你将使用二叉搜索树的根节点初始化迭代器。</p>
-<p>调用 <code>next()</code> 将返回二叉搜索树中的下一个最小的数。</p>
-<p><strong>注意</strong>: <code>next()</code> 和<code>hasNext()</code> 操作的时间复杂度是O(1)，并使用 <em>O(h)</em>内存，其中 <em>h</em>是树的高度。</p>
-<p>原题地址：<a href="https://leetcode.com/problems/binary-search-tree-iterator/" target="_blank" rel="noopener">https://leetcode.com/problems/binary-search-tree-iterator/</a></p></p>
-            <p class="article-more-link">
-                <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/#more">Читать дальше</a>
-            </p>
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/" data-id="cjlvp32tf001aw4r93a3ylkyw" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/">Comentarios</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <article id="post-leetcode题解-98-验证二叉搜索树" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -393,7 +257,7 @@
 <li>节点的右子树只包含<strong>大于</strong>当前节点的数。</li>
 <li>所有左子树和右子树自身必须也是二叉搜索树</p>
             <p class="article-more-link">
-                <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/#more">Читать дальше</a>
+                <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/#more">Read More</a>
             </p>
         
         </div>
@@ -404,7 +268,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/" data-id="cjlvp32tm001fw4r9exmaw2n9" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/" data-id="cjlxi7um10013l4r9p956eqqt" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -482,6 +346,142 @@
 
 
 
+    <article id="post-leecode题解-二叉搜索树迭代器" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2018/07/22/leecode题解-二叉搜索树迭代器/">leecode题解 二叉搜索树迭代器</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/">
+            <time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished">2018-07-22</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/数据结构/">数据结构</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/leetcode/">leetcode</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            <p><h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>实现一个二叉搜索树迭代器。你将使用二叉搜索树的根节点初始化迭代器。</p>
+<p>调用 <code>next()</code> 将返回二叉搜索树中的下一个最小的数。</p>
+<p><strong>注意</strong>: <code>next()</code> 和<code>hasNext()</code> 操作的时间复杂度是O(1)，并使用 <em>O(h)</em>内存，其中 <em>h</em>是树的高度。</p>
+<p>原题地址：<a href="https://leetcode.com/problems/binary-search-tree-iterator/" target="_blank" rel="noopener">https://leetcode.com/problems/binary-search-tree-iterator/</a></p></p>
+            <p class="article-more-link">
+                <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/#more">Read More</a>
+            </p>
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/" data-id="cjlxi7umh001gl4r9ld7w6ynd" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/">Comentarios</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-JWT的介绍与使用" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -521,7 +521,7 @@
         
             <p><p>今天写一篇关于JWT学习的记录，虽然网上有很多介绍JWT用法和特性的文章博客，但是还是想自己写一点JWT的总结，其中参照很多优秀的博文。更重要是加深自己的理解。</p></p>
             <p class="article-more-link">
-                <a href="/2018/04/15/JWT的介绍与使用/#more">Читать дальше</a>
+                <a href="/2018/04/15/JWT的介绍与使用/#more">Read More</a>
             </p>
         
         </div>
@@ -532,7 +532,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/04/15/JWT的介绍与使用/" data-id="cjlvp32sa000lw4r9r0qg6bhf" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/04/15/JWT的介绍与使用/" data-id="cjlxi7ulk000vl4r9t9ohl3im" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -649,7 +649,7 @@
         
             <p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><code>@ConfigurationProperties</code> 和 <code>@Value</code> 都是 Spring 提供的用于从配置文件注入配置信息的方式，不同的是@Value比较适合配置少的场景，当配置多的时候，每次写@Value会显得很麻烦，所以用@ConfigurationProperties来处理配置多的情形</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/28/springboot属性配置/#more">Читать дальше</a>
+                <a href="/2018/03/28/springboot属性配置/#more">Read More</a>
             </p>
         
         </div>
@@ -660,7 +660,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot属性配置/" data-id="cjlvp32tq001jw4r9szekx513" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot属性配置/" data-id="cjlxi7umd001bl4r9s1q1bsfc" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -777,7 +777,7 @@
         
             <p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>我们在练习项目的时候，往往会涉及参数校验的问题，有时候是前端进行大部分校验，如用户名唯一性，生日格式，邮箱格式校验等等常用的校验。但是为了避免用户绕过浏览器，使用http工具直接向后端请求一些违法数据，服务端的数据校验也是必要的，可以防止脏数据落到数据库中，如果数据库中出现一个非法的邮箱格式，也会让运维人员头疼不已，所以后端校验也是有必要的。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/28/springboot参数校验总结(一)/#more">Читать дальше</a>
+                <a href="/2018/03/28/springboot参数校验总结(一)/#more">Read More</a>
             </p>
         
         </div>
@@ -788,7 +788,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" data-id="cjlvp32u0001qw4r9ahsiob07" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" data-id="cjlxi7umj001il4r9bapyeosh" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -905,7 +905,7 @@
         
             <p><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在学习过程中，我们总会遇到过滤器和拦截器的使用，因为对于他们之间的关系和区别不是很清楚，所以每次用的时候都感觉模棱两可的。所以今天特意写一篇文章总结之前用的过滤器与拦截器它们<strong>拦截请求的处理过程</strong>，不仅要知其然，还要知其所以然。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/26/过滤器与拦截器总结/#more">Читать дальше</a>
+                <a href="/2018/03/26/过滤器与拦截器总结/#more">Read More</a>
             </p>
         
         </div>
@@ -916,7 +916,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlvp32w4003ew4r9mqhc0iyg" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlxi7uo8003dl4r9998nj4em" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1033,7 +1033,7 @@
         
             <p><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前在集成第三方即时通信系统-融云的时候，我直接clone它的服务端源码，然后导入我的项目，我在测试它连接融云服务器案例时，发现一直不成功，始终报一个 ExceptionInInitializerError 的异常。后来通过网上查资料才发现，这个异常是静态变量初始化时出现异常时，JVM会抛出<strong>java.lang.ExceptionInInitializerError</strong>的异常。由此，我对这个异常做了进一步探究。</p></p>
             <p class="article-more-link">
-                <a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/#more">Читать дальше</a>
+                <a href="/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/#more">Read More</a>
             </p>
         
         </div>
@@ -1044,7 +1044,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" data-id="cjlvp32w7003gw4r90xmrdodf" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" data-id="cjlxi7uoe003il4r94g8sdyzs" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

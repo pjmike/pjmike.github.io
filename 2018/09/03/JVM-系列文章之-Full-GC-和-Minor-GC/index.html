@@ -14,7 +14,7 @@
 <meta property="og:description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/YGCcross.png">
-<meta property="og:updated_time" content="2018-09-03T12:58:24.987Z">
+<meta property="og:updated_time" content="2018-09-10T11:05:21.199Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM 系列文章之 Full GC 和 Minor GC">
 <meta name="twitter:description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
@@ -306,6 +306,8 @@
 <p>Java虚拟机会记录 Survivor区中的对象一共被来回复制了几次。<strong>如果一个对象被复制的次数为 15 (对应虚拟机参数 -XX:+MaxTenuringThreshold),那么该对象将被晋升为至老年代</strong>，(至于为什么是 15次，原因是 HotSpot会在对象头的中的标记字段里记录年龄，分配到的空间只有4位，所以最多只能记录到15)。另外，<strong>如果单个 Survivor 区已经被占用了 50% (对应虚拟机参数: -XX:TargetSurvivorRatio)，那么较高复制次数的对象也会被晋升至老年代。</strong></p>
 </blockquote>
 <p><strong>当Survivor区的部分对象晋升到老年代后，老年代的占用量通常会升高。</strong></p>
+<p><strong>注意</strong>：</p>
+<p>在Minor GC过程中，Survivor 可能不足以容纳Eden和另一个Survivor中的存活对象。如果Survivor中的存活对象溢出，多余的对象将被移到老年代，这称为<strong>过早提升(Premature Promotion)</strong>，这会导致老年代中短期存活对象的增长，可能会引发严重的性能问题。再进一步说，在Minor GC过程中，如果老年代满了而无法容纳更多的对象，Minor GC 之后通常就会进行Full GC,这将导致遍历整个Java堆，这称为<strong>提升失败(Promotion Failure)</strong>。至于解决办法，这就涉及到对应用程序的调优问题了，这里就不叙述了，如有兴趣，请自行查阅相关资料</p>
 <h3 id="Minor-GC的问题与卡表分析"><a href="#Minor-GC的问题与卡表分析" class="headerlink" title="Minor GC的问题与卡表分析"></a>Minor GC的问题与卡表分析</h3><p><strong>Minor GC存在一个问题就是，老年代的对象可能引用新生代的对象</strong>，在标记存活对象的时候，就需要扫描老年代的对象，如果该对象拥有对新生代对象的引用，那么这个引用也会被作为 GC Roots。这相当于就做了<strong>全堆扫描</strong>。</p>
 <h4 id="JVM如何避免Minor-GC扫描全堆"><a href="#JVM如何避免Minor-GC扫描全堆" class="headerlink" title="JVM如何避免Minor GC扫描全堆"></a>JVM如何避免Minor GC扫描全堆</h4><p>HotSpot 给出的解决方案是 一项叫做 <strong>卡表</strong> 的技术。如下图所示:<br><img src="http://osvtz719h.bkt.clouddn.com/YGCcross.png" alt="card table"></p>
 <p>卡表的具体策略是<strong>将老年代的空间分成大小为 512B的若干张卡，并且维护一个卡表，卡表本省是字节数组，数组中的每个元素对应着一张卡，其实就是一个标识位，这个标识位代表对应的卡是否可能存有指向新生代对象的引用</strong>，如果可能存在，那么我们认为这张卡是脏的，即<strong>脏卡</strong>。如上图所示，卡表3被标记为脏。</p>
@@ -333,7 +335,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" data-id="cjlvp32as000ew4r9dmdvrd80" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" data-id="cjlxi7ul1000gl4r94t3n4hla" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

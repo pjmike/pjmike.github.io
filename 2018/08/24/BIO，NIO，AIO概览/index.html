@@ -5,23 +5,25 @@
     
     <title>BIO，NIO，AIO概览 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
+    <meta name="description" content="前言在Java中，有三种IO模型： BIO，NIO，AIO。介绍这三种IO模型之前，需要介绍一下同步，异步与阻塞，非阻塞的概念，然后再从Java和Linux OS的角度去分析BIO,NIO和AIO">
 <meta name="keywords" content="Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="BIO，NIO，AIO概览">
 <meta property="og:url" content="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
+<meta property="og:description" content="前言在Java中，有三种IO模型： BIO，NIO，AIO。介绍这三种IO模型之前，需要介绍一下同步，异步与阻塞，非阻塞的概念，然后再从Java和Linux OS的角度去分析BIO,NIO和AIO">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/bio.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/NIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/AIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Multiplexing_IO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E9%98%BB%E5%A1%9EIO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E9%9D%9E%E9%98%BB%E5%A1%9EIO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E4%BF%A1%E5%8F%B7%E5%BC%8FIO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E5%BC%82%E6%AD%A5IO.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/5%E7%A7%8DIO%E6%A8%A1%E5%9E%8B%E6%AF%94%E8%BE%83.png">
 <meta property="og:updated_time" content="2018-08-30T16:34:08.500Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="BIO，NIO，AIO概览">
-<meta name="twitter:description" content="前言本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/bio.png">
+<meta name="twitter:description" content="前言在Java中，有三种IO模型： BIO，NIO，AIO。介绍这三种IO模型之前，需要介绍一下同步，异步与阻塞，非阻塞的概念，然后再从Java和Linux OS的角度去分析BIO,NIO和AIO">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/%E9%98%BB%E5%A1%9EIO.png">
     
 
     
@@ -259,58 +261,90 @@
             
                 <div id="toc" class="toc-article">
                 <strong class="toc-title">Catálogo</strong>
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步与异步"><span class="toc-number">2.</span> <span class="toc-text">同步与异步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阻塞与非阻塞"><span class="toc-number">3.</span> <span class="toc-text">阻塞与非阻塞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO介绍"><span class="toc-number">4.</span> <span class="toc-text">BIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NIO介绍"><span class="toc-number">5.</span> <span class="toc-text">NIO介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AIO-NIO2"><span class="toc-number">6.</span> <span class="toc-text">AIO(NIO2)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O多路复用"><span class="toc-number">7.</span> <span class="toc-text">I/O多路复用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">8.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">9.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步与异步"><span class="toc-number">2.</span> <span class="toc-text">同步与异步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阻塞与非阻塞"><span class="toc-number">3.</span> <span class="toc-text">阻塞与非阻塞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同步、异步和阻塞、非阻塞的区别"><span class="toc-number">4.</span> <span class="toc-text">同步、异步和阻塞、非阻塞的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BIO、NIO、AIO概览"><span class="toc-number">5.</span> <span class="toc-text">BIO、NIO、AIO概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux的5种-I-O模型"><span class="toc-number">6.</span> <span class="toc-text">Linux的5种 I/O模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞IO模型-BIO"><span class="toc-number">6.1.</span> <span class="toc-text">阻塞IO模型 - BIO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#非阻塞式I-O模型-NIO"><span class="toc-number">6.2.</span> <span class="toc-text">非阻塞式I/O模型 - NIO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O复用模型"><span class="toc-number">6.3.</span> <span class="toc-text">I/O复用模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#I-O多路复用的应用场景"><span class="toc-number">6.3.1.</span> <span class="toc-text">I/O多路复用的应用场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#I-O多路复用的系统调用函数"><span class="toc-number">6.3.2.</span> <span class="toc-text">I/O多路复用的系统调用函数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#信号驱动式I-O模型"><span class="toc-number">6.4.</span> <span class="toc-text">信号驱动式I/O模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#信号驱动式IO不是异步的"><span class="toc-number">6.4.1.</span> <span class="toc-text">信号驱动式IO不是异步的</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步I-O模型-AIO"><span class="toc-number">6.5.</span> <span class="toc-text">异步I/O模型 - AIO</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#与信号驱动式I-O的区别"><span class="toc-number">6.5.1.</span> <span class="toc-text">与信号驱动式I/O的区别</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5种I-O模型的比较"><span class="toc-number">6.6.</span> <span class="toc-text">5种I/O模型的比较</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">7.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">8.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
             
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文简单介绍一下BIO，NIO，AIO以及同步与异步，阻塞与非阻塞等概念</p>
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在Java中，有三种IO模型： BIO，NIO，AIO。介绍这三种IO模型之前，需要介绍一下同步，异步与阻塞，非阻塞的概念，然后再从Java和Linux OS的角度去分析BIO,NIO和AIO</p>
 <a id="more"></a>
-<h2 id="同步与异步"><a href="#同步与异步" class="headerlink" title="同步与异步"></a>同步与异步</h2><p>同步与异步关注的是<strong>消息通信机制</strong></p>
-<p><strong>同步</strong></p>
-<p>同步就是发起一个调用后，等待当前调用返回，没得到结果之前，调用不返回，就像做事一样，事情必须一件一件做完了，才能做下一件</p>
-<p><strong>异步</strong></p>
-<p>异步就是发起一个调用后，立刻得到回应，但没有返回结果，此时我们可以处理其他的请求，被调用者通常<strong>依靠事件，回调</strong>等机制来通知调用者其返回结果。</p>
-<p>举个通俗的例子，同步就像:</p>
+<h2 id="同步与异步"><a href="#同步与异步" class="headerlink" title="同步与异步"></a>同步与异步</h2><p><strong>同步</strong></p>
+<p>同步就是发起一个调用后，<strong>被调用者</strong>未处理完请求之前，调用不返回。</p>
+<p>通俗的例子描述同步就像:</p>
 <blockquote>
-<p>你打电话问书店老板有没有《分布式系统》这本书，如果是同步通信机制，书店老板会说，你稍等，”我查一下”，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。</p>
+<p>你打电话问书店老板有没有《葵花宝典》这本书的时候，如果是同步机制，书店老板会说，你稍等，”我查一下”，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。</p>
 </blockquote>
-<p>异步就像:</p>
+<p><strong>异步</strong></p>
+<p>异步就是发起一个调用后，立刻得到<strong>被调用者</strong>的回应表示已接收到请求，但是被调用者并没有返回结果，此时我们可以处理其他的请求，被调用者通常<strong>依靠事件，回调</strong>等机制来通知调用者其返回结果。</p>
+<p>通俗的例子描述异步就像:</p>
 <blockquote>
-<p>而异步通信机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调</p>
+<p>而异步机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调</p>
 </blockquote>
 <p>此处参照知乎上关于此问题的回答：<a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">https://www.zhihu.com/question/19732473</a></p>
-<h2 id="阻塞与非阻塞"><a href="#阻塞与非阻塞" class="headerlink" title="阻塞与非阻塞"></a><strong>阻塞与非阻塞</strong></h2><p>阻塞与非阻塞关注的是<strong>程序在等待调用结果(消息，返回值)时的状态</strong></p>
-<p><strong>阻塞</strong></p>
-<p>阻塞就是发起一个请求，在请求结果返回之前，当前线程会被挂起(被阻塞)，无法从事其他任务，只有当条件就绪才能继续。比如<code>ServerSocket</code>新连接建立完毕</p>
+<p>再次总结一下同步与异步：</p>
+<blockquote>
+<p>同步与异步最大的区别就是<strong>被调用方</strong>的<strong>执行方式</strong>和<strong>返回时机</strong>，同步指的是<strong>被调用方</strong>做完事情之后再返回，异步指的是<strong>被调用方</strong>先返回，然后再做事情，做完之后再想办法通知调用方</p>
+</blockquote>
+<h2 id="阻塞与非阻塞"><a href="#阻塞与非阻塞" class="headerlink" title="阻塞与非阻塞"></a>阻塞与非阻塞</h2><p><strong>阻塞</strong></p>
+<p>阻塞就是发起一个请求，<strong>调用者</strong>一直等待请求结果返回，也就是当前线程会被挂起，无法从事其他任务，只有当条件就绪才能继续。</p>
 <p><strong>非阻塞</strong></p>
-<p>非阻塞就是发起一个请求，在不能立刻得到返回结果之前，直接返回，不等待，函数不会阻塞当前线程。</p>
+<p>非阻塞就是发起一个请求，<strong>调用者</strong>不用一直等着结果返回，可以先去干其他事情。</p>
 <p>还是上面买书的例子:</p>
 <blockquote>
-<p>你打电话问书店老板有没有《分布式系统》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。</p>
+<p>你打电话问书店老板有没有《葵花宝典》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。</p>
 </blockquote>
-<h2 id="BIO介绍"><a href="#BIO介绍" class="headerlink" title="BIO介绍"></a>BIO介绍</h2><p>BIO也就是传统的同步阻塞IO模型，对应Java.io包，它提供了很多IO功能，比如输入输出流，对文件进行操作。在网络编程(Socket通信)中也同样进行IO操作。</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/bio.png" alt="bio"></p>
-<p>上图是从操作系统的角度上去阐述 BIO 的，程序发送请求给内核，然后由内核去进行通信，在内核准备好数据之前这个线程是被挂起的。</p>
-<h2 id="NIO介绍"><a href="#NIO介绍" class="headerlink" title="NIO介绍"></a>NIO介绍</h2><p>NIO是一种同步非阻塞的I/O模型，在Java 1.4 中引入了NIO框架，对应 java.nio 包，提供了 Channel , Selector，Buffer等抽象</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/NIO.png" alt="nio"></p>
-<p>与BIO的区别就是，发起第一次请求后，线程并没有被阻塞，它反复检查数据是否准备好，有点类似于”轮询”。</p>
-<h2 id="AIO-NIO2"><a href="#AIO-NIO2" class="headerlink" title="AIO(NIO2)"></a>AIO(NIO2)</h2><p>AIO 也就是 NIO 2。在 Java 7 中引入了 NIO 的改进版 NIO 2,它是异步非阻塞的IO方式</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/AIO.png" alt="AIO"></p>
-<p>AIO是异步非阻塞的IO模型，所以用户线程可以同时处理别的事情。应用程序发起一个系统调用过后，无需等待，立刻返回，等到数据准备好后，再通知应用程序</p>
-<h2 id="I-O多路复用"><a href="#I-O多路复用" class="headerlink" title="I/O多路复用"></a>I/O多路复用</h2><p>这个概念来自通信领域，指一个信道上传输多路信号的技术，在计算机里表示使用一个线程监视多个描述符的就绪状态。I/O 多路复用技术是由操作系统提供的功能，比如<a href="https://baike.baidu.com/item/POSIX/3792413" target="_blank" rel="noopener">POSIX标准</a>下的 select 或 linux 下的 epoll 以及 <a href="https://baike.baidu.com/item/BSD" target="_blank" rel="noopener">BSD</a> 特有的 kqueue 。首先向操作系统注册一个描述符集合的可读或者可写事件，如果某个或某些描述符就绪，操作系统就会通知，这样，多个描述符就能在一个线程内并发通信。<br><img src="http://osvtz719h.bkt.clouddn.com/Multiplexing_IO.png" alt="muti_io"></p>
-<p>从IO操作的角度来看，多路复用的特点就是用户进程能够同时等待多个IO请求，系统来监控状态，其中的任意一个进入读就绪的状态，系统就会向进程通知。再简单点说，<strong>I/O多路复用就是多个网络连接，共用一个线程</strong></p>
-<p><strong>I/O多路复用的应用场景</strong></p>
-<p>I/O 多路复用的主要应用场景如下：</p>
+<h2 id="同步、异步和阻塞、非阻塞的区别"><a href="#同步、异步和阻塞、非阻塞的区别" class="headerlink" title="同步、异步和阻塞、非阻塞的区别"></a>同步、异步和阻塞、非阻塞的区别</h2><p>阻塞和同步不是一回事，同步，异步与阻塞，非阻塞针对的对象是不一样的，<strong>阻塞,非阻塞是说的调用者，同步，异步说的是被调用者</strong></p>
+<h2 id="BIO、NIO、AIO概览"><a href="#BIO、NIO、AIO概览" class="headerlink" title="BIO、NIO、AIO概览"></a>BIO、NIO、AIO概览</h2><ul>
+<li><p><strong>BIO(Blocking I/O)</strong>：BIO也就是传统的同步阻塞IO模型，对应Java.io包，它提供了很多IO功能，比如输入输出流，对文件进行操作。在网络编程(Socket通信)中也同样进行IO操作。</p>
+</li>
+<li><p><strong>NIO(New I/O)</strong>: NIO是一种同步非阻塞的I/O模型，在Java 1.4 中引入了NIO框架，对应 java.nio 包，提供了 Channel , Selector，Buffer等抽象</p>
+</li>
+<li><p><strong>AIO</strong>: AIO 也就是 NIO 2。在 Java 7 中引入了 NIO 的改进版 NIO 2,它是异步非阻塞的IO模型</p>
+</li>
+</ul>
+<h2 id="Linux的5种-I-O模型"><a href="#Linux的5种-I-O模型" class="headerlink" title="Linux的5种 I/O模型"></a>Linux的5种 I/O模型</h2><p>上面简单介绍了Java中的三种IO模型，三种模型提供的与IO有关的API,在文件处理时，底层实际上是依赖操作系统层面的IO操作实现的，比如在Linux 2.6以后，Java中的NIO和AIO都是通过 epoll来实现的，关于epoll等概念后面也会阐述。</p>
+<p>而实际上在Linux(Unix)操作系统中，共有五种 IO模型，分别是：<strong>阻塞IO模型</strong>、<strong>非阻塞IO模型</strong>、<strong>IO复用模型</strong>、<strong>信号驱动IO模型</strong>以及<strong>异步IO模型</strong>，而4种都是同步的，只有最后一种是异步的。下面的分析主要参考了<a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a>中的介绍。</p>
+<h3 id="阻塞IO模型-BIO"><a href="#阻塞IO模型-BIO" class="headerlink" title="阻塞IO模型 - BIO"></a>阻塞IO模型 - BIO</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E9%98%BB%E5%A1%9EIO.png" alt="阻塞IO"></p>
+<p>一个输入操作通常包括两个不同的阶段:</p>
+<ul>
+<li>等待数据准备好</li>
+<li>从内核向进程复制数据</li>
+</ul>
+<p>对于一个套接字上的输入操作，第一步通常涉及等待数据从网络中到达，当所等待分组到达时，它被复制到内核中的某个缓冲区，第二步就是把数据从内核缓冲区复制到应用进程缓冲区。</p>
+<p>从上图可以看出，<strong>应用进程通过 系统调用 <code>recvfrom</code> 去接收数据，而由于内核数据没有准备好，应用进程就会阻塞，直到内核准备好数据并将其从内核复制到应用进程的缓冲区中或者发生错误才返回</strong>。最常见的错误就是系统调用被信号中断。进程从调用recvfrom开始到它返回的整段时间内是被阻塞的。</p>
+<p>Linux下的阻塞式I/O模型就对应了Java下的BIO模型，BIO的底层实现是调用操作系统的API去执行的，也就是调用操作系统的Socket套接字。</p>
+<h3 id="非阻塞式I-O模型-NIO"><a href="#非阻塞式I-O模型-NIO" class="headerlink" title="非阻塞式I/O模型 - NIO"></a>非阻塞式I/O模型 - NIO</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E9%9D%9E%E9%98%BB%E5%A1%9EIO.png" alt="非阻塞IO"></p>
+<p>应用进程通过系统调用 <code>recvfrom</code> 不断的去和内核交互，直到内核数据报准备好，而如果内核无数据准备好，转而立即返回一个 <code>EWOULDBLOCK</code>的错误，过一段时间再次发送 <code>recvfrom</code>请求，在此期间进程可以做其他事情，不用一直等待，这就是非阻塞。</p>
+<p>当一个应用进程循环调用 <code>recvfrom</code>时，我们称之为<strong>轮询(polling)</strong>，应用进程持续轮询内核，以查看某个操作是否就绪。Java的NIO映射到Linux操作系统就是如上图所示的非阻塞I/O模型</p>
+<h3 id="I-O复用模型"><a href="#I-O复用模型" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h3><p><img src="http://osvtz719h.bkt.clouddn.com/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png" alt="IO复用模型"></p>
+<p>IO多路复用使用<code>select/poll/epoll</code>函数，多个进程的IO都可以注册在同一个 <code>select</code> 上，当用户进程调用该 <code>select</code>时，<code>select</code>去监听所有注册好的IO,<strong>如果所有被监听的IO需要的数据都没有准备好，那么 <code>select</code>调用进程会被阻塞</strong>，只要任意一个IO的数据报套接字变为可读，即数据报已经准备好，<code>select</code> 就返回套接字可读这一条件，然后调用 <code>recvfrom</code>把所读数据报复制到应用进程缓冲区。</p>
+<p><strong>强调一点就是，IO多路复用模型并没有涉及到非阻塞</strong>，进程在发出<code>select</code>后，要一直阻塞等待其监听的所有IO操作至少有一个数据准备好才返回，强调阻塞状态，不存在非阻塞。</p>
+<p>而在 Java NIO中也可以实现多路复用，主要是利用多路复用器 <strong>Selector</strong>，与这里的 <code>select</code>函数类型，<strong>Selector</strong>会不断轮询注册在其上的通道Channel，如果有某一个Channel上面发生读或写事件，这个Channel处于就绪状态，就会被Selector轮询出来。关于Java NIO实现多路复用更多的介绍请查询相关文章。</p>
+<h4 id="I-O多路复用的应用场景"><a href="#I-O多路复用的应用场景" class="headerlink" title="I/O多路复用的应用场景"></a>I/O多路复用的应用场景</h4><p>I/O 多路复用的主要应用场景如下：</p>
 <ul>
 <li>服务器需要同时处理多个处于监听状态或者多个连接状态的套接字</li>
 <li>服务器需要同时处理多种网络协议的套接字</li>
 </ul>
-<p>目前支持I/O 多路复用的系统调用有 select，pselect，poll，epoll。在Linux 网络编程中，很长一段时间都使用select 做轮询和网络事件通知。然而因为select的一些固有缺陷导致它的应用受到了很大的限制，比如select 单个进程打开的最大句柄数是有限的。最终Linux 选择epoll 替代了select。更多关于这些系统调用的介绍与使用，请参阅 <a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上关于 BIO，NIO，AIO 的说明参照了《UNIX网络编程》对 I/O 模型的分类，BIO，NIO，I/O的多路复用都是同步机制，AIO 是异步方式。本文只是简单介绍了一些概念，更多I/O 模型详细的原理和API介绍，可以阅读《UNIX网络编程》</p>
+<h4 id="I-O多路复用的系统调用函数"><a href="#I-O多路复用的系统调用函数" class="headerlink" title="I/O多路复用的系统调用函数"></a>I/O多路复用的系统调用函数</h4><p>目前支持I/O 多路复用的系统调用函数有 <code>select，pselect，poll，epoll</code>。在Linux 网络编程中，很长一段时间都使用<code>select</code> 做轮询和网络事件通知。然而因为select的一些固有缺陷导致它的应用受到了很大的限制，比如select 单个进程打开的最大句柄数是有限的。最终在 Linux 2.6 选择<strong>epoll</strong> 替代了select,Java NIO和AIO底层就是用epoll。更多关于这些系统调用的介绍与使用，请参阅 <a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></p>
+<h3 id="信号驱动式I-O模型"><a href="#信号驱动式I-O模型" class="headerlink" title="信号驱动式I/O模型"></a>信号驱动式I/O模型</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E4%BF%A1%E5%8F%B7%E5%BC%8FIO.png" alt="信号"></p>
+<p>应用进程预先向内核安装一个信号处理函数，然后立即返回，进程继续工作，不阻塞，当数据报准备好读取时，内核就为该进程产生一个信号通知进程，然后进程再调用recvfrom读取数据报。</p>
+<h4 id="信号驱动式IO不是异步的"><a href="#信号驱动式IO不是异步的" class="headerlink" title="信号驱动式IO不是异步的"></a>信号驱动式IO不是异步的</h4><p>信号驱动式IO在数据准备阶段是异步的，当内核中有数据报准备后再通知进程，但是在调用 recvfrom操作进行数据拷贝时是同步的，所以总体来说，整个IO过程不能是异步的。</p>
+<h3 id="异步I-O模型-AIO"><a href="#异步I-O模型-AIO" class="headerlink" title="异步I/O模型 - AIO"></a>异步I/O模型 - AIO</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E5%BC%82%E6%AD%A5IO.png" alt="异步IO"></p>
+<p>应用进程调用<code>aio_read</code>函数，给内核传递描述符，缓存区指针，缓存区大小和文件偏移，并告诉内核当整个操作完成时如何通知进程，然后该系统调用立即返回，而且在等待I/O完成期间，我们的进程不被阻塞，进程可以去干其他事情，然后内核开始等待数据准备，数据准备好以后再拷贝数据到进程缓冲区，最后通知整个IO操作已完成。</p>
+<p>Java的AIO提供了异步通道API，其操作系统底层实现就是这个异步I/O模型</p>
+<h4 id="与信号驱动式I-O的区别"><a href="#与信号驱动式I-O的区别" class="headerlink" title="与信号驱动式I/O的区别"></a>与信号驱动式I/O的区别</h4><p>主要区别在于: 信号驱动式I/O是由内核通知我们何时去启动一个I/O操作，而异步I/O模型是由内核通知我们I/O操作何时完成。</p>
+<h3 id="5种I-O模型的比较"><a href="#5种I-O模型的比较" class="headerlink" title="5种I/O模型的比较"></a>5种I/O模型的比较</h3><p><img src="http://osvtz719h.bkt.clouddn.com/5%E7%A7%8DIO%E6%A8%A1%E5%9E%8B%E6%AF%94%E8%BE%83.png" alt="5"></p>
+<p>由上图可以再次看出，IO操作主要分为两个阶段:</p>
+<ul>
+<li>等待数据报准备阶段</li>
+<li>数据拷贝阶段</li>
+</ul>
+<p><strong>前4种IO模型都是同步IO模型，为什么说都是同步的，因为它们在第二步数据拷贝阶段都是阻塞的，这会导致整个请求进程存在阻塞的情况，所以是同步的，而异步IO模型不会导致请求进程阻塞。</strong></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>上面简要阐述了BIO,NIO,AIO以及Linux下的5种IO模型，对于IO模型更加详细的介绍参考<a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></p>
 <h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
 <li><a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></li>
-<li><a href="http://loveshisong.cn/%E7%BC%96%E7%A8%8B%E6%8A%80%E6%9C%AF/2016-06-25-%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3BIO-NIO-AIO.html" target="_blank" rel="noopener">十分钟了解BIO、NIO、AIO</a></li>
 <li><a href="https://www.yanxurui.cc/posts/linux/2017-06-03-IO-multiplexing/" target="_blank" rel="noopener">IO多路复用漫谈(附epoll示例)</a></li>
 <li><a href="https://www.zhihu.com/question/19732473" target="_blank" rel="noopener">怎样理解阻塞非阻塞与同步异步的区别？——知乎</a></li>
+<li><a href="https://mp.weixin.qq.com/s/fVpb1R0o2knXh3_uZeaQBA" target="_blank" rel="noopener">漫话：如何给女朋友解释什么是Linux的五种IO模型？</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzI3NzE0NjcwMg==&amp;mid=2650121924&amp;idx=1&amp;sn=2b34c54391347fc81e11702fa5bfea09&amp;chksm=f36bbbe5c41c32f309aa85aa6c027d644052233864db85655839530d111ca37339ea1b81ef71&amp;mpshare=1&amp;scene=1&amp;srcid=0827POjeNpUaga1gKNqMuUiY#rd" target="_blank" rel="noopener">漫话：如何给女朋友解释什么是IO中的阻塞、非阻塞、同步、异步？</a></li>
 </ul>
 
         
@@ -322,7 +356,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjlvp329d0005w4r95j0jdyea" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjlxi7td10003l4r9fspaekr2" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
