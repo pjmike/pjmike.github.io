@@ -243,9 +243,9 @@
         <a class="tag-link" href="/tags/MySQL/">MySQL</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -265,7 +265,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/" data-id="cjlzbmpju000tmsr9zyp71cmh" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/" data-id="cjlzbuj9d000u5kr9sw3hhssr" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -343,145 +343,6 @@
 
 
 
-    <article id="post-leetcode题解-98-验证二叉搜索树" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">leetcode题解 98 验证二叉搜索树</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">
-            <time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished">2018-07-22</time>
-        </a>
-    </div>
-
-
-                        
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/数据结构/">数据结构</a>
-    </div>
-
-                        
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/leetcode/">leetcode</a>
-    </div>
-
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            <p><h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>给定一个二叉树，<strong>判断其是否是一个有效的二叉搜索树</strong>。</p>
-<p>一个二叉搜索树具有如下特征：</p>
-<ul>
-<li>节点的左子树只包含<strong>小于</strong>当前节点的数。</li>
-<li>节点的右子树只包含<strong>大于</strong>当前节点的数。</li>
-<li>所有左子树和右子树自身必须也是二叉搜索树</p>
-            <p class="article-more-link">
-                <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/#more">Read More</a>
-            </p>
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/" data-id="cjlzbmpkc001bmsr9s4qg9gwd" class="article-share-link"><i class="fas fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
     <article id="post-leecode题解-二叉搜索树迭代器" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -517,9 +378,9 @@
         <a class="tag-link" href="/tags/leetcode/">leetcode</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -541,7 +402,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/" data-id="cjlzbmpk20011msr9re54svvm" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/07/22/leecode题解-二叉搜索树迭代器/" data-id="cjlzbuj9n00155kr95qgbfnes" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -619,6 +480,145 @@
 
 
 
+    <article id="post-leetcode题解-98-验证二叉搜索树" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">leetcode题解 98 验证二叉搜索树</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/">
+            <time datetime="2018-07-22T13:27:41.000Z" itemprop="datePublished">2018-07-22</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/数据结构/">数据结构</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/leetcode/">leetcode</a>
+    </div>
+
+                    </div>
+                
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            <p><h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>给定一个二叉树，<strong>判断其是否是一个有效的二叉搜索树</strong>。</p>
+<p>一个二叉搜索树具有如下特征：</p>
+<ul>
+<li>节点的左子树只包含<strong>小于</strong>当前节点的数。</li>
+<li>节点的右子树只包含<strong>大于</strong>当前节点的数。</li>
+<li>所有左子树和右子树自身必须也是二叉搜索树</p>
+            <p class="article-more-link">
+                <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/#more">Read More</a>
+            </p>
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/" data-id="cjlzbuj9p00185kr9co8bhlpi" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/07/22/leetcode题解-98-验证二叉搜索树/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
     <article id="post-JWT的介绍与使用" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
@@ -649,9 +649,9 @@
         <a class="tag-link" href="/tags/jwt/">jwt</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -670,7 +670,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/04/15/JWT的介绍与使用/" data-id="cjlzbmpjb000hmsr9h07p13x5" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/04/15/JWT的介绍与使用/" data-id="cjlzbuj91000h5kr9tocc51hx" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -778,9 +778,9 @@
         <a class="tag-link" href="/tags/springboot/">springboot</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -799,7 +799,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot属性配置/" data-id="cjlzbmpkh001fmsr9clasw7pz" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot属性配置/" data-id="cjlzbuj9x001g5kr9idxxc6ba" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -907,9 +907,9 @@
         <a class="tag-link" href="/tags/springboot/">springboot</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -928,7 +928,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" data-id="cjlzbmpk90018msr97h2u39l5" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/03/28/springboot参数校验总结(一)/" data-id="cjlzbuj9u001d5kr98c62wad6" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1036,9 +1036,9 @@
         <a class="tag-link" href="/tags/spring/">spring</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -1057,7 +1057,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlzbmpmo003amsr9uuq117je" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlzbujbk00365kr9hkw4hgk8" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1165,9 +1165,9 @@
         <a class="tag-link" href="/tags/Java/">Java</a>
     </div>
 
-  |阅读量 <span id="busuanzi_value_page_pv"></span>次
                     </div>
                 
+                |阅读量 <span id="busuanzi_value_page_pv"></span>次
             </header>
         
         
@@ -1186,7 +1186,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" data-id="cjlzbmpmt003emsr977tu999f" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/03/18/项目中遇到的ExceptionInInitializerError异常引发的问题/" data-id="cjlzbujbu003h5kr9hvm2bqvh" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
