@@ -15,7 +15,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/c.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/b.PNG">
-<meta property="og:updated_time" content="2018-08-07T06:38:26.004Z">
+<meta property="og:updated_time" content="2018-09-12T13:35:57.740Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="过滤器与拦截器总结">
 <meta name="twitter:description" content="背景在学习过程中，我们总会遇到过滤器和拦截器的使用，因为对于他们之间的关系和区别不是很清楚，所以每次用的时候都感觉模棱两可的。所以今天特意写一篇文章总结之前用的过滤器与拦截器它们拦截请求的处理过程，不仅要知其然，还要知其所以然。">
@@ -242,6 +242,9 @@
         <a class="tag-link" href="/tags/spring/">spring</a>
     </div>
 
+                        <span id="busuanzi_container_page_pv">
+  |阅读量 <span id="busuanzi_value_page_pv"></span>次
+</span>
                     </div>
                 
             </header>
@@ -265,7 +268,7 @@
 <p>自定义过滤器需要添加@Component组件注解，让spring服务扫描到该组件类。</p>
 <h2 id="第三方的过滤器"><a href="#第三方的过滤器" class="headerlink" title="第三方的过滤器"></a>第三方的过滤器</h2><p>现在我们很多java web项目中都会用到第三方过滤器，尤其是在spring框架</p>
 <h3 id="传统的spring项目"><a href="#传统的spring项目" class="headerlink" title="传统的spring项目"></a>传统的spring项目</h3><p>在spring项目中我们经常用到spring自带的过滤器来满足项目的一些需要，比如比较常用的处理乱码的过滤器等。往往这些第三方过滤器，通常的做法是将过滤器的配置写在web.xml中。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;filter&gt;</span><br><span class="line">    &lt;filter-name&gt;encodingFilter&lt;/filter-name&gt;</span><br><span class="line">    &lt;filter-<span class="class"><span class="keyword">class</span>&gt;<span class="title">org</span>.<span class="title">springframework</span>.<span class="title">web</span>.<span class="title">filter</span>.<span class="title">CharacterEncodingFilter</span>&lt;/<span class="title">filter</span>-<span class="title">class</span>&gt;</span></span><br><span class="line"><span class="class">&lt;/<span class="title">filter</span>&gt;</span></span><br><span class="line"><span class="class">&lt;<span class="title">filter</span>-<span class="title">mapping</span>&gt;</span></span><br><span class="line"><span class="class">    &lt;<span class="title">filter</span>-<span class="title">name</span>&gt;<span class="title">encodingFilter</span>&lt;/<span class="title">filter</span>-<span class="title">name</span>&gt;</span></span><br><span class="line"><span class="class">    &lt;<span class="title">url</span>-<span class="title">pattern</span>&gt;/*&lt;/<span class="title">url</span>-<span class="title">pattern</span>&gt;</span></span><br><span class="line"><span class="class">&lt;/<span class="title">filter</span>-<span class="title">mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>encodingFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.springframework.web.filter.CharacterEncodingFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>encodingFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>加载项目的时候，将第三方的过滤器加载进去。</p>
 <h3 id="springboot项目"><a href="#springboot项目" class="headerlink" title="springboot项目"></a>springboot项目</h3><p>对于springboot项目来说，我们无法在web.xml中去配置过滤器，所以一般我们可以用JavaConfig的方式声明一个配置类，然后将我们第三方的过滤器配置进去。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FilterConfig</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置一个filter注册类</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> FilterRegistrationBean <span class="title">registrationBean</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        FilterRegistrationBean registrationBean = <span class="keyword">new</span> FilterRegistrationBean();</span><br><span class="line">        MyFilter filter = <span class="keyword">new</span> MyFilter();</span><br><span class="line">        <span class="comment">//将第三方filter加进去</span></span><br><span class="line">        registrationBean.setFilter(filter);</span><br><span class="line">        List&lt;String&gt; urls = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        urls.add(<span class="string">"/*"</span>);</span><br><span class="line">        <span class="comment">//可以设置需要过滤的url</span></span><br><span class="line">        registrationBean.addUrlPatterns(String.valueOf(urls));</span><br><span class="line">        <span class="keyword">return</span> registrationBean;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -324,7 +327,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlyvivbb003bk8r9z9omzm1e" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/03/26/过滤器与拦截器总结/" data-id="cjlzahh44003bbor9h0x3vfnf" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -501,7 +504,16 @@
             Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
         </div>
     </div>
+    <div calss="count-span">
+	<span id="busuanzi_container_site_pv">
+		总访问量: <span id="busuanzi_value_site_pv"></span>次|
+	</span>
+	<span id="busuanzi_container_site_uv">
+		总访客: <span id="busuanzi_value_site_uv"></span>人次
+	</span>
+</div>
 </footer>
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
         
     
