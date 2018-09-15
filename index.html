@@ -82,14 +82,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -101,11 +101,11 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Posts',
-            PAGES: 'Pages',
-            CATEGORIES: 'Categories',
-            TAGS: 'Tags',
-            UNTITLED: '(Untitled)',
+            POSTS: 'Pos',
+            PAGES: 'Halaman',
+            CATEGORIES: 'Kategori',
+            TAGS: 'Tag',
+            UNTITLED: 'Tanpa Judul',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
@@ -131,7 +131,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
     </div>
 
                 </td>
@@ -151,16 +151,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 39
-                <span>posts</span>
+                <span>pos</span>
             </div>
             <div class="article-info-block">
                 22
-                <span>tags</span>
+                <span>tag</span>
             </div>
         </div>
         
@@ -250,14 +250,78 @@
         
         <div class="article-entry" itemprop="articleBody">
         
-            <p><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有参与过一个小型的校园抢票系统的部分设计，里面就涉及到关于高并发下如何进行限流的问题，当时的做法是直接利用 <code>redis</code>进行限流，后期维护的时候发现自己对限流这块掌握的不好，于是就从网上查资料去研究 限流的应用，下面的总结也是基于网上的资料写的，肯定与网上的内容有重叠的情况，这里算是做个记录总结一下吧。</p>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有参与过一个小型的校园抢票系统的部分设计，里面就涉及到关于高并发下如何进行限流的问题，当时的做法是直接利用 <code>redis</code>进行限流，后期维护的时候发现自己对限流这块掌握的不好，于是就从网上查资料去研究 限流的应用，下面的总结也是基于网上的资料写的，肯定与网上的内容有重叠的情况，这里算是做个记录总结一下吧。</p>
 <h2 id="限流简介"><a href="#限流简介" class="headerlink" title="限流简介"></a>限流简介</h2><p>在高并发项目中，经常会存在短时间内用户访问人数过多导致系统崩溃的问题，这个时候一个解决方法就是利用<strong>限流</strong>。</p>
 <blockquote>
 <p>限流的目的是通过对并发访问、请求进行限速或者一个时间窗口内的请求进行限速来保护系统，一旦达到限制速率则可以拒绝服务，排队或等待，降级等</p>
-</blockquote></p>
-            <p class="article-more-link">
-                <a href="/2018/09/14/浅谈限流算法/#more">Read More</a>
-            </p>
+</blockquote>
+<h2 id="限流算法"><a href="#限流算法" class="headerlink" title="限流算法"></a>限流算法</h2><p>常用的限流算法有: <strong>漏桶(leaky bucket)</strong>，<strong>令牌桶(Token Bucket)</strong>,<strong>计数器</strong>，下面就对三种算法进行简单分析。</p>
+<h3 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h3><blockquote>
+<p>令牌桶算法的原理是系统会以一个恒定的速度往桶里放入令牌，而如果请求需要被处理，则需要先从桶里获取一个令牌，当桶里没有令牌可取时，则拒绝服务。桶中最多存放一定数量的令牌,当桶满时，新添加的令牌被丢弃或拒绝。如下图所示</p>
+</blockquote>
+<p><img src="http://osvtz719h.bkt.clouddn.com/%E4%BB%A4%E7%89%8C.png" alt="token_bucket"></p>
+<p>上图出自开涛大神的<a href="http://jinnianshilongnian.iteye.com/blog/2305117" target="_blank" rel="noopener">聊聊高并发系统之限流特技</a>这篇博客，非常形象。</p>
+<p>令牌桶的另一个好处是可以方便的改变速度，一旦需要提高速率，则按需提高放入桶中的令牌的速率。一般会定时(比如100毫秒)往桶中增加一定数量的令牌，有些变种的算法则实时的计算应该增加的令牌的数量。</p>
+<h4 id="令牌桶算法的实现"><a href="#令牌桶算法的实现" class="headerlink" title="令牌桶算法的实现"></a>令牌桶算法的实现</h4><p>在 <code>Google Guava</code>中提供了一个 <strong>RateLimiter</strong> 工具类，就是基于 <strong>令牌桶算法</strong> 实现平滑突发的限流策略。</p>
+<p><strong>RateLimiter</strong>是一个速度控制器，可以根据配置的速度发送令牌。其中有一个重要的方法——<code>acquire(num)</code>方法，、该方法表示从RateLimiter消费多少个令牌，被阻塞到获取到令牌(许可证)，如果存在等待的情况的话，告诉调用者获取到该请求所需要的睡眠时间.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public class RateLimiterTest implements Runnable&#123;</span><br><span class="line">    /**</span><br><span class="line">     * 令牌桶算法</span><br><span class="line">     * 每秒产生 2 个令牌</span><br><span class="line">     *</span><br><span class="line">     */</span><br><span class="line">    private static final RateLimiter limiter = RateLimiter.create(2);</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        for (int i = 0; i &lt; 5; i++) &#123;</span><br><span class="line">            RateLimiterTest rateLimiterTest = new RateLimiterTest();</span><br><span class="line">            new Thread(rateLimiterTest).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        final double acquire = limiter.acquire();</span><br><span class="line">        System.out.println(&quot;当前时间 - &quot;+LocalDateTime.now()+&quot; - &quot;+Thread.currentThread().getName()+&quot;- 阻塞时长 -&quot;+ acquire+ &quot;秒&quot;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>控制台输出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">当前时间 - 2018-09-14T14:44:44.189 - Thread-1- 阻塞时长 -0.0秒</span><br><span class="line">当前时间 - 2018-09-14T14:44:44.573 - Thread-2- 阻塞时长 -0.490724秒</span><br><span class="line">当前时间 - 2018-09-14T14:44:45.071 - Thread-5- 阻塞时长 -0.990702秒</span><br><span class="line">当前时间 - 2018-09-14T14:44:45.571 - Thread-4- 阻塞时长 -1.490681秒</span><br><span class="line">当前时间 - 2018-09-14T14:44:46.072 - Thread-3- 阻塞时长 -1.990559秒</span><br></pre></td></tr></table></figure></p>
+<p>代码解读:</p>
+<ul>
+<li><code>RateLimiter.create(2)</code>表示每秒新增2个令牌，即每500ms新增一个令牌</li>
+<li><code>limiter.acquire()</code>表示消费一个令牌，如果当前桶中有足够令牌则成功 (返回值为0)，如果没有令牌则暂停一段时间，比如发令牌间隔是500ms，则大致等待500ms再去消费令牌，如上面控制台输出一样，每次阻塞间隔大致500ms左右</li>
+</ul>
+<p>在江南白衣大大的<a href="http://calvin1978.blogcn.com/articles/ratelimiter.html" target="_blank" rel="noopener">服务化体系之－限流</a>中有提到关于 <code>RateLimiter</code>的一些实现细节：</p>
+<blockquote>
+<p>在RateLimiter的实现里，即使桶里没有多少令牌，依旧可以超出消耗，然后桶里面在时间段内都没有新令牌，比如桶的容量是5，桶里面现在只有1个令牌，如果你要拿5个令牌，也可以，清了桶里的一个令牌，再预借4个，然后再过800ms，桶里才会出现新令牌。</p>
+</blockquote>
+<h3 id="漏桶算法"><a href="#漏桶算法" class="headerlink" title="漏桶算法"></a>漏桶算法</h3><p>漏桶作为计量工具时，可以用于流量整型和流量控制，网上大多数关于漏桶算法的描述如下:</p>
+<ul>
+<li>一个<strong>固定容量</strong>的漏桶，按照常量固定速率流出水滴</li>
+<li>如果桶是空的，则不需流出水滴</li>
+<li>可以以<strong>任意速率</strong>流入水滴到漏桶</li>
+<li>如果流入水滴超出了桶的容量，则流入的水滴溢出了(被丢弃)，而漏桶容量是不变的<br><img src="http://osvtz719h.bkt.clouddn.com/low.png" alt="leakly_bucket"></li>
+</ul>
+<p>漏桶算法思路很简单，水(数据或者请求)先进入到漏桶里，漏桶以一定的速度出水，当水流入速度过大会直接溢出，可以看出漏桶算法能强行限制数据的传输速率。</p>
+<blockquote>
+<p>漏桶它的主要目的是控制注入到网络的速率，平滑网络上的突发流量。漏桶算法提供了一种机制，通过它，突发流量可以被整形以便为网络提供了一个稳定的流量。漏桶可以看做是一个带有常量服务时间的单服务器队列，如果漏桶(包缓存)溢出，那么数据包会被丢弃。</p>
+</blockquote>
+<p>在某些情况下，漏桶算法不能够有效使用网络资源，因为漏桶的漏出速率是固定的参数，所以，即使网络中不存在资源冲突(没有发生拥塞)，漏桶算法也不能使某一个单独的流突发到端口速率。因此，对于存在突发特性的流量来说缺乏效率，而令牌桶算法则能够满足这些具有突发特性的流量。</p>
+<p>通常，漏桶算法与令牌桶算法可以结合起来为网络流量提供更大的控制</p>
+<h4 id="漏桶算法的实现"><a href="#漏桶算法的实现" class="headerlink" title="漏桶算法的实现"></a>漏桶算法的实现</h4><p>漏桶算法可以通过 <strong>信号量(Semaphore)</strong> 的方式实现，可以达到消峰的目的。<strong>Semaphore</strong>是用来控制同时访问特定资源的线程数量，它通过协调各个线程，以保证合理的使用公共资源，其应用场景就是用于流量控制，也可以说是实现了漏桶算法，比如数据库连接，如果有大量的线程访问数据库，而数据库连接数只有10个，此时我们就需要控制只有10个线程同时获取数据库连接保存数据，否则无法获取数据库连接。这种情况下，我们就可以利用 <strong>semaphore</strong>来做限流控制，示例代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SemaphoreTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> THRED_COUNT = <span class="number">20</span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 设置线程池大小为20</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ExecutorService service = Executors.newFixedThreadPool(THRED_COUNT);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 设置信号量，表示只允许10个并发的执行</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Semaphore semaphore = <span class="keyword">new</span> Semaphore(<span class="number">10</span>);</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//20个线程在运行</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; THRED_COUNT; i++) &#123;</span><br><span class="line">            service.execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="comment">//线程使用acquire获取一个许可证</span></span><br><span class="line">                        semaphore.acquire();</span><br><span class="line">                        System.out.println(<span class="string">"通过,save data,线程: "</span>+Thread.currentThread().getName());</span><br><span class="line"></span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        semaphore.release();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        service.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>代码解读:</p>
+<ul>
+<li>一共30个线程，但是只允许10个<strong>并发</strong>的执行，我们启动的线程数就表示了漏桶算法中的<strong>流入速率</strong>，该速率是任意的</li>
+<li><code>Semaphore(int permits)</code> 接受一共整型的数字，表示可用的许可证数量，比如<code>Semaphore(10)</code>表示允许10个线程获取许可证，也就是<strong>最大并发数是10</strong>，其实就相当于漏桶算法中的<strong>常量固定速率</strong></li>
+<li>线程使用 <code>acquire</code>方法获取一个许可证，使用完之后调用release()归还许可证</li>
+</ul>
+<p>测试结果:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">通过,save data,线程: pool-1-thread-2</span><br><span class="line">通过,save data,线程: pool-1-thread-1</span><br><span class="line">通过,save data,线程: pool-1-thread-3</span><br><span class="line">通过,save data,线程: pool-1-thread-4</span><br><span class="line">通过,save data,线程: pool-1-thread-5</span><br><span class="line">通过,save data,线程: pool-1-thread-6</span><br><span class="line">通过,save data,线程: pool-1-thread-7</span><br><span class="line">通过,save data,线程: pool-1-thread-8</span><br><span class="line">通过,save data,线程: pool-1-thread-9</span><br><span class="line">通过,save data,线程: pool-1-thread-10</span><br><span class="line">通过,save data,线程: pool-1-thread-12</span><br><span class="line">通过,save data,线程: pool-1-thread-11</span><br><span class="line">通过,save data,线程: pool-1-thread-14</span><br><span class="line">通过,save data,线程: pool-1-thread-16</span><br><span class="line">通过,save data,线程: pool-1-thread-18</span><br><span class="line">通过,save data,线程: pool-1-thread-17</span><br><span class="line">通过,save data,线程: pool-1-thread-19</span><br><span class="line">通过,save data,线程: pool-1-thread-20</span><br><span class="line">通过,save data,线程: pool-1-thread-13</span><br><span class="line">通过,save data,线程: pool-1-thread-15</span><br></pre></td></tr></table></figure></p>
+<h2 id="令牌桶算法和漏桶算法比较"><a href="#令牌桶算法和漏桶算法比较" class="headerlink" title="令牌桶算法和漏桶算法比较"></a>令牌桶算法和漏桶算法比较</h2><p>令牌桶和漏桶比较:</p>
+<ul>
+<li>定义<ul>
+<li>令牌桶是按照<strong>设定速率往桶中添加令牌，请求是否被处理需要看桶中令牌是否足够</strong>，当令牌数减为零时则拒绝新的请求</li>
+<li>漏桶是按照<strong>常量固定速率</strong>流出请求，<strong>流入速率任意</strong>，当流入的请求数累积到漏桶容量时，新流入的请求被拒绝</li>
+</ul>
+</li>
+<li>针对突发性流量<ul>
+<li>令牌桶可以限制平均流入速率，只要有令牌，允许一定程度的突发流量</li>
+<li>漏桶流入速率任意，流出速率常量，即平滑突发流入速率</li>
+</ul>
+</li>
+</ul>
+<h2 id="计数器限流"><a href="#计数器限流" class="headerlink" title="计数器限流"></a>计数器限流</h2><p>计数器限流算法也是比较常用一种的限流方案，是最简单粗暴的，主要用来限制总并发数，比如数据库连接池大小，线程池大小，接口访问并发数等都是使用计数器算法。在我之前参与的那个校园抢票系统中实际上也是利用计数器进行限流。</p>
+<h3 id="使用Java中的-AomicInteger"><a href="#使用Java中的-AomicInteger" class="headerlink" title="使用Java中的 AomicInteger"></a>使用Java中的 AomicInteger</h3><p><strong>AomicInteger</strong>是JDK 1.5提供的拥有原子特性的计数功能，在Java多线程过程中，<code>++i</code>和<code>i++</code>操作并不是线程安全的，而AtomicInteger就解决了这个问题，提供一种保证线程安全的加减操作接口，就像 <code>redis incr</code>一样。下面是示例代码:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AtomicLimiterTest</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AtomicInteger atomic = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            AtomicLimiterTest atomicLimiterTest = <span class="keyword">new</span> AtomicLimiterTest();</span><br><span class="line">            <span class="keyword">new</span> Thread(atomicLimiterTest).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (atomic.get() &gt;= <span class="number">3</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">"超出限流数，拒绝请求"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            atomic.incrementAndGet();</span><br><span class="line">            System.out.println(<span class="string">"当前计数为: "</span>+atomic.get());</span><br><span class="line">            <span class="comment">//处理业务逻辑</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>控制台输出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">当前计数为: 1</span><br><span class="line">当前计数为: 2</span><br><span class="line">当前计数为: 3</span><br><span class="line">超出限流数，拒绝请求</span><br><span class="line">超出限流数，拒绝请求</span><br></pre></td></tr></table></figure></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>对于限流来说，我们往往需要根据实际业务场景来决定使用何种算法进行限流。<strong>最好的算法不一定是最合适的</strong>。</p>
+<p>上面简单的介绍了几种限流算法，参考了一些大神的文章，这里只是做个简单记录，如有错误之处，欢迎指出。</p>
+<h2 id="参考链接-amp-鸣谢"><a href="#参考链接-amp-鸣谢" class="headerlink" title="参考链接 &amp; 鸣谢"></a>参考链接 &amp; 鸣谢</h2><ul>
+<li><a href="http://jinnianshilongnian.iteye.com/blog/2305117" target="_blank" rel="noopener">聊聊高并发系统之限流特技</a></li>
+<li><a href="http://calvin1978.blogcn.com/articles/ratelimiter.html" target="_blank" rel="noopener">服务化体系之－限流</a></li>
+<li><a href="http://blog.battcn.com/2018/07/24/service/limiting-strategy/" target="_blank" rel="noopener">限流探索</a></li>
+<li><a href="http://ifeve.com/concurrency-semaphore/#more-14753" target="_blank" rel="noopener">并发工具类（三）控制并发线程数的Semaphore</a></li>
+<li><a href="http://ifeve.com/guava-ratelimiter/" target="_blank" rel="noopener">Guava官方文档-RateLimiter类</a></li>
+</ul>
+
         
         </div>
         <footer class="article-footer">
@@ -267,7 +331,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/14/浅谈限流算法/" data-id="cjm1q1l6z0036ncr9zve7c3wf" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/14/浅谈限流算法/" data-id="cjm2self0002wskr9kdei739w" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -335,7 +399,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/14/浅谈限流算法/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/14/浅谈限流算法/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/14/浅谈限流算法/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/14/浅谈限流算法/">Komentar</a>
     
 
         </footer>
@@ -401,7 +465,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/13/springboot系列文章之过滤器-vs-拦截器/" data-id="cjm1q1l66002cncr9cugrugmh" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/13/springboot系列文章之过滤器-vs-拦截器/" data-id="cjm2sele10025skr95bzyzp6z" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -469,7 +533,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/13/springboot系列文章之过滤器-vs-拦截器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/13/springboot系列文章之过滤器-vs-拦截器/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/13/springboot系列文章之过滤器-vs-拦截器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/13/springboot系列文章之过滤器-vs-拦截器/">Komentar</a>
     
 
         </footer>
@@ -539,7 +603,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/12/springboot系列文章之集成WebSocket进行广播式消息推送/" data-id="cjm1q1l69002encr959fizwra" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/12/springboot系列文章之集成WebSocket进行广播式消息推送/" data-id="cjm2self40030skr9zqvuahvm" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -607,7 +671,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/12/springboot系列文章之集成WebSocket进行广播式消息推送/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/12/springboot系列文章之集成WebSocket进行广播式消息推送/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/12/springboot系列文章之集成WebSocket进行广播式消息推送/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/12/springboot系列文章之集成WebSocket进行广播式消息推送/">Komentar</a>
     
 
         </footer>
@@ -672,7 +736,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/10/springboot系列文章之使用单元测试/" data-id="cjm1q1l5p001tncr92bgo2j2b" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/10/springboot系列文章之使用单元测试/" data-id="cjm2seles002qskr9gospq2jb" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -740,7 +804,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/10/springboot系列文章之使用单元测试/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/10/springboot系列文章之使用单元测试/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/10/springboot系列文章之使用单元测试/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/10/springboot系列文章之使用单元测试/">Komentar</a>
     
 
         </footer>
@@ -808,7 +872,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/08/springboot系列文章之日志配置/" data-id="cjm1q1l610026ncr9zwr8mzr7" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/08/springboot系列文章之日志配置/" data-id="cjm2seleo002mskr9lacjtsa7" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -876,7 +940,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/08/springboot系列文章之日志配置/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/08/springboot系列文章之日志配置/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/08/springboot系列文章之日志配置/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/08/springboot系列文章之日志配置/">Komentar</a>
     
 
         </footer>
@@ -942,7 +1006,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/06/springboot系列文章之实现跨域请求-CORS/" data-id="cjm1q1l5y0021ncr9pu27msgd" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/06/springboot系列文章之实现跨域请求-CORS/" data-id="cjm2seldz0022skr96cnwqpkd" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1010,7 +1074,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/06/springboot系列文章之实现跨域请求-CORS/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/06/springboot系列文章之实现跨域请求-CORS/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/06/springboot系列文章之实现跨域请求-CORS/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/06/springboot系列文章之实现跨域请求-CORS/">Komentar</a>
     
 
         </footer>
@@ -1075,7 +1139,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/" data-id="cjm1q1l5m001pncr9biuctme4" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/" data-id="cjm2sele50028skr97h6267xi" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1143,7 +1207,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/">Komentar</a>
     
 
         </footer>
@@ -1209,7 +1273,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" data-id="cjm1q1l3q0005ncr9epxy8j6v" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" data-id="cjm2selbp000cskr9pk064vdw" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1277,7 +1341,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/">Komentar</a>
     
 
         </footer>
@@ -1342,7 +1406,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjm1q1l3y0009ncr9omni9na2" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjm2selb60005skr9z4i0z1t4" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1410,7 +1474,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Komentar</a>
     
 
         </footer>
@@ -1475,7 +1539,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" data-id="cjm1q1l4a000gncr9um5v9x5t" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" data-id="cjm2selbl000askr9mdrsvovt" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1543,7 +1607,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/">Komentar</a>
     
 
         </footer>
@@ -1554,7 +1618,7 @@
 
 
     <nav id="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Berikutnya &raquo;</a>
     </nav>
 </section>
             
@@ -1563,7 +1627,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">categories</h3>
+        <h3 class="widget-title">Kategori</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
         </div>
@@ -1572,7 +1636,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">archives</h3>
+        <h3 class="widget-title">Arsip</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -1581,7 +1645,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tags</h3>
+        <h3 class="widget-title">tag</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -1590,7 +1654,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag cloud</h3>
+        <h3 class="widget-title">awan tag</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a>
         </div>
@@ -1599,7 +1663,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">links</h3>
+        <h3 class="widget-title">tautan</h3>
         <div class="widget">
             <ul>
                 
