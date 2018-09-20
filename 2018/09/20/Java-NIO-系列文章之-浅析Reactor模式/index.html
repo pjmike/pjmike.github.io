@@ -3,22 +3,28 @@
 <head>
     <meta charset="utf-8">
     
-    <title>JVM 系列文章之 Full GC 和 Minor GC | 风居者的街道</title>
+    <title>Java NIO 系列文章之 浅析Reactor模式 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
-<meta name="keywords" content="Java,JVM">
+    <meta name="description" content="前言最近研究 Java NIO 的时候，常常看到一种 设计模式——Reactor模式，以前没接触过这个模式在Netty中也有应用，那么Reactor模式是什么？为什么要使用Reactor模式？在NIO中如何实现Reactor模式？下面将揭开 Reactor的神秘面纱  下面的介绍参考了网上很多相关资料，所以可能会与网上某些资料有重复的情况  Reactor的介绍Reactor 是一种和 IO 相关">
+<meta name="keywords" content="NIO,Reactor">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JVM 系列文章之 Full GC 和 Minor GC">
-<meta property="og:url" content="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/index.html">
+<meta property="og:title" content="Java NIO 系列文章之 浅析Reactor模式">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
+<meta property="og:description" content="前言最近研究 Java NIO 的时候，常常看到一种 设计模式——Reactor模式，以前没接触过这个模式在Netty中也有应用，那么Reactor模式是什么？为什么要使用Reactor模式？在NIO中如何实现Reactor模式？下面将揭开 Reactor的神秘面纱  下面的介绍参考了网上很多相关资料，所以可能会与网上某些资料有重复的情况  Reactor的介绍Reactor 是一种和 IO 相关">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/YGCcross.png">
-<meta property="og:updated_time" content="2018-09-10T11:05:21.199Z">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Reactor_Simple.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/reactor1.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/reacor1_nio.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/reactor2.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/reactor2_nio.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Reactor3_nio.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/reactor3_nio.jpg">
+<meta property="og:updated_time" content="2018-09-20T11:32:17.460Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="JVM 系列文章之 Full GC 和 Minor GC">
-<meta name="twitter:description" content="Full GCFull GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式 RednaxelaFX大在Major GC和Full GC的区别是什么？触发条件呢？- 知乎这个问题有关于 GC分类的回答：">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/YGCcross.png">
+<meta name="twitter:title" content="Java NIO 系列文章之 浅析Reactor模式">
+<meta name="twitter:description" content="前言最近研究 Java NIO 的时候，常常看到一种 设计模式——Reactor模式，以前没接触过这个模式在Netty中也有应用，那么Reactor模式是什么？为什么要使用Reactor模式？在NIO中如何实现Reactor模式？下面将揭开 Reactor的神秘面纱  下面的介绍参考了网上很多相关资料，所以可能会与网上某些资料有重复的情况  Reactor的介绍Reactor 是一种和 IO 相关">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/Reactor_Simple.png">
     
 
     
@@ -211,7 +217,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-JVM-系列文章之-Full-GC-和-Minor-GC" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Java-NIO-系列文章之-浅析Reactor模式" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -219,7 +225,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            JVM 系列文章之 Full GC 和 Minor GC
+            Java NIO 系列文章之 浅析Reactor模式
         </h1>
     
 
@@ -228,8 +234,8 @@
                         
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/">
-            <time datetime="2018-09-03T12:38:44.000Z" itemprop="datePublished">2018-09-03</time>
+        <a href="/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/">
+            <time datetime="2018-09-20T11:32:17.000Z" itemprop="datePublished">2018-09-20</time>
         </a>
     </div>
 
@@ -237,13 +243,13 @@
                         
     <div class="article-category">
     	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
+        <a class="article-category-link" href="/categories/NIO/">NIO</a>
     </div>
 
                         
     <div class="article-tag">
         <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/JVM/">JVM</a>, <a class="tag-link" href="/tags/Java/">Java</a>
+        <a class="tag-link" href="/tags/NIO/">NIO</a>, <a class="tag-link" href="/tags/Reactor/">Reactor</a>
     </div>
 
                     </div>
@@ -256,74 +262,118 @@
             
                 <div id="toc" class="toc-article">
                 <strong class="toc-title">Catálogo</strong>
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Full-GC"><span class="toc-number">1.</span> <span class="toc-text">Full GC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Full-GC的触发条件"><span class="toc-number">1.1.</span> <span class="toc-text">Full GC的触发条件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Minor-GC"><span class="toc-number">2.</span> <span class="toc-text">Minor GC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#触发条件"><span class="toc-number">2.1.</span> <span class="toc-text">触发条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Minor-GC的过程"><span class="toc-number">2.2.</span> <span class="toc-text">Minor GC的过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Survivor区对象晋升位老年代对象的条件"><span class="toc-number">2.3.</span> <span class="toc-text">Survivor区对象晋升位老年代对象的条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Minor-GC的问题与卡表分析"><span class="toc-number">2.4.</span> <span class="toc-text">Minor GC的问题与卡表分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JVM如何避免Minor-GC扫描全堆"><span class="toc-number">2.4.1.</span> <span class="toc-text">JVM如何避免Minor GC扫描全堆</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于-Major-GC的说明"><span class="toc-number">3.</span> <span class="toc-text">关于 Major GC的说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">5.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor的介绍"><span class="toc-number">2.</span> <span class="toc-text">Reactor的介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#模式比较"><span class="toc-number">2.1.</span> <span class="toc-text">模式比较</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reactor模式的三种实现"><span class="toc-number">3.</span> <span class="toc-text">Reactor模式的三种实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#单Reactor单线程"><span class="toc-number">3.1.</span> <span class="toc-text">单Reactor单线程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#单Reactor单线程在NIO中的实现"><span class="toc-number">3.1.1.</span> <span class="toc-text">单Reactor单线程在NIO中的实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#单Reactor多线程"><span class="toc-number">3.2.</span> <span class="toc-text">单Reactor多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#单Reactor多线程在-Java-NIO中的实现"><span class="toc-number">3.2.1.</span> <span class="toc-text">单Reactor多线程在 Java NIO中的实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多Reactor多进程-线程"><span class="toc-number">3.3.</span> <span class="toc-text">多Reactor多进程/线程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#多Reactor多线程在-Java-NIO中的体现"><span class="toc-number">3.3.1.</span> <span class="toc-text">多Reactor多线程在 Java NIO中的体现</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">5.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
             
-            <h2 id="Full-GC"><a href="#Full-GC" class="headerlink" title="Full GC"></a>Full GC</h2><p><strong>Full GC 就是收集整个堆，包括新生代，老年代，永久代(在JDK 1.8及以后，永久代会被移除，换为metaspace)等收集所有部分的模式</strong></p>
-<p><strong>RednaxelaFX大</strong>在<a href="https://www.zhihu.com/question/41922036/answer/93079526" target="_blank" rel="noopener">Major GC和Full GC的区别是什么？触发条件呢？- 知乎</a>这个问题有关于 GC分类的回答：</p>
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近研究 Java NIO 的时候，常常看到一种 设计模式——Reactor模式，以前没接触过这个模式在Netty中也有应用，那么Reactor模式是什么？为什么要使用Reactor模式？在NIO中如何实现Reactor模式？下面将揭开 Reactor的神秘面纱</p>
+<blockquote>
+<p>下面的介绍参考了网上很多相关资料，所以可能会与网上某些资料有重复的情况</p>
+</blockquote>
+<h2 id="Reactor的介绍"><a href="#Reactor的介绍" class="headerlink" title="Reactor的介绍"></a>Reactor的介绍</h2><p>Reactor 是一种和 IO 相关的设计模式，Java中的NIO中天生就对 Reactor模式提供了很好的支持，比较著名的就是 <a href="https://baike.baidu.com/item/Doug%20Lea/6319404" target="_blank" rel="noopener">Doung Lea</a> 大神在 <a href="http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf" target="_blank" rel="noopener">《Scalable IO in Java》</a>演示如何使用 NIO 实现Reactor模式</p>
 <a id="more"></a>
-<p>针对 HotSpot VM的实现，它里面的GC其实准确分类有两种:</p>
+<p>在维基百科上对 Reactor模式定义如下:</p>
+<blockquote>
+<p>The reactor design pattern is an <strong>event handling pattern</strong> for handling service requests <strong>delivered concurrently to a service handler</strong> by one or more inputs. The service handler then <strong>demultiplexes</strong> the incoming requests and dispatches them synchronously to the associated request handlers</p>
+</blockquote>
+<p>从上面的描述我们可以得到几个关键点：</p>
 <ul>
-<li><strong>Partial GC(局部 GC)</strong>: 并不收集整个 GC 堆的模式<ul>
-<li>Young GC: 只收集young gen的GC，<strong>Young GC还有种说法就叫做 “Minor GC”</strong></li>
-<li>Old GC: 只收集old gen的GC。只有垃圾收集器CMS的concurrent collection 是这个模式</li>
-<li>Mixed GC: 收集整个young gen 以及部分old gen的GC。只有垃圾收集器 G1有这个模式</li>
+<li>一种事件驱动模型</li>
+<li>处理多个输入</li>
+<li>采用多路复用将事件分发给相应的Handler处理</li>
 </ul>
-</li>
-<li><strong>Full GC</strong>: 收集整个堆，包括 新生代，老年代，永久代(在 JDK 1.8及以后，永久代被移除，换为metaspace 元空间)等所有部分的模式</li>
-</ul>
-<h3 id="Full-GC的触发条件"><a href="#Full-GC的触发条件" class="headerlink" title="Full GC的触发条件"></a>Full GC的触发条件</h3><p>针对不同的垃圾收集器，Full GC的触发条件可能不都一样。<strong>按HotSpot VM的serial GC的实现来看</strong>，触发条件是:</p>
-<ul>
-<li><blockquote>
-<p><strong>当准备要触发一次 young GC时，如果发现统计数据说之前 young GC的平均晋升大小比目前的 old gen剩余的空间大，则不会触发young GC而是转为触发 full GC</strong> (因为HotSpot VM的GC里，除了垃圾回收器 CMS的concurrent collection 之外，其他能收集old gen的GC都会同时收集整个GC堆，包括young gen，所以不需要事先准备一次单独的young GC)</p>
-</blockquote>
-</li>
-<li><blockquote>
-<p><strong>如果有永久代(perm gen),要在永久代分配空间但已经没有足够空间时，也要触发一次 full GC</strong></p>
-</blockquote>
-</li>
-<li><blockquote>
-<p><strong>System.gc()，heap dump带GC,其默认都是触发 full GC.</strong></p>
-</blockquote>
-</li>
-</ul>
-<p>HotSpot VM里其他非并发GC的触发条件复杂一些，不过大致原理与上面说的其实一样。</p>
-<p>而<strong>在 Parallel Scavenge 收集器下，默认是在要触发 full GC前先执行一次 young GC</strong>,并且两次GC之间能让应用程序稍微运行一小下，以期降低 full GC的暂停时间 (因为 young GC 会尽量清理了young gen的死对象，减少了 full GC的工作量)。<strong>控制这个行为的VM参数是: -XX:+ScavengeBeforeFullGC</strong>。</p>
-<p>并发GC的触发条件就不一样，<strong>以 CMS GC为例，它主要是定时去检查old gen的使用量，但使用量超过了触发比例就会启动一次 CMS GC，对old gen做并发收集</strong>。</p>
-<h2 id="Minor-GC"><a href="#Minor-GC" class="headerlink" title="Minor GC"></a>Minor GC</h2><p>Minor GC 是俗称，<strong>新生代(新生代分为一个 Eden区和两个Survivor区)的垃圾收集叫做 Minor GC</strong>。在 Oracle 高级研究员郑雨迪的<a href="https://time.geekbang.org/column/intro/108" target="_blank" rel="noopener">极客时间专栏 《深入拆解Java虚拟机》</a>中也谈到 <strong>Minor GC</strong>，内容如下:</p>
-<h3 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h3><blockquote>
-<p>当 Eden 区的空间耗尽了怎么办？这个时候 Java虚拟机便会触发一次 <strong>Minor GC</strong>来收集新生代的垃圾，存活下来的对象，则会被送到 Survivor区。</p>
-</blockquote>
-<p><strong>简单说就是当新生代的Eden区满的时候触发 Minor GC</strong></p>
-<h3 id="Minor-GC的过程"><a href="#Minor-GC的过程" class="headerlink" title="Minor GC的过程"></a>Minor GC的过程</h3><blockquote>
-<p>前面提到，<strong>新生代共有 两个 Survivor区，我们分别用 from 和 to来指代</strong>。其中 to 指向的Survivor区是空的。</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/Reactor_Simple.png" alt="Reactor"></p>
+<p>在<a href="https://www.jianshu.com/p/38b56531565d" target="_blank" rel="noopener">netty学习系列二：NIO Reactor模型 &amp; Netty线程模型</a>这篇文章谈到，Reactor实际上采用了<strong>分而治之</strong>和<strong>事件驱动</strong>的思想：</p>
+<blockquote>
+<p><strong>分而治之</strong>： 一个连接里完整的网络处理过程一般分为 accept，read，decode，process，encode，send这几步。而Reactor模式将每个步骤映射为 一个Task，服务端线程执行的最小逻辑单元不再是一个完整的网络请求，而是 Task，且采用非阻塞方式执行。</p>
 </blockquote>
 <blockquote>
-<p>当发生 Minor GC时，Eden 区和 from 指向的 Survivor 区中的存活对象会被复制(此处采用标记 - 复制算法)到 to 指向的 Survivor区中，然后<strong>交换 from 和 to指针，以保证下一次 Minor GC时，to 指向的 Survivor区还是空的</strong>。</p>
+<p><strong>事件驱动</strong>： 每个Task 对应特定的网络事件，当Task 准备就绪时，Reactor 收到对应的网络事件通知，并将Task 分发给绑定了对应网络事件的 Handler 执行。</p>
 </blockquote>
-<p><strong>注意: from与to只是两个指针，它们变动的，to指针指向的Survivor区是空的</strong></p>
-<h3 id="Survivor区对象晋升位老年代对象的条件"><a href="#Survivor区对象晋升位老年代对象的条件" class="headerlink" title="Survivor区对象晋升位老年代对象的条件"></a>Survivor区对象晋升位老年代对象的条件</h3><blockquote>
-<p>Java虚拟机会记录 Survivor区中的对象一共被来回复制了几次。<strong>如果一个对象被复制的次数为 15 (对应虚拟机参数 -XX:+MaxTenuringThreshold),那么该对象将被晋升为至老年代</strong>，(至于为什么是 15次，原因是 HotSpot会在对象头的中的标记字段里记录年龄，分配到的空间只有4位，所以最多只能记录到15)。另外，<strong>如果单个 Survivor 区已经被占用了 50% (对应虚拟机参数: -XX:TargetSurvivorRatio)，那么较高复制次数的对象也会被晋升至老年代。</strong></p>
+<p>总结以上几个特点，再次说明下 <strong>Reactor模式就是 指一个或多个事件输入同时传递给服务处理器(Reactor)，服务处理器负责监听各事件的状态，当任意一个事件准备就绪时，服务处理器收到该事件通知，并将事件发送给绑定了该对应网络事件的事件处理器(Handler)执行</strong></p>
+<p><strong>Reactor模式也叫做Dispatcher模式</strong>，即 I/O多路复用统一监听事件，收到事件后再分发(Dispatch)给相应的处理线程。</p>
+<h3 id="模式比较"><a href="#模式比较" class="headerlink" title="模式比较"></a>模式比较</h3><p>谈到 Reactor模式就会让我想起观察者模式，它俩看起来非常相似的，但是观察者模式主要用于<strong>一对多</strong>的情况，它定义了一个一对多的依赖关系，让多个观察者对象监听一个主题对象，当被观察者状态改变时，需要通知相应的观察者，使这些观察者能够自动更新。所以<strong>实际上它们还是有不同的，观察者模式与单个事件源关联，而Reactor模式与多个事件源关联</strong>。</p>
+<h2 id="Reactor模式的三种实现"><a href="#Reactor模式的三种实现" class="headerlink" title="Reactor模式的三种实现"></a>Reactor模式的三种实现</h2><blockquote>
+<p>以下的说明参考了Alibaba资深技术专家李运华的极客时间专栏<a href="https://time.geekbang.org/column/intro/81?code=OK4eM0TBPTKGPRCzcZdzIeXjPACLfY3KCzATXOSWzXE%3D" target="_blank" rel="noopener">从0开始学架构</a>中对于Reactor的介绍</p>
 </blockquote>
-<p><strong>当Survivor区的部分对象晋升到老年代后，老年代的占用量通常会升高。</strong></p>
-<p><strong>注意</strong>：</p>
-<p>在Minor GC过程中，Survivor 可能不足以容纳Eden和另一个Survivor中的存活对象。如果Survivor中的存活对象溢出，多余的对象将被移到老年代，这称为<strong>过早提升(Premature Promotion)</strong>，这会导致老年代中短期存活对象的增长，可能会引发严重的性能问题。再进一步说，在Minor GC过程中，如果老年代满了而无法容纳更多的对象，Minor GC 之后通常就会进行Full GC,这将导致遍历整个Java堆，这称为<strong>提升失败(Promotion Failure)</strong>。至于解决办法，这就涉及到对应用程序的调优问题了，这里就不叙述了，如有兴趣，请自行查阅相关资料</p>
-<h3 id="Minor-GC的问题与卡表分析"><a href="#Minor-GC的问题与卡表分析" class="headerlink" title="Minor GC的问题与卡表分析"></a>Minor GC的问题与卡表分析</h3><p><strong>Minor GC存在一个问题就是，老年代的对象可能引用新生代的对象</strong>，在标记存活对象的时候，就需要扫描老年代的对象，如果该对象拥有对新生代对象的引用，那么这个引用也会被作为 GC Roots。这相当于就做了<strong>全堆扫描</strong>。</p>
-<h4 id="JVM如何避免Minor-GC扫描全堆"><a href="#JVM如何避免Minor-GC扫描全堆" class="headerlink" title="JVM如何避免Minor GC扫描全堆"></a>JVM如何避免Minor GC扫描全堆</h4><p>HotSpot 给出的解决方案是 一项叫做 <strong>卡表</strong> 的技术。如下图所示:<br><img src="http://osvtz719h.bkt.clouddn.com/YGCcross.png" alt="card table"></p>
-<p>卡表的具体策略是<strong>将老年代的空间分成大小为 512B的若干张卡，并且维护一个卡表，卡表本省是字节数组，数组中的每个元素对应着一张卡，其实就是一个标识位，这个标识位代表对应的卡是否可能存有指向新生代对象的引用</strong>，如果可能存在，那么我们认为这张卡是脏的，即<strong>脏卡</strong>。如上图所示，卡表3被标记为脏。</p>
-<p><strong>在进行Minor GC的时候，我们便可以不用扫描整个老年代，而是在卡表中寻找脏卡，并将脏卡中的老年代指向新生代的引用加入到 Minor GC的GC Roots里，当完成所有脏卡的扫描之后，Java 虚拟机便会将所有脏卡的标识位清零。这样虚拟机以空间换时间，避免了全表扫描</strong></p>
-<h2 id="关于-Major-GC的说明"><a href="#关于-Major-GC的说明" class="headerlink" title="关于 Major GC的说明"></a>关于 Major GC的说明</h2><p>除了Full GC和Minor GC外，还有一种说法叫做 “Major GC”：</p>
-<blockquote>
-<p>Major GC通常是跟full GC是等价的，收集整个GC堆，但因为 HotSpot VM发展这么多年，外界对各种名词的解读已经完全混乱了，当有人说”Major GC”的时候一定要问清楚他想要指的是上面的 full GC还是 old GC</p>
-</blockquote>
-<p>以上是 R大关于 Major GC的说法，比较权威的。在网上还流行着<strong>另外一种说法就是 Major GC是对老年代的垃圾回收</strong>。</p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上的内容基本上是从 R大的知乎回答与<a href="https://time.geekbang.org/column/intro/108" target="_blank" rel="noopener">极客时间专栏 《深入拆解Java虚拟机》</a>总结来的，在总结过程中，也算是对 Full GC 与 Minor GC 有了一个基本的认识。</p>
-<p>取之网络，再回馈之网络，本人对于JVM是渣渣级选手，如有错误之处，欢迎指教</p>
+<p>Reactor模式有三种典型的实现方案：</p>
+<ul>
+<li>单Reactor单线程</li>
+<li>单Reactor多线程</li>
+<li>主从Reactor多线程</li>
+</ul>
+<p>在介绍三个方案之前，先来了解下Reactor模式中的几个角色：</p>
+<ul>
+<li><strong>Reactor</strong>: 负责响应事件，将事件分发绑定了该事件的Handler处理</li>
+<li><strong>Handler</strong>: 事件处理器，绑定了某类事件，负责执行对应事件的任务对事件进行处理</li>
+<li><strong>Acceptor</strong>：Handler的一种，绑定了 connect 事件，当客户端发起connect请求时，Reactor会将accept事件分发给Acceptor处理<h3 id="单Reactor单线程"><a href="#单Reactor单线程" class="headerlink" title="单Reactor单线程"></a>单Reactor单线程</h3></li>
+</ul>
+<p><img src="http://osvtz719h.bkt.clouddn.com/reactor1.png" alt="reactor1"></p>
+<p>PS: 以上的select，accept,read,send是标准I/O复用模型的网络编程API,dispatch和”业务处理”是需要完成的操作。</p>
+<p>方案的具体步骤如下:</p>
+<ul>
+<li>Reactor对象通过select监控连接事件，收到事件后通过dispatch进行分发</li>
+<li>如果是连接建立的事件，则交由 Acceptor 通过accept 处理连接请求，然后创建一个 Handler 对象处理连接完成后的后续业务处理</li>
+<li>如果不是建立连接事件，则 Reactor 会分发调用连接对应的 Handler来响应</li>
+<li>Handler 会完成 read -&gt; 业务处理 -&gt; send 的完整业务流程</li>
+</ul>
+<p><strong>单Reactor单线程的优点</strong>：</p>
+<ul>
+<li>模型简单，没有多线程，进程通信，竞争的问题，全部都在一个线程中完成</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>只有一个进程，无法发挥多核 CPU的性能，只能采取部署多个系统来利用多核CPU,但这样会带来运维复杂度</li>
+<li>Handler 在处理某个连接上的业务时，整个进程无法处理其他连接的事件，很容易导致性能瓶颈</li>
+</ul>
+<h4 id="单Reactor单线程在NIO中的实现"><a href="#单Reactor单线程在NIO中的实现" class="headerlink" title="单Reactor单线程在NIO中的实现"></a>单Reactor单线程在NIO中的实现</h4><p>下图是单Reactor单线程在 Java NIO中流程图：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/reacor1_nio.jpg" alt="reactor1_nio"></p>
+<p>至于单Reactor单线程在 NIO 中的代码，详情参阅 <a href="https://baike.baidu.com/item/Doug%20Lea/6319404" target="_blank" rel="noopener">Doung Lea</a> 大神的 <a href="http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf" target="_blank" rel="noopener">《Scalable IO in Java》</a></p>
+<h3 id="单Reactor多线程"><a href="#单Reactor多线程" class="headerlink" title="单Reactor多线程"></a>单Reactor多线程</h3><p><img src="http://osvtz719h.bkt.clouddn.com/reactor2.png" alt="reactor2"></p>
+<p>方案步骤:</p>
+<ul>
+<li>主线程中，Reactor对象通过select 监听连接事件，收到事件后通过 dispatch进行分发</li>
+<li>如果是连接建立的事件，则由Acceptor处理，Acceptor通过 accept接受连接，并创建一个 Handler 来处理连接后续的各种事件。</li>
+<li>如果不是连接建立事件，则Reactor会调用连接对应的Handler来进行相应</li>
+<li>Handler 只负责响应事件，不进行业务处理，Handler 通过 read 读取到数据后，会发给 processor 进行业务处理</li>
+<li>Processor 会在独立的子线程中完成真正的 业务处理，然后将响应结果发给主进程的 Handler处理，Handler 收到响应后通过 send 将响应结果返回给 client</li>
+</ul>
+<p><strong>优点</strong>:</p>
+<ul>
+<li>能够充分利用多核多 CPU的处理能力</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>多线程数据共享和访问比较复杂</li>
+<li>Reactor 承担所有事件的监听和响应，只在主线程中运行，瞬间高并发时会成为性能瓶颈</li>
+</ul>
+<h4 id="单Reactor多线程在-Java-NIO中的实现"><a href="#单Reactor多线程在-Java-NIO中的实现" class="headerlink" title="单Reactor多线程在 Java NIO中的实现"></a>单Reactor多线程在 Java NIO中的实现</h4><p>下图是单Reactor多线程在 Java NIO实现的流程图<br><img src="http://osvtz719h.bkt.clouddn.com/reactor2_nio.png" alt="reactor2_nio"></p>
+<p>说明:</p>
+<ul>
+<li>有专门一个Reactor线程用于监听服务器 ServerSocketChannel，接收客户端的TCP连接请求</li>
+<li>网络IO的读/写操作等由一个 worker reactor线程池负责，由线程池中的NIO线程负责监听 SocketChannel事件，进行消息的读取，解码，编码和发送</li>
+<li>一个 NIO 线程可以同时处理 N条链路，但是一个链路只注册在一个NIO 线程上处理，防止发生并发操作问题。</li>
+</ul>
+<p>至于单Reactor多线程在 NIO 中的代码，详情参阅 <a href="https://baike.baidu.com/item/Doug%20Lea/6319404" target="_blank" rel="noopener">Doung Lea</a> 大神的 <a href="http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf" target="_blank" rel="noopener">《Scalable IO in Java》</a></p>
+<h3 id="多Reactor多进程-线程"><a href="#多Reactor多进程-线程" class="headerlink" title="多Reactor多进程/线程"></a>多Reactor多进程/线程</h3><p>下图以多Reactor多进程为例<br><img src="http://osvtz719h.bkt.clouddn.com/Reactor3_nio.png" alt="reactor3_nio"></p>
+<p>方案说明:</p>
+<ul>
+<li>主进程中mainReactor对象通过 select监控连接建立事件，收到事件后通过 Acceptor接收，将新的连接分配给某个子进程。</li>
+<li>子进程中的 subReactor 将 mainReactor 分配的连接加入连接队列进行监听，并创建一个 Handler 用于处理连接的各种事件</li>
+<li>当有新的事件发生时，subReactor 会调用里连接对应的 Handler 来响应</li>
+<li>Handler完成 read -&gt; 业务处理 -&gt; send 的完整业务流程</li>
+</ul>
+<p><strong>特点</strong>:</p>
+<ul>
+<li>主进程和子进程的职责非常明确，主进程只负责接收新连接，子进程负责完成后续的业务处理</li>
+<li>主进程和子进程的交互很简单，主进程只需要把新的连接传递给子进程，子进程无需返回数据</li>
+<li>子进程之间是相互独立的，无需同步共享之类的处理（这里仅限于网络模型相关的 select,read,send等无须同步共享，”业务处理”还是有可能需要同步共享的）</li>
+</ul>
+<h4 id="多Reactor多线程在-Java-NIO中的体现"><a href="#多Reactor多线程在-Java-NIO中的体现" class="headerlink" title="多Reactor多线程在 Java NIO中的体现"></a>多Reactor多线程在 Java NIO中的体现</h4><p><img src="http://osvtz719h.bkt.clouddn.com/reactor3_nio.jpg" alt="reactor3_nio"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>上面的总结参考了很多大神的分析，算是对 <strong>Reactor模式</strong> 有个初步的认识。</p>
 <h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
-<li><a href="https://www.zhihu.com/question/41922036/answer/93079526" target="_blank" rel="noopener">Major GC和Full GC的区别是什么？触发条件呢？- 知乎-RednaxelaFX的回答</a></li>
-<li><a href="https://time.geekbang.org/column/intro/108" target="_blank" rel="noopener">极客时间专栏 《深入拆解Java虚拟机》</a></li>
-<li><a href="https://tech.meituan.com/jvm_optimize.html" target="_blank" rel="noopener">从实际案例聊聊Java应用的GC优化-美团技术团队</a></li>
-<li><a href="https://segmentfault.com/a/1190000007723051" target="_blank" rel="noopener">译文-Minor GC vs Major GC vs Full GC</a></li>
+<li><a href="http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf" target="_blank" rel="noopener">《Scalable IO in Java》</a></li>
+<li><a href="https://www.jianshu.com/p/38b56531565d" target="_blank" rel="noopener">netty学习系列二：NIO Reactor模型 &amp; Netty线程模型</a></li>
+<li><a href="https://time.geekbang.org/column/intro/81?code=OK4eM0TBPTKGPRCzcZdzIeXjPACLfY3KCzATXOSWzXE%3D" target="_blank" rel="noopener">极客时间专栏-从0开始学架构</a></li>
 </ul>
 
         
@@ -335,7 +385,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" data-id="cjmai07wb0004ywr969y7cxus" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/" data-id="cjmai07wv000bywr9fv4tkz03" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -403,7 +453,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/">Comentarios</a>
     
 
         </footer>
@@ -412,19 +462,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2018/09/05/springboot系列文章之spring-boot-devtools实现热部署/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más nuevo</strong>
-            <div class="article-nav-title">
-                
-                    springboot系列文章之spring-boot-devtools实现热部署
-                
-            </div>
-        </a>
     
-    
-        <a href="/2018/09/03/JVM-系列文章之-GC-算法浅析/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2018/09/20/Netty-入门初体验/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Más viejo</strong>
-            <div class="article-nav-title">JVM 系列文章之 GC 算法浅析</div>
+            <div class="article-nav-title">Netty 入门初体验</div>
         </a>
     
 </nav>
@@ -529,9 +570,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'https://pjmike.github.io/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/';
+            this.page.url = 'https://pjmike.github.io/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/';
         
-        this.page.identifier = 'JVM-系列文章之-Full-GC-和-Minor-GC';
+        this.page.identifier = 'Java-NIO-系列文章之-浅析Reactor模式';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
