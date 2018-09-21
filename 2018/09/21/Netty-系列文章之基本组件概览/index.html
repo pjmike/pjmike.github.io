@@ -3,19 +3,24 @@
 <head>
     <meta charset="utf-8">
     
-    <title>about | 风居者的街道</title>
+    <title>Netty 系列文章之基本组件概览 | 风居者的街道</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="个人简介Java后端爱好者一枚，努力做一个笔耕者 联系方式 GitHub: https://github.com/pjmike email:  pjmike_pj@163.com">
-<meta property="og:type" content="website">
-<meta property="og:title" content="about">
-<meta property="og:url" content="https://pjmike.github.io/about/index.html">
+    <meta name="description" content="前言在之前的文章Netty 入门初体验简单介绍了 Netty 服务端和客户端的例子，下面依旧以Netty 服务端 demo 为例，来简单阐述下 Netty 的基本组件。">
+<meta name="keywords" content="Netty">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty 系列文章之基本组件概览">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/21/Netty-系列文章之基本组件概览/index.html">
 <meta property="og:site_name" content="风居者的街道">
-<meta property="og:description" content="个人简介Java后端爱好者一枚，努力做一个笔耕者 联系方式 GitHub: https://github.com/pjmike email:  pjmike_pj@163.com">
+<meta property="og:description" content="前言在之前的文章Netty 入门初体验简单介绍了 Netty 服务端和客户端的例子，下面依旧以Netty 服务端 demo 为例，来简单阐述下 Netty 的基本组件。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-03T06:37:46.950Z">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Netty%E5%9F%BA%E6%9C%AC%E7%BB%84%E4%BB%B6.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/eventloop.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/channelpipline.JPG">
+<meta property="og:updated_time" content="2018-09-21T08:12:50.009Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="about">
-<meta name="twitter:description" content="个人简介Java后端爱好者一枚，努力做一个笔耕者 联系方式 GitHub: https://github.com/pjmike email:  pjmike_pj@163.com">
+<meta name="twitter:title" content="Netty 系列文章之基本组件概览">
+<meta name="twitter:description" content="前言在之前的文章Netty 入门初体验简单介绍了 Netty 服务端和客户端的例子，下面依旧以Netty 服务端 demo 为例，来简单阐述下 Netty 的基本组件。">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/Netty%E5%9F%BA%E6%9C%AC%E7%BB%84%E4%BB%B6.png">
     
 
     
@@ -208,7 +213,7 @@
 </aside>
 
             
-            <section id="main"><article id="about-" class="article article-type-about" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-Netty-系列文章之基本组件概览" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -216,7 +221,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            about
+            Netty 系列文章之基本组件概览
         </h1>
     
 
@@ -225,14 +230,24 @@
                         
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/about/index.html">
-            <time datetime="2018-08-27T13:45:43.000Z" itemprop="datePublished">2018-08-27</time>
+        <a href="/2018/09/21/Netty-系列文章之基本组件概览/">
+            <time datetime="2018-09-21T08:12:49.000Z" itemprop="datePublished">2018-09-21</time>
         </a>
     </div>
 
 
                         
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Netty/">Netty</a>
+    </div>
+
                         
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Netty/">Netty</a>
+    </div>
+
                     </div>
                 
             </header>
@@ -241,10 +256,51 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <h3 id="个人简介"><a href="#个人简介" class="headerlink" title="个人简介"></a>个人简介</h3><p>Java后端爱好者一枚，努力做一个笔耕者</p>
-<h3 id="联系方式"><a href="#联系方式" class="headerlink" title="联系方式"></a>联系方式</h3><ul>
-<li>GitHub: <a href="https://github.com/pjmike" target="_blank" rel="noopener">https://github.com/pjmike</a></li>
-<li>email:  <a href="mailto:pjmike_pj@163.com" target="_blank" rel="noopener">pjmike_pj@163.com</a></li>
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基本组件概览"><span class="toc-number">2.</span> <span class="toc-text">基本组件概览</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Channel"><span class="toc-number">2.1.</span> <span class="toc-text">Channel</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EventLoop"><span class="toc-number">2.2.</span> <span class="toc-text">EventLoop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ChannelHandler"><span class="toc-number">2.3.</span> <span class="toc-text">ChannelHandler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ChannelPipeline"><span class="toc-number">2.4.</span> <span class="toc-text">ChannelPipeline</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ChannelFuture"><span class="toc-number">2.5.</span> <span class="toc-text">ChannelFuture</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ByteBuf"><span class="toc-number">2.6.</span> <span class="toc-text">ByteBuf</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BootStrap"><span class="toc-number">2.7.</span> <span class="toc-text">BootStrap</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">3.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">4.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在之前的文章<a href="https://pjmike.github.io/2018/09/20/Netty-%E5%85%A5%E9%97%A8%E5%88%9D%E4%BD%93%E9%AA%8C/">Netty 入门初体验</a>简单介绍了 Netty 服务端和客户端的例子，下面依旧以Netty 服务端 demo 为例，来简单阐述下 Netty 的基本组件。</p>
+<a id="more"></a>
+<h2 id="基本组件概览"><a href="#基本组件概览" class="headerlink" title="基本组件概览"></a>基本组件概览</h2><p>以Netty服务端的一个例子来阐述其中用到的基本组件，代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoServer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> port;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">EchoServer</span><span class="params">(<span class="keyword">int</span> port)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.port = port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> EchoServer(<span class="number">8888</span>).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> EchoServerHandler serverHandler = <span class="keyword">new</span> EchoServerHandler();</span><br><span class="line">        <span class="comment">//创建EventLoopGroup，处理事件</span></span><br><span class="line">        EventLoopGroup group = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        EventLoopGroup worker = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ServerBootstrap b = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">            b.group(group,worker)</span><br><span class="line">                    <span class="comment">//指定所使用的NIO传输 Channel</span></span><br><span class="line">                    .channel(NioServerSocketChannel.class)</span><br><span class="line">                    <span class="comment">//使用指定的端口设置套接字地址</span></span><br><span class="line">                    .localAddress(<span class="keyword">new</span> InetSocketAddress(port))</span><br><span class="line">                    <span class="comment">//添加一个EchoServerHandler到子Channel的ChannelPipeline</span></span><br><span class="line">                    .childHandler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                        <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel socketChannel)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                            <span class="comment">//EchoServerHandler别标志为@Shareable,所以我们可以总是使用同样的实例</span></span><br><span class="line">                            socketChannel.pipeline().addLast(serverHandler);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">            <span class="comment">//异步的绑定服务器，调用sync()方法阻塞等待直到绑定完成</span></span><br><span class="line">            ChannelFuture future = b.bind().sync();</span><br><span class="line">            future.channel().closeFuture().sync();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">//关闭EventLoopGroup,释放所有的资源</span></span><br><span class="line">            group.shutdownGracefully().sync();</span><br><span class="line">            worker.shutdownGracefully().sync();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>服务端创建流程：</p>
+<ul>
+<li>创建 ServerBootStrap实例</li>
+<li>设置并绑定 <code>NioEventLoopGroup</code>线程池</li>
+<li>通过 <code>ServerBootStrap</code>的<code>group</code>方法设置并绑定服务端 Channel</li>
+<li>创建并初始化 <code>ChannelPipeline</code></li>
+<li>添加并设置 <code>ChannelHandler</code></li>
+<li>绑定并启动监听端口</li>
+</ul>
+<p>上面简述了服务端的创建流程，其中包含了 Netty的基本组件的使用，下面这张导图也简单的叙述了Netty各大组件的概念与作用</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/Netty%E5%9F%BA%E6%9C%AC%E7%BB%84%E4%BB%B6.png" alt="netty"></p>
+<h3 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h3><p>Channel是 Netty中的网络操作抽象类，对应JDK底层的Socket,它除了包含基本的I/O操作，如 bind(),connect()，read()，write()之外，还包括了Netty框架相关的一些功能，如获取 Channel的EventLoop。</p>
+<h3 id="EventLoop"><a href="#EventLoop" class="headerlink" title="EventLoop"></a>EventLoop</h3><p>EventLoop定义了Netty的核心抽象，<strong>用于处理连接的生命周期中所发生的事件</strong>。EventLoop 为Channel处理I/O操作，下图是 Channel,EventLoop,Thread以及EventLoopGroup之间的关系(摘自《Netty In Action》)：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/eventloop.jpg" alt="eventloop"></p>
+<p>这些关系是:</p>
+<ul>
+<li>一个EventLoopGroup 包含一个或者多个EventLoop</li>
+<li>一个 EventLoop 在它的生命周期内只和一个Thread绑定</li>
+<li>所有由 EventLoop处理的 I/O事件都将在它专有的Thread上被处理</li>
+<li>一个 Channel 在它的生命周期内只注册一个EventLoop</li>
+<li>一个 EventLoop 可能会被分配给一个或多个 Channel</li>
+</ul>
+<p>EventLoopGroup实际上就是处理I/O操作的线程池，负责为每个新注册的Channel分配一个EventLoop，Channel在整个生命周期都有其绑定的 EventLoop来服务。</p>
+<p>而上面服务端用的 <strong>NioEventLoop</strong> 就是 EventLoop的一个重要实现类，NioEventLoop 是Netty内部的I/O线程，而 <strong>NioEventLoopGroup</strong>是拥有 <strong>NioEventLoop</strong>的线程池，在Netty服务端中一般存在两个这样的<strong>NioEventLoopGroup</strong>线程池，一个 “Boss” 线程池，用于接收客户端连接，实际上该线程池中只有一个线程，一个 “Worker”线程池用于处理每个连接的读写。而Netty客户端只需一个线程池即可，主要用于处理连接中的读写操作。</p>
+<h3 id="ChannelHandler"><a href="#ChannelHandler" class="headerlink" title="ChannelHandler"></a>ChannelHandler</h3><p>ChannelHandler是Netty的主要组件，它主要用于对出站和入站数据进行处理，它有两个重要的子接口：</p>
+<ul>
+<li>ChannelInboundHandler——处理入站数据以及各种状态变化</li>
+<li>ChannelOutboundHandler——处理出站数据并且允许拦截所有的操作</li>
+</ul>
+<h3 id="ChannelPipeline"><a href="#ChannelPipeline" class="headerlink" title="ChannelPipeline"></a>ChannelPipeline</h3><p>ChannelPipeline提供了 ChannelHandler链的容器，换句话说，就是一个逻辑处理链，用于<strong>拦截</strong>流经Channel的入站和出站事件的<strong>ChannelHandler</strong>。还是就是当 Channel被创建时，它会被自动地分配到它的专属的 ChannelPipeline。<br><img src="http://osvtz719h.bkt.clouddn.com/channelpipline.JPG" alt="channelpipline"></p>
+<p>当一个消息或者任何其他的入站事件被读取时，那么它会从 ChannelPipeline的头部开始流动，并被传递给第一个 ChannelInboundHandler，第一个处理完成之后传递给下一个 ChannelInboundHandler,一直到ChannelPipeline的尾端，与之对应的是，当数据被写出时，数据从 ChannelOutboundHandler 链的尾端开始流动，直到它到达链的头部为止。</p>
+<h3 id="ChannelFuture"><a href="#ChannelFuture" class="headerlink" title="ChannelFuture"></a>ChannelFuture</h3><p>Netty中所有I/O操作都是异步的，使用ChannelFuture可以获取操作完成的结果，其 <code>addListener()</code>方法注册了一个 ChannelFutureListener，以便在某个操作完成时(无论是否成功)得到通知。</p>
+<h3 id="ByteBuf"><a href="#ByteBuf" class="headerlink" title="ByteBuf"></a>ByteBuf</h3><p>ByteBuf是Netty中的字节缓冲区，相比于Java NIO中的 ByeBuffer，ByteBuf做了很多改进，ByteBuf的功能性和灵活性更好。</p>
+<h3 id="BootStrap"><a href="#BootStrap" class="headerlink" title="BootStrap"></a>BootStrap</h3><p>Netty提供的启动辅助类，帮助Netty客户端或服务端的Netty初始化，服务端对应的是 ServerBootStrap引导类。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>上面简单的介绍了Netty的一些基本组件，后续文章会详细对每个组件进行分析</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://book.douban.com/subject/27038538/" target="_blank" rel="noopener">Netty In Action</a></li>
 </ul>
 
         
@@ -256,7 +312,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/about/index.html" data-id="cjmbqb1gm001ynor9nov3cpce" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/09/21/Netty-系列文章之基本组件概览/" data-id="cjmbqb1dq000vnor9tcjdsa16" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -324,13 +380,23 @@
 
             
     
-        <a href="https://pjmike.github.io/about/index.html#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/about/index.html">Comments</a>
+        <a href="https://pjmike.github.io/2018/09/21/Netty-系列文章之基本组件概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/21/Netty-系列文章之基本组件概览/">Comments</a>
     
 
         </footer>
     </div>
     
         
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/20/Java-NIO-系列文章之-浅析Reactor模式/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">Java NIO 系列文章之 浅析Reactor模式</div>
+        </a>
+    
+</nav>
+
 
     
 </article>
@@ -431,9 +497,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'https://pjmike.github.io/about/index.html';
+            this.page.url = 'https://pjmike.github.io/2018/09/21/Netty-系列文章之基本组件概览/';
         
-        this.page.identifier = '';
+        this.page.identifier = 'Netty-系列文章之基本组件概览';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
