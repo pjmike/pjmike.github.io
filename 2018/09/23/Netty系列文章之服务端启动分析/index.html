@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>Netty系列文章之服务端启动分析 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言本文主要分析 Netty服务端的启动，以便对Netty框架有一个基本的认识,我用的Netty版本是 netty-4.1.29，之前的文章Netty 系列文章之基本组件概览 对Netty的基本组件做了一个简单的介绍，算是对本文分析Netty服务端的启动做一个基础铺垫">
+<meta name="keywords" content="Netty">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty系列文章之服务端启动分析">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/23/Netty系列文章之服务端启动分析/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="前言本文主要分析 Netty服务端的启动，以便对Netty框架有一个基本的认识,我用的Netty版本是 netty-4.1.29，之前的文章Netty 系列文章之基本组件概览 对Netty的基本组件做了一个简单的介绍，算是对本文分析Netty服务端的启动做一个基础铺垫">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/channel.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/NioEventLoopGroup.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/ChannelInitial.png">
+<meta property="og:updated_time" content="2018-09-23T07:48:36.895Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netty系列文章之服务端启动分析">
+<meta name="twitter:description" content="前言本文主要分析 Netty服务端的启动，以便对Netty框架有一个基本的认识,我用的Netty版本是 netty-4.1.29，之前的文章Netty 系列文章之基本组件概览 对Netty的基本组件做了一个简单的介绍，算是对本文分析Netty服务端的启动做一个基础铺垫">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/channel.png">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Articles',
+            PAGES: 'Pages',
+            CATEGORIES: 'Catégories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SUIVRE</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                44
+                <span>Articles</span>
+            </div>
+            <div class="article-info-block">
+                25
+                <span>Tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-Netty系列文章之服务端启动分析" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            Netty系列文章之服务端启动分析
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/23/Netty系列文章之服务端启动分析/">
+            <time datetime="2018-09-23T07:48:36.000Z" itemprop="datePublished">2018-09-23</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Netty/">Netty</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Netty/">Netty</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务端代码"><span class="toc-number">2.</span> <span class="toc-text">服务端代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Channel的创建和初始化过程"><span class="toc-number">3.</span> <span class="toc-text">Channel的创建和初始化过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#NioServerSocketChannel的创建"><span class="toc-number">3.1.</span> <span class="toc-text">NioServerSocketChannel的创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NioServerSocketChanel的实例化过程"><span class="toc-number">3.2.</span> <span class="toc-text">NioServerSocketChanel的实例化过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#关于-unsafe"><span class="toc-number">3.2.1.</span> <span class="toc-text">关于 unsafe</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ChannelPipeline的初始化"><span class="toc-number">4.</span> <span class="toc-text">ChannelPipeline的初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NioEventLoopGroup"><span class="toc-number">5.</span> <span class="toc-text">NioEventLoopGroup</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#NioEventLoopGroup-1"><span class="toc-number">5.1.</span> <span class="toc-text">NioEventLoopGroup</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#创建ThreadPerTaskExecutor"><span class="toc-number">5.1.1.</span> <span class="toc-text">创建ThreadPerTaskExecutor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#调用-newChild-方法初始化-children-数组"><span class="toc-number">5.1.2.</span> <span class="toc-text">调用 newChild 方法初始化 children 数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#创建线程选择器——chooser"><span class="toc-number">5.1.3.</span> <span class="toc-text">创建线程选择器——chooser</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NioEventLoop的初始化"><span class="toc-number">5.2.</span> <span class="toc-text">NioEventLoop的初始化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Channel的注册过程"><span class="toc-number">6.</span> <span class="toc-text">Channel的注册过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加-ChannelHandler"><span class="toc-number">7.</span> <span class="toc-text">添加 ChannelHandler</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">8.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">9.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文主要分析 Netty服务端的启动，以便对Netty框架有一个基本的认识,我用的Netty版本是 <code>netty-4.1.29</code>，之前的文章<a href="https://pjmike.github.io/2018/09/21/Netty-%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B9%8B%E5%9F%BA%E6%9C%AC%E7%BB%84%E4%BB%B6%E6%A6%82%E8%A7%88/">Netty 系列文章之基本组件概览
+</a>对Netty的基本组件做了一个简单的介绍，算是对本文分析Netty服务端的启动做一个基础铺垫</p>
+<a id="more"></a>
+<h2 id="服务端代码"><a href="#服务端代码" class="headerlink" title="服务端代码"></a>服务端代码</h2><p>该源码出自 netty官方提供的 服务端demo，详细地址： <a href="https://github.com/netty/netty/blob/4.1/example/src/main/java/io/netty/example/echo/EchoServer.java" target="_blank" rel="noopener">https://github.com/netty/netty/blob/4.1/example/src/main/java/io/netty/example/echo/EchoServer.java</a></p>
+<p>我做了一点小改动，代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoServer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = Integer.parseInt(System.getProperty(<span class="string">"port"</span>, <span class="string">"8007"</span>));</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// Configure the server.</span></span><br><span class="line">        EventLoopGroup bossGroup = <span class="keyword">new</span> NioEventLoopGroup(<span class="number">1</span>);</span><br><span class="line">        EventLoopGroup workerGroup = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        <span class="keyword">final</span> EchoServerHandler serverHandler = <span class="keyword">new</span> EchoServerHandler();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ServerBootstrap b = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">            b.group(bossGroup, workerGroup)</span><br><span class="line">             .channel(NioServerSocketChannel.class)</span><br><span class="line">             .option(ChannelOption.SO_BACKLOG, <span class="number">100</span>)</span><br><span class="line">             .handler(<span class="keyword">new</span> LoggingHandler(LogLevel.INFO))</span><br><span class="line">             .childHandler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                 <span class="meta">@Override</span></span><br><span class="line">                 <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                     ChannelPipeline p = ch.pipeline();</span><br><span class="line">                     <span class="comment">//p.addLast(new LoggingHandler(LogLevel.INFO));</span></span><br><span class="line">                     p.addLast(serverHandler);</span><br><span class="line">                 &#125;</span><br><span class="line">             &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Start the server.</span></span><br><span class="line">            ChannelFuture f = b.bind(PORT).sync();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Wait until the server socket is closed.</span></span><br><span class="line">            f.channel().closeFuture().sync();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// Shut down all event loops to terminate all threads.</span></span><br><span class="line">            bossGroup.shutdownGracefully();</span><br><span class="line">            workerGroup.shutdownGracefully();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>服务端启动流程概览：</p>
+<ul>
+<li>创建 <code>ServerBootStrap</code>启动类</li>
+<li>设置并绑定 <code>NioEventLoopGroup</code>线程池</li>
+<li>创建服务端 <code>Channel</code></li>
+<li>添加并设置 <code>ChannelHandler</code></li>
+<li>绑定并启动监听端口</li>
+</ul>
+<p>在之前的文章我就提到过，<strong>ServerBootstrap</strong>是Netty服务端的启动辅助类，帮助Netty服务端完成初始化，下面我将深入代码，仔细分析Netty服务端启动过程中各组件的创建与初始化</p>
+<h2 id="Channel的创建和初始化过程"><a href="#Channel的创建和初始化过程" class="headerlink" title="Channel的创建和初始化过程"></a>Channel的创建和初始化过程</h2><p>Channel是Netty的网络操作抽象类，对应于JDK底层的 Socket，Netty服务端的Channel类型是 <strong>NioServerSocketChannel</strong>。下面来分析<strong>NioServerSocketChannel</strong>的创建和初始化</p>
+<h3 id="NioServerSocketChannel的创建"><a href="#NioServerSocketChannel的创建" class="headerlink" title="NioServerSocketChannel的创建"></a>NioServerSocketChannel的创建</h3><p><code>NioServerSocketChannel</code>的创建实际上是从 <code>ServerBootStrap</code>的<code>bind()</code>方法开始的，进入<code>bind()</code>源码分析（<code>AbstractBootstrap</code>的bind()方法)：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"><span class="function"><span class="keyword">public</span> ChannelFuture <span class="title">bind</span><span class="params">(<span class="keyword">int</span> inetPort)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> bind(<span class="keyword">new</span> InetSocketAddress(inetPort));</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Create a new &#123;<span class="doctag">@link</span> Channel&#125; and bind it.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ChannelFuture <span class="title">bind</span><span class="params">(SocketAddress localAddress)</span> </span>&#123;</span><br><span class="line">    validate();</span><br><span class="line">    <span class="keyword">if</span> (localAddress == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"localAddress"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> doBind(localAddress);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> ChannelFuture <span class="title">doBind</span><span class="params">(<span class="keyword">final</span> SocketAddress localAddress)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> ChannelFuture regFuture = initAndRegister();</span><br><span class="line">    <span class="keyword">final</span> Channel channel = regFuture.channel();</span><br><span class="line">    <span class="keyword">if</span> (regFuture.cause() != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> regFuture;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (regFuture.isDone()) &#123;</span><br><span class="line">        <span class="comment">// At this point we know that the registration was complete and successful.</span></span><br><span class="line">        ChannelPromise promise = channel.newPromise();</span><br><span class="line">        doBind0(regFuture, channel, localAddress, promise);</span><br><span class="line">        <span class="keyword">return</span> promise;</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在源码里注意到一个 <code>initAndRegister()</code>方法，这个方法就负责 <code>NioServerSocketChannel</code>的初始化和注册操作，走进<code>initAndRegister()</code>方法，如下图所示:</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/channel.png" alt="channel_init_and_create"></p>
+<p>从上图可以看出，源码里是调用 <code>channelFactory.newChannel()</code>来创建 channel , 走进<code>ChannelFactory</code>发现该接口被 <code>@Deprecated</code>注解标注了，说明是一个过时的接口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@Deprecated</span><br><span class="line">public interface ChannelFactory&lt;T extends Channel&gt; &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Creates a new channel.</span><br><span class="line">     */</span><br><span class="line">    T newChannel();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我用的Netty版本是 <code>Netty-4.1.29</code>，其<a href="http://netty.io/4.1/api/index.html" target="_blank" rel="noopener">Netty API 文档</a> 中介绍 <code>io.netty.bootstrap.ChannelFactory</code>提到用 <code>io.netty.channel.ChannelFactory</code>代替。</p>
+<p>这里 <code>ChannelFactory</code>只是一个工厂接口，真正创建 <code>Channel</code>的是<strong>ReflectiveChannelFactory</strong>类，它是<code>ChannelFactory</code>的一个重要实现类，该类通过反射方式创建 <code>Channel</code>,源代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectiveChannelFactory</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">Channel</span>&gt; <span class="keyword">implements</span> <span class="title">ChannelFactory</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Class&lt;? extends T&gt; clazz;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReflectiveChannelFactory</span><span class="params">(Class&lt;? extends T&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"clazz"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.clazz = clazz;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">newChannel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz.getConstructor().newInstance();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ChannelException(<span class="string">"Unable to create Channel from class "</span> + clazz, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> StringUtil.simpleClassName(clazz) + <span class="string">".class"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中 <code>newChannel()</code>方法通过 <code>clazz.getConstructor().newInstance()</code>来创建 Channel，即通过反射方式来创建 Channel,而这个 <code>clazz</code>就是 通过<code>ServerBootStrap</code>的 <code>channel</code>方法传入的，最开始的服务端代码传入的<strong>NioServerSocketChannel</strong>，所以对应通过反射创建了<strong>NioServerSocketChannel</strong>,并且 <code>ChannelFactory</code>的初始化也是在该方法中进行的，代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public B channel(Class&lt;? extends C&gt; channelClass) &#123;</span><br><span class="line">    if (channelClass == null) &#123;</span><br><span class="line">        throw new NullPointerException(&quot;channelClass&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return channelFactory(new ReflectiveChannelFactory&lt;C&gt;(channelClass));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>到此，<code>NioServerSocketChannel</code>的创建过程大体结束,再次总结一下：</p>
+<ul>
+<li><code>ServerBootstrap</code>中的<code>ChannelFactory</code>的实现是 <code>ReflectiveChannelFactory</code></li>
+<li>生成的 Channel的具体类型是 <code>NioServerSocketChannel</code></li>
+<li><code>Channel</code>的实例化过程其实就是调用 <code>ChannelFactory.newChannel</code>方法，实际上是通过反射方式进行创建的</li>
+</ul>
+<h3 id="NioServerSocketChanel的实例化过程"><a href="#NioServerSocketChanel的实例化过程" class="headerlink" title="NioServerSocketChanel的实例化过程"></a>NioServerSocketChanel的实例化过程</h3><p>在前面的分析中，NioServerSocketChannel是通过反射创建的，它的构造方法如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> ServerSocketChannel <span class="title">newSocket</span><span class="params">(SelectorProvider provider)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         *  Use the &#123;<span class="doctag">@link</span> SelectorProvider&#125; to open &#123;<span class="doctag">@link</span> SocketChannel&#125; and so remove condition in</span></span><br><span class="line"><span class="comment">         *  &#123;<span class="doctag">@link</span> SelectorProvider#provider()&#125; which is called by each ServerSocketChannel.open() otherwise.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         *  See &lt;a href="https://github.com/netty/netty/issues/2308"&gt;#2308&lt;/a&gt;.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">return</span> provider.openServerSocketChannel();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ChannelException(</span><br><span class="line">                <span class="string">"Failed to open a server socket."</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Create a new instance</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">NioServerSocketChannel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(newSocket(DEFAULT_SELECTOR_PROVIDER));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>方法newSocket利用 <code>provider.openServerSocketChannel()</code>生成Nio中的 <code>ServerSocketChannel</code>对象，然后调用重载的构造器:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">NioServerSocketChannel</span><span class="params">(ServerSocketChannel channel)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(<span class="keyword">null</span>, channel, SelectionKey.OP_ACCEPT);</span><br><span class="line">    config = <span class="keyword">new</span> NioServerSocketChannelConfig(<span class="keyword">this</span>, javaChannel().socket());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>该构造器中，调用了父类的构造器，传入的参数是 <code>SelectionKey.OP_ACCEPT</code>，这个参数对于有Java NIO编程经验的人来说应该非常熟悉，在Java NIO中服务端要监听客户端的连接请求，就向多路复用器 <code>Selector</code>注册 <code>SelectionKey.OP_ACCEPT</code> 客户端连接事件，而Netty又是基于 Java NIO开发的，这里可见一斑。接着进入父类构造器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected AbstractNioMessageChannel(Channel parent, SelectableChannel ch, int readInterestOp) &#123;</span><br><span class="line">    super(parent, ch, readInterestOp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">AbstractNioChannel</span><span class="params">(Channel parent, SelectableChannel ch, <span class="keyword">int</span> readInterestOp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(parent);</span><br><span class="line">    <span class="keyword">this</span>.ch = ch;</span><br><span class="line">    <span class="keyword">this</span>.readInterestOp = readInterestOp;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        ch.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ch.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e2) &#123;</span><br><span class="line">            <span class="keyword">if</span> (logger.isWarnEnabled()) &#123;</span><br><span class="line">                logger.warn(</span><br><span class="line">                        <span class="string">"Failed to close a partially initialized socket."</span>, e2);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ChannelException(<span class="string">"Failed to enter non-blocking mode."</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>设置当前 ServerSocketChannel为非阻塞通道，然后再次进入父类构造器 <code>AbstractChannel(Channel parent)</code>:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">AbstractChannel</span><span class="params">(Channel parent)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.parent = parent;</span><br><span class="line">    id = newId();</span><br><span class="line">    unsafe = newUnsafe();</span><br><span class="line">    pipeline = newChannelPipeline();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>parent属性设置为null</li>
+<li>初始化unsafe,用来负责底层的connect,register,read和write操作</li>
+<li>初始化pipeline,在实例化一个Channel的同时,当有事件发生的时候，pipeline负责调用相应的Handler进行处理</li>
+</ul>
+<h4 id="关于-unsafe"><a href="#关于-unsafe" class="headerlink" title="关于 unsafe"></a>关于 unsafe</h4><p>Netty中的<code>unsafe</code>不是JDK中的<code>sun.misc.Unsafe</code>,该<code>unsafe</code>实际是封装了 Java 底层 Socket的操作，因此是沟通 Netty上层和Java 底层重要的桥梁。</p>
+<h2 id="ChannelPipeline的初始化"><a href="#ChannelPipeline的初始化" class="headerlink" title="ChannelPipeline的初始化"></a>ChannelPipeline的初始化</h2><p>每个Channel都有对应的 <code>ChannelPipeline</code>,当一个Channel被创建时，对应的ChannelPipeline也会自动创建，在上面分析 <code>NioServerSocketChannel</code>实例化过程就看到，在其父类构造器中，有初始化一个 <code>pipeline</code>，对应源代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractChannel</span> <span class="keyword">extends</span> <span class="title">DefaultAttributeMap</span> <span class="keyword">implements</span> <span class="title">Channel</span> </span>&#123;</span><br><span class="line">    .....</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Channel parent;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ChannelId id;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Unsafe unsafe;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> DefaultChannelPipeline pipeline;</span><br><span class="line">    ......</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Creates a new instance.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> parent</span></span><br><span class="line"><span class="comment">     *        the parent of this channel. &#123;<span class="doctag">@code</span> null&#125; if there's no parent.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="title">AbstractChannel</span><span class="params">(Channel parent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.parent = parent;</span><br><span class="line">        id = newId();</span><br><span class="line">        unsafe = newUnsafe();</span><br><span class="line">        pipeline = newChannelPipeline();</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns a new &#123;<span class="doctag">@link</span> DefaultChannelPipeline&#125; instance.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> DefaultChannelPipeline <span class="title">newChannelPipeline</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DefaultChannelPipeline(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面代码看到，pipeline最终被初始化为一个 <code>DefaultChannelPipeline</code>，<code>DefaultChannelPipeline</code>是<code>ChannelPipeline</code>的实现类，进入它的构造方法，如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">DefaultChannelPipeline</span><span class="params">(Channel channel)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.channel = ObjectUtil.checkNotNull(channel, <span class="string">"channel"</span>);</span><br><span class="line">    succeededFuture = <span class="keyword">new</span> SucceededChannelFuture(channel, <span class="keyword">null</span>);</span><br><span class="line">    voidPromise =  <span class="keyword">new</span> VoidChannelPromise(channel, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">    tail = <span class="keyword">new</span> TailContext(<span class="keyword">this</span>);</span><br><span class="line">    head = <span class="keyword">new</span> HeadContext(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    head.next = tail;</span><br><span class="line">    tail.prev = head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>该构造方法有一个参数 <code>channel</code>,这个 <code>channel</code>就是我们之前传入的 <code>NioServerSocketChannel</code>。关于该构造器其他方法以及<code>ChannelPipeline</code>更详细的介绍将在后续文章分析。</p>
+<h2 id="NioEventLoopGroup"><a href="#NioEventLoopGroup" class="headerlink" title="NioEventLoopGroup"></a>NioEventLoopGroup</h2><p>在我们最开始的Netty服务端代码中初始化了两个 <code>NioEventLoopGroup</code>,即一个处理客户端连接请求的线程池——<code>bossGroup</code>，一个处理客户端读写操作的线程池——<code>workerGroup</code>：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">EventLoopGroup bossGroup = <span class="keyword">new</span> NioEventLoopGroup(<span class="number">1</span>);</span><br><span class="line">EventLoopGroup workerGroup = <span class="keyword">new</span> NioEventLoopGroup();</span><br></pre></td></tr></table></figure></p>
+<p><code>NioEventLoopGroup</code>的类继承结构图如下所示：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/NioEventLoopGroup.png" alt="nioeventLoopGroup"></p>
+<p>从图中可以看到，<code>NioEventLoopGroup</code>实现了 <code>Executor</code>接口，<code>Executor</code>框架可以用来创建线程池的，也是一个线程执行器。关于 <code>Executor</code>框架更加详细的介绍请参阅 <a href="https://book.douban.com/subject/26591326/" target="_blank" rel="noopener">《Java并发编程的艺术》</a></p>
+<h3 id="NioEventLoopGroup-1"><a href="#NioEventLoopGroup-1" class="headerlink" title="NioEventLoopGroup"></a>NioEventLoopGroup</h3><p>看了<code>NioEventLoopGroup</code>的类继承结构，下面来分析一下它的初始化过程，构造器源代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">public NioEventLoopGroup(int nThreads) &#123;</span><br><span class="line">    this(nThreads, (Executor) null);</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">public NioEventLoopGroup(int nThreads, Executor executor) &#123;</span><br><span class="line">    this(nThreads, executor, SelectorProvider.provider());</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">public NioEventLoopGroup(</span><br><span class="line">        int nThreads, Executor executor, final SelectorProvider selectorProvider) &#123;</span><br><span class="line">    this(nThreads, executor, selectorProvider, DefaultSelectStrategyFactory.INSTANCE);</span><br><span class="line">&#125;</span><br><span class="line">public NioEventLoopGroup(int nThreads, Executor executor, final SelectorProvider selectorProvider,</span><br><span class="line">                         final SelectStrategyFactory selectStrategyFactory) &#123;</span><br><span class="line">    super(nThreads, executor, selectorProvider, selectStrategyFactory, RejectedExecutionHandlers.reject());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面几个重载构造器其实没做啥，最终调用父类 <strong>MultithreadEventLoopGroup</strong> 的构造器，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">MultithreadEventLoopGroup</span><span class="params">(<span class="keyword">int</span> nThreads, Executor executor, Object... args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(nThreads == <span class="number">0</span> ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里需要注意的是如果我们传入的线程数 <code>nThreads</code> 是 0 的话，那么Netty将会为我们设置默认的线程数 <code>DEFAULT_EVENT_LOOP_THREADS</code>,这个默认值是<strong>处理器核心数 * 2</strong>，如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    DEFAULT_EVENT_LOOP_THREADS = Math.max(<span class="number">1</span>, SystemPropertyUtil.getInt(</span><br><span class="line">            <span class="string">"io.netty.eventLoopThreads"</span>, NettyRuntime.availableProcessors() * <span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">        logger.debug(<span class="string">"-Dio.netty.eventLoopThreads: &#123;&#125;"</span>, DEFAULT_EVENT_LOOP_THREADS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在 <code>bossGroup</code>这个线程池我们传入的 <code>nThread</code>是1，实际上在 <code>bossGroup</code>中只会有一个线程用于处理客户端连接请求，所以这里设置为1，而不使用默认的线程数，至于为什么只用一个线程处理连接请求还需用线程池，在<a href="https://stackoverflow.com/questions/34275138/why-do-we-really-need-multiple-netty-boss-threads" target="_blank" rel="noopener">Stack Overflow</a>有相关问题的讨论。</p>
+<p>然后回来再次进入父类<strong>MultithreadEventExecutorGroup</strong>的构造器，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">MultithreadEventExecutorGroup</span><span class="params">(<span class="keyword">int</span> nThreads, Executor executor, Object... args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(nThreads, executor, DefaultEventExecutorChooserFactory.INSTANCE, args);</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">MultithreadEventExecutorGroup</span><span class="params">(<span class="keyword">int</span> nThreads, Executor executor,</span></span></span><br><span class="line"><span class="function"><span class="params">                                        EventExecutorChooserFactory chooserFactory, Object... args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (nThreads &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(String.format(<span class="string">"nThreads: %d (expected: &gt; 0)"</span>, nThreads));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (executor == <span class="keyword">null</span>) &#123;</span><br><span class="line">        executor = <span class="keyword">new</span> ThreadPerTaskExecutor(newDefaultThreadFactory());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    children = <span class="keyword">new</span> EventExecutor[nThreads];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nThreads; i ++) &#123;</span><br><span class="line">        <span class="keyword">boolean</span> success = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            children[i] = newChild(executor, args);</span><br><span class="line">            success = <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="comment">// <span class="doctag">TODO:</span> Think about if this is a good exception type</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"failed to create a child event loop"</span>, e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!success) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; i; j ++) &#123;</span><br><span class="line">                    children[j].shutdownGracefully();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; i; j ++) &#123;</span><br><span class="line">                    EventExecutor e = children[j];</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">while</span> (!e.isTerminated()) &#123;</span><br><span class="line">                            e.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException interrupted) &#123;</span><br><span class="line">                        <span class="comment">// Let the caller handle the interruption.</span></span><br><span class="line">                        Thread.currentThread().interrupt();</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    chooser = chooserFactory.newChooser(children);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> FutureListener&lt;Object&gt; terminationListener = <span class="keyword">new</span> FutureListener&lt;Object&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operationComplete</span><span class="params">(Future&lt;Object&gt; future)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (terminatedChildren.incrementAndGet() == children.length) &#123;</span><br><span class="line">                terminationFuture.setSuccess(<span class="keyword">null</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (EventExecutor e: children) &#123;</span><br><span class="line">        e.terminationFuture().addListener(terminationListener);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Set&lt;EventExecutor&gt; childrenSet = <span class="keyword">new</span> LinkedHashSet&lt;EventExecutor&gt;(children.length);</span><br><span class="line">    Collections.addAll(childrenSet, children);</span><br><span class="line">    readonlyChildren = Collections.unmodifiableSet(childrenSet);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>MultithreadEventExecutorGroup</code>管理着 <code>eventLoop</code>的生命周期，它有几个变量:</p>
+<ul>
+<li><strong>children</strong>: EventExecutor数组，保存eventloop</li>
+<li><strong>chooser</strong>: 线程选择器，从children中选取一个 eventloop的策略</li>
+</ul>
+<p><code>MultithreadEventExecutorGroup</code>的构造器主要分为以下几个步骤:</p>
+<ul>
+<li>创建线程执行器——<code>ThreadPerTaskExecutor</code></li>
+<li>调用 <code>newChild</code>方法初始化 <code>children</code>数组</li>
+<li>创建线程选择器——<code>chooser</code></li>
+</ul>
+<h4 id="创建ThreadPerTaskExecutor"><a href="#创建ThreadPerTaskExecutor" class="headerlink" title="创建ThreadPerTaskExecutor"></a>创建ThreadPerTaskExecutor</h4><p>我们一开始初始化 <code>NioEventLoopGroup</code>，并没有传入 <code>Executor</code>参数：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">NioEventLoopGroup</span><span class="params">(<span class="keyword">int</span> nThreads)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(nThreads, (Executor) <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>所以到父类<code>MultithreadEventExecutorGroup</code>构造器时，executor 为null, 然后执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if (executor == null) &#123;</span><br><span class="line">    executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ThreadPerTaskExecutor是一个线程执行器，它实现了 <code>Executor</code>接口，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadPerTaskExecutor</span> <span class="keyword">implements</span> <span class="title">Executor</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ThreadFactory threadFactory;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThreadPerTaskExecutor</span><span class="params">(ThreadFactory threadFactory)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (threadFactory == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"threadFactory"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.threadFactory = threadFactory;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable command)</span> </span>&#123;</span><br><span class="line">        threadFactory.newThread(command).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ThreadPerTaskExecutor 实现了 <code>execute</code>方法，每次通过调用<code>execute</code>方法执行线程任务</p>
+<h4 id="调用-newChild-方法初始化-children-数组"><a href="#调用-newChild-方法初始化-children-数组" class="headerlink" title="调用 newChild 方法初始化 children 数组"></a>调用 newChild 方法初始化 children 数组</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">children[i] = newChild(executor, args);</span><br></pre></td></tr></table></figure>
+<p>在一个for循环里，nThread线程数是总的循环次数，通过 newChild方法初始化  EventExecutor数组的每个元素，而 <code>newChild</code>方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected EventLoop newChild(Executor executor, Object... args) throws Exception &#123;</span><br><span class="line">    return new NioEventLoop(this, executor, (SelectorProvider) args[0],</span><br><span class="line">        ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>每次循环通过newChild实例化一个<code>NioEventLoop</code>对象。</p>
+<h4 id="创建线程选择器——chooser"><a href="#创建线程选择器——chooser" class="headerlink" title="创建线程选择器——chooser"></a>创建线程选择器——chooser</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> EventExecutorChooser <span class="title">newChooser</span><span class="params">(EventExecutor[] executors)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (isPowerOfTwo(executors.length)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PowerOfTwoEventExecutorChooser(executors);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> GenericEventExecutorChooser(executors);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPowerOfTwo</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (val &amp; -val) == val;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据<code>EventExecutor[]</code>数组的大小，采用不同策略初始化一个 Chooser,如果大小为 2的幂次方则采用 <code>PowerOfTwoEventExecutorChooser</code>,否则使用 <code>GenericEventExecutorChooser</code>。<br>无论使用哪个 chooser，它们的功能都是一样的，即从 <code>EventExecutor[]</code>数组中，这里也就是 <code>NioEventLoop</code>数组中，选择一个合适的 <code>NioEventLoop</code>。</p>
+<h3 id="NioEventLoop的初始化"><a href="#NioEventLoop的初始化" class="headerlink" title="NioEventLoop的初始化"></a>NioEventLoop的初始化</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> EventLoop <span class="title">newChild</span><span class="params">(Executor executor, Object... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> NioEventLoop(<span class="keyword">this</span>, executor, (SelectorProvider) args[<span class="number">0</span>],</span><br><span class="line">        ((SelectStrategyFactory) args[<span class="number">1</span>]).newSelectStrategy(), (RejectedExecutionHandler) args[<span class="number">2</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从前面的分析就可以看到，通过 newChild方法初始化 <code>NioEventLoopGroup</code>中的 <code>NioEventLoop</code>，下面来看下<code>NioEventLoop</code>的构造方法是怎样的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,</span><br><span class="line">             SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler) &#123;</span><br><span class="line">    super(parent, executor, false, DEFAULT_MAX_PENDING_TASKS, rejectedExecutionHandler);</span><br><span class="line">    if (selectorProvider == null) &#123;</span><br><span class="line">        throw new NullPointerException(&quot;selectorProvider&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (strategy == null) &#123;</span><br><span class="line">        throw new NullPointerException(&quot;selectStrategy&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    provider = selectorProvider;</span><br><span class="line">    final SelectorTuple selectorTuple = openSelector();</span><br><span class="line">    selector = selectorTuple.selector;</span><br><span class="line">    unwrappedSelector = selectorTuple.unwrappedSelector;</span><br><span class="line">    selectStrategy = strategy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>之前在 <code>NioEventLoopGroup</code>的构造器中通过 <code>SelectorProvider.provider()</code>创建了一个 <code>SelectorProvider</code>,这里传递给了NioEventLoop中的provider,而<code>NioEventLoop</code>又通过 <code>openSelector()</code>方法获取一个 selector对象，实际上是通过 <code>provider</code>的<code>openSelector</code>方法。这不就是 对应Java NIO中的创建多路复用器 selector。(这里只是简单阐述NioEventLoop的构造方法，后续文章会对NioEventLoop做更加详细的分析)</p>
+<h2 id="Channel的注册过程"><a href="#Channel的注册过程" class="headerlink" title="Channel的注册过程"></a>Channel的注册过程</h2><p>前面已经介绍了 Channel的创建和初始化过程，是在 <code>initAndRegister</code>方法中进行的，这个方法里还会将初始化好的 channel注册到 <code>EventLoop</code>线程中去<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">final ChannelFuture initAndRegister() &#123;</span><br><span class="line">    Channel channel = null;</span><br><span class="line">    try &#123;</span><br><span class="line">        channel = channelFactory.newChannel();</span><br><span class="line">        init(channel);</span><br><span class="line">    &#125; catch (Throwable t) &#123;</span><br><span class="line">       .....</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ChannelFuture regFuture = config().group().register(channel);</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用<code>config().group().register</code>方法将 channel注册到 <code>EventLoopGroup</code>中去，其目的就是<strong>为了实现NIO中把ServerSocketChannel注册到 Selector中去，这样就是可以实现client请求的监听</strong>，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public ChannelFuture register(Channel channel) &#123;</span><br><span class="line">    return next().register(channel);</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">public EventLoop next() &#123;</span><br><span class="line">    return (EventLoop) super.next();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>父类MultithreadEventExecutorGroup的next()方法,next方法使用 chooser策略从 <code>EventExecutor[]</code>数组中选择一个  <code>SingleThreadEventLoop</code>：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> EventExecutor <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> chooser.next();</span><br><span class="line">&#125;</span><br><span class="line">.....</span><br><span class="line"><span class="function"><span class="keyword">public</span> EventExecutor <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> executors[idx.getAndIncrement() &amp; executors.length - <span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后再执行 <code>SingleThreadEventLoop</code>的 <code>register()</code>注册方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public ChannelFuture register(Channel channel) &#123;</span><br><span class="line">    return register(new DefaultChannelPromise(channel, this));</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">public ChannelFuture register(final ChannelPromise promise) &#123;</span><br><span class="line">    ObjectUtil.checkNotNull(promise, &quot;promise&quot;);</span><br><span class="line">    promise.channel().unsafe().register(this, promise);</span><br><span class="line">    return promise;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面代码调用了 unsafe的register方法，具体是<code>AbstractUnsafe.register</code>,而unsafe主要用于实现底层的 rergister,read,write等操作。该<code>register</code>方法是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public final void register(EventLoop eventLoop, final ChannelPromise promise) &#123;</span><br><span class="line">        ......</span><br><span class="line">        AbstractChannel.this.eventLoop = eventLoop;</span><br><span class="line"></span><br><span class="line">        if (eventLoop.inEventLoop()) &#123;</span><br><span class="line">            register0(promise);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            ......</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>将 eventLoop 赋值给 Channel 的 eventLoop 属性,然后又调用了 register0()方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">private void register0(ChannelPromise promise) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            ......</span><br><span class="line">            boolean firstRegistration = neverRegistered;</span><br><span class="line">            doRegister();</span><br><span class="line">            neverRegistered = false;</span><br><span class="line">            registered = true;</span><br><span class="line">            pipeline.invokeHandlerAddedIfNeeded();</span><br><span class="line">            safeSetSuccess(promise);</span><br><span class="line">            pipeline.fireChannelRegistered();</span><br><span class="line">            if (isActive()) &#123;</span><br><span class="line">                if (firstRegistration) &#123;</span><br><span class="line">                    pipeline.fireChannelActive();</span><br><span class="line">                &#125; else if (config().isAutoRead()) &#123;</span><br><span class="line">                    beginRead();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (Throwable t) &#123;</span><br><span class="line">            ......</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面有个关键方法就是 <code>doRegister()</code>,<code>doRegister</code>才是最终Nio的注册方法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">protected void doRegister() throws Exception &#123;</span><br><span class="line">    boolean selected = false;</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);</span><br><span class="line">            return;</span><br><span class="line">        &#125; catch (CancelledKeyException e) &#123;</span><br><span class="line">            if (!selected) &#123;</span><br><span class="line">                eventLoop().selectNow();</span><br><span class="line">                selected = true;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                throw e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过<code>javaChannel().register(eventLoop().unwrappedSelector(), 0, this)</code>将 Channel对应的Java NIO ServerSocketChannel注册到 <code>EventLoop</code>中的Selector上，最终完成了channel向eventLoop的注册过程。</p>
+<p>这里总结下 Channel注册过程中函数调用链：<br><strong>AbstractBootstrap.initAndRegister -&gt; MultithreadEventLoopGroup.register -&gt; SingleThreadEventLoop.register -&gt; AbstractUnsafe.register -&gt; AbstractUnsafe.register0 -&gt; AbstractNioChannel.doRegister()</strong></p>
+<h2 id="添加-ChannelHandler"><a href="#添加-ChannelHandler" class="headerlink" title="添加 ChannelHandler"></a>添加 ChannelHandler</h2><p>在之前的 <code>initAndRegister()</code>方法里，里面有个 <code>init()</code>方法，如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(Channel channel)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Map&lt;ChannelOption&lt;?&gt;, Object&gt; options = options0();</span><br><span class="line">        <span class="keyword">synchronized</span> (options) &#123;</span><br><span class="line">            setChannelOptions(channel, options, logger);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> Map&lt;AttributeKey&lt;?&gt;, Object&gt; attrs = attrs0();</span><br><span class="line">        <span class="keyword">synchronized</span> (attrs) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Entry&lt;AttributeKey&lt;?&gt;, Object&gt; e: attrs.entrySet()) &#123;</span><br><span class="line">                <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">                AttributeKey&lt;Object&gt; key = (AttributeKey&lt;Object&gt;) e.getKey();</span><br><span class="line">                channel.attr(key).set(e.getValue());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ChannelPipeline p = channel.pipeline();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> EventLoopGroup currentChildGroup = childGroup;</span><br><span class="line">        <span class="keyword">final</span> ChannelHandler currentChildHandler = childHandler;</span><br><span class="line">        <span class="keyword">final</span> Entry&lt;ChannelOption&lt;?&gt;, Object&gt;[] currentChildOptions;</span><br><span class="line">        <span class="keyword">final</span> Entry&lt;AttributeKey&lt;?&gt;, Object&gt;[] currentChildAttrs;</span><br><span class="line">        <span class="keyword">synchronized</span> (childOptions) &#123;</span><br><span class="line">            currentChildOptions = childOptions.entrySet().toArray(newOptionArray(<span class="number">0</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">synchronized</span> (childAttrs) &#123;</span><br><span class="line">            currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(<span class="number">0</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        p.addLast(<span class="keyword">new</span> ChannelInitializer&lt;Channel&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(<span class="keyword">final</span> Channel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">final</span> ChannelPipeline pipeline = ch.pipeline();</span><br><span class="line">                ChannelHandler handler = config.handler();</span><br><span class="line">                <span class="keyword">if</span> (handler != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    pipeline.addLast(handler);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                ch.eventLoop().execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                        pipeline.addLast(<span class="keyword">new</span> ServerBootstrapAcceptor(</span><br><span class="line">                                ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>在<code>init()</code>方法中设置服务端自定义的 <code>ChannelOptions,ChannelAttrs</code>属性和为服务端Channel创建出来的新连接的Channel设置的自定义属性<code>ChildOptions，ChildAttrs</code>，这里就不多叙述设置参数的问题了，重点关注 <code>pipeline</code>的 <code>addLast</code>方法，该方法就是添加用于处理出站和入站数据流的 ChannelHandler，而<code>pipeline</code>是从 <code>channel</code>中获取的，之前分析过当创建<code>channel</code>时会自动创建一个对应的 <code>channelPipeline</code>。</p>
+<p>至于<code>ChannelInitializer</code>又是什么，来看下它的类继承结构图就知道了：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/ChannelInitial.png" alt="channelHandler"></p>
+<p><code>ChannelInitializer</code>是一个抽象类，实现了<code>ChannelHandler</code>接口，它有一个抽象方法<code>initChannel</code>,上面代码实现了该方法并且添加了<code>bootstrap</code>的handler，逻辑如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.....</span><br><span class="line">//1</span><br><span class="line">ChannelHandler handler = config.handler();</span><br><span class="line">if (handler != null) &#123;</span><br><span class="line">    pipeline.addLast(handler);</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">//2</span><br><span class="line">public final ChannelHandler handler() &#123;</span><br><span class="line">    return bootstrap.handler();</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">//3</span><br><span class="line">final ChannelHandler handler() &#123;</span><br><span class="line">    return handler;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>initChannel</code>添加的<code>Handler</code>就是我们服务端代码中 <code>serverbootstrap</code>设置的<code>handler</code>，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">b.group(bossGroup, workerGroup)</span><br><span class="line">         .channel(NioServerSocketChannel.class)</span><br><span class="line">         .option(ChannelOption.SO_BACKLOG, 100)</span><br><span class="line">         .handler(new LoggingHandler(LogLevel.INFO))</span><br><span class="line">         .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">             @Override</span><br><span class="line">             public void initChannel(SocketChannel ch) &#123;</span><br><span class="line">                 ChannelPipeline p = ch.pipeline();</span><br><span class="line">                 //p.addLast(new LoggingHandler(LogLevel.INFO));</span><br><span class="line">                 p.addLast(serverHandler);</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>示例代码设置的handler为<code>LoggingHandler</code>,用于处理日志，这里不细说。上面的<code>initChannel</code>方法可以添加 <code>Handler</code>，这里的<code>serverbootstrap</code>启动类还增加了 <strong>childHandler</strong>方法，也是用来添加 handler，只不过是向已经连接的 channel客户端的 <code>channnelpipeline</code>添加<code>handler</code>。</p>
+<p><strong><code>serverbootstrap.handler()</code>设置的<code>handler</code>在初始化就会执行，而 <code>serverbootstrap.childHandler()</code>设置的<code>childHandler</code>在客户端连接成功才会执行</strong></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>由于自身知识与经验有限，对Netty的服务端启动源码分析得不是很全面，在此过程中也参考了一些大佬的Netty源码分析文章，本文如有错误之处，欢迎指出。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://segmentfault.com/a/1190000007282789#articleHeader9" target="_blank" rel="noopener">Netty 源码分析之 一 揭开 Bootstrap 神秘的红盖头 (客户端)</a></li>
+<li><a href="https://www.jianshu.com/p/e577803f0fb8" target="_blank" rel="noopener">Netty源码分析之服务启动</a></li>
+<li><a href="https://book.douban.com/subject/27038538/" target="_blank" rel="noopener">Netty In Action</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/09/23/Netty系列文章之服务端启动分析/" data-id="cjmekbzm0001bicr97hv8dg0e" class="article-share-link"><i class="fas fa-share"></i>Partager</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/09/23/Netty系列文章之服务端启动分析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/23/Netty系列文章之服务端启动分析/">Commentaires</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/21/Netty-系列文章之基本组件概览/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Plus ancien</strong>
+            <div class="article-nav-title">Netty 系列文章之基本组件概览</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Catégories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">16</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nuage de tags</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 14px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Liens</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/09/23/Netty系列文章之服务端启动分析/';
+        
+        this.page.identifier = 'Netty系列文章之服务端启动分析';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
