@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>Netty系列文章之构建HTTP(HTTPS)应用程序 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言这篇文章主要介绍如何用Netty构建一个HTTP/HTTPS应用程序，用一个HelloWorld级Demo进行阐述 SSL/TLS协议简介因为要同时构建HTTPS应用程序，所以我们需要通过使用 SSL/TLS保护Netty应用程序，这里先简单介绍下 SSL/TLS协议。">
+<meta name="keywords" content="Netty">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty系列文章之构建HTTP(HTTPS)应用程序">
+<meta property="og:url" content="https://pjmike.github.io/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="前言这篇文章主要介绍如何用Netty构建一个HTTP/HTTPS应用程序，用一个HelloWorld级Demo进行阐述 SSL/TLS协议简介因为要同时构建HTTPS应用程序，所以我们需要通过使用 SSL/TLS保护Netty应用程序，这里先简单介绍下 SSL/TLS协议。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/tcp-ip_model_ssl-tls_protocol.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/sslhandler.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/httprequset.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/httpreponse.JPG">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/httpservercodec.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/curlHttp.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/server_log.png">
+<meta property="og:updated_time" content="2018-09-25T11:55:42.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netty系列文章之构建HTTP(HTTPS)应用程序">
+<meta name="twitter:description" content="前言这篇文章主要介绍如何用Netty构建一个HTTP/HTTPS应用程序，用一个HelloWorld级Demo进行阐述 SSL/TLS协议简介因为要同时构建HTTPS应用程序，所以我们需要通过使用 SSL/TLS保护Netty应用程序，这里先简单介绍下 SSL/TLS协议。">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/tcp-ip_model_ssl-tls_protocol.png">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Entradas',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                46
+                <span>Entradas</span>
+            </div>
+            <div class="article-info-block">
+                26
+                <span>Etiquetas</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-Netty系列文章之构建HTTP-HTTPS-应用程序" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            Netty系列文章之构建HTTP(HTTPS)应用程序
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/">
+            <time datetime="2018-09-25T11:55:41.000Z" itemprop="datePublished">2018-09-25</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Netty/">Netty</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Netty/">Netty</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catálogo</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SSL-TLS协议简介"><span class="toc-number">2.</span> <span class="toc-text">SSL/TLS协议简介</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK的javax-net-ssl包-VS-Netty的OpenSSL-SSLEngine"><span class="toc-number">2.1.</span> <span class="toc-text">JDK的javax.net.ssl包 VS Netty的OpenSSL/SSLEngine</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP请求和响应组成部分"><span class="toc-number">3.</span> <span class="toc-text">HTTP请求和响应组成部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP解码器、编码器和编解码器"><span class="toc-number">4.</span> <span class="toc-text">HTTP解码器、编码器和编解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#应用程序代码"><span class="toc-number">5.</span> <span class="toc-text">应用程序代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码解读"><span class="toc-number">5.1.</span> <span class="toc-text">代码解读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#HttpHelloWorldServerHandler"><span class="toc-number">5.1.1.</span> <span class="toc-text">HttpHelloWorldServerHandler</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#AsciiString"><span class="toc-number">5.1.2.</span> <span class="toc-text">AsciiString</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#测试"><span class="toc-number">5.2.</span> <span class="toc-text">测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">6.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">7.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这篇文章主要介绍如何用Netty构建一个HTTP/HTTPS应用程序，用一个HelloWorld级Demo进行阐述</p>
+<h2 id="SSL-TLS协议简介"><a href="#SSL-TLS协议简介" class="headerlink" title="SSL/TLS协议简介"></a>SSL/TLS协议简介</h2><p>因为要同时构建HTTPS应用程序，所以我们需要通过使用 SSL/TLS保护Netty应用程序，这里先简单介绍下 SSL/TLS协议。</p>
+<a id="more"></a>
+<p>SSL和TLS都是运输层的安全协议，  它们发展历史如下：</p>
+<ul>
+<li>1995： SSL 2.0 ,由Netscape提出，这个版本由于设计缺陷，并不安全，很快被发现有严重漏洞，已经废弃</li>
+<li>1996：SSL 3.0写成RFC,开始流行，目前(从2015年)已经不安全，必须禁用</li>
+<li>1999：TLS1.0互联网标准化组织ISOC接替NetScape公司，发布了<strong>SSL 的升级版TLS1.0版</strong></li>
+<li>2006: TLS 1.1. 作为 RFC 4346 发布。主要fix了CBC模式相关的如BEAST攻击等漏洞</li>
+<li>2008: TLS 1.2. 作为RFC 5246 发布 。增进安全性。目前(2015年)应该主要部署的版本，请确保你使用的是这个版本</li>
+<li>2015之后: TLS 1.3，还在制订中，支持0-rtt，大幅增进安全性，砍掉了aead之外的加密方式</li>
+</ul>
+<p>由于SSL的2个版本都已经退出历史舞台，<strong>现在一般所说的SSL就是TLS</strong></p>
+<p>SSL/TLS安全协议示意图如下：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/tcp-ip_model_ssl-tls_protocol.png" alt="ssl/tls"></p>
+<p>SSL/TLS协议是一个位于HTTP层与TCP层之间的可选层，其提供的服务主要有：</p>
+<ul>
+<li>认证用户和服务器，确保数据发送到正确的客户机和服务器</li>
+<li>加密数据以防止数据中途被窃取</li>
+<li>维护数据的完整性，确保数据在传输过程中不被改变</li>
+</ul>
+<p>关于SSL/TLS协议更加详细的介绍可以查找相关资料，这里就不细说了。</p>
+<h3 id="JDK的javax-net-ssl包-VS-Netty的OpenSSL-SSLEngine"><a href="#JDK的javax-net-ssl包-VS-Netty的OpenSSL-SSLEngine" class="headerlink" title="JDK的javax.net.ssl包 VS Netty的OpenSSL/SSLEngine"></a>JDK的javax.net.ssl包 VS Netty的OpenSSL/SSLEngine</h3><p>为了支持 SSL/TLS，Java提供了 javax.net.ssl 包，它的 SSLContext 和 SSLEngine 类使得解密和加密相当简单和高效。SSLContext是SSL链接的上下文，SSLEngine主要用于出站和入站字节流的操作。</p>
+<p>Netty还提供了使用 OpenSSL工具包的SSLEngine实现，该SSLEngine比JDK提供的SSLEngine实现有更好的性能</p>
+<p>Netty通过一个名为<code>SslHandler</code>的<code>ChannelHandler</code>实现加密和解密的功能，其中<code>SslHandler</code>在内部使用SSLEngine来完成实际的工作，SSLEngine的实现可以是JDK的<code>SSLEngine</code>,也可以是 Netty 的<code>OpenSslEngine</code>，当然推荐使用Netty的OpenSslEngine，因为它性能更好，通过SslHandler进行解密和加密的过程如下图所示（摘自《Netty In Action》）：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/sslhandler.jpg" alt="sslhandler"></p>
+<p>大多数情况下，SslHandler 将是 ChannelPipeline 中的第一个 ChannelHandler。这确保了只有在所有其他的 ChannelHandler 将它们的逻辑应用到数据之后，才会进行加密。</p>
+<h2 id="HTTP请求和响应组成部分"><a href="#HTTP请求和响应组成部分" class="headerlink" title="HTTP请求和响应组成部分"></a>HTTP请求和响应组成部分</h2><p>HTTP是基于请求/响应模型的的: 客户端向服务端发送一个HTTP请求，然后服务端将会返回一个HTTP响应，Netty提供了多种编码器和解码器以简化对这个协议的使用。</p>
+<p>HTTP请求的组成部分如下图：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/httprequset.jpg" alt="httpRequest"></p>
+<p>HTTP响应的组成部分如下图:</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/httpreponse.JPG" alt="httpreponse"></p>
+<p>如上面两图所示，一个HTTP请求/响应可能由多个数据部分组成，并且它总是以一个 LastHttpContent 部分作为结束。 <code>FullHttpRequest</code>和<code>FullHttpResponse</code>消息是特殊的子类型，分别代表了完整的请求和响应。</p>
+<p>所有类型的HTTP消息都实现了 <code>HttpObject</code> 接口</p>
+<h2 id="HTTP解码器、编码器和编解码器"><a href="#HTTP解码器、编码器和编解码器" class="headerlink" title="HTTP解码器、编码器和编解码器"></a>HTTP解码器、编码器和编解码器</h2><p>Netty为HTTP消息提供了编码器和解码器：</p>
+<ul>
+<li><code>HttpRequestEncoder</code>: 编码器，用于客户端，向服务器发送请求</li>
+<li><code>HttpResponseEecoder</code>: 编码器，用于服务端，向服务端发送响应</li>
+<li><code>HttpRequestDecoder</code>:解码器，用于服务端，接收来自客户端的请求</li>
+<li><code>HttpResponseDecoder</code>: 解码器，用于客户端，接收来自服务端的请求</li>
+</ul>
+<p><strong>编解码器</strong>：</p>
+<ul>
+<li><code>HttpClientCodec</code>: 用于客户端的编解码器，等效于 <code>HttpRequestEncoder</code>和<code>HttpResponseDecoder</code>的组合</li>
+<li><code>HttpServerCodec</code>:用于服务端的编解码器，等效于 <code>HttpRequsetDecoder</code>和 <code>HttpResponseEncoder</code>的组合</li>
+</ul>
+<p>以<code>HttpServerCodec</code>为例，它的类继承结构图如下：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/httpservercodec.png" alt="httpservercodec"></p>
+<p>HttpServerCodec 同时实现了 <code>ChannelInboundHandler</code>和 <code>ChannelOutboundHandler</code>接口，以达到同时具有编码和解码的能力。</p>
+<p><strong>聚合器</strong>：</p>
+<ul>
+<li><code>HttpObjectAggregator</code>: 聚合器，可以将多个消息部分合并为 <code>FullHttpRequest</code>或者 <code>FullHttpResponse</code>消息。使用该聚合器的原因是HTTP解码器会在每个HTTP消息中生成多个消息对象，如<code>HttpRequest/HttpResponse,HttpContent,LastHttpContent</code>,使用聚合器将它们聚合成一个完整的消息内容，这样就不用关心消息碎片了。</li>
+</ul>
+<h2 id="应用程序代码"><a href="#应用程序代码" class="headerlink" title="应用程序代码"></a>应用程序代码</h2><p>构建基于Netty的HTTP/HTTPS 应用程序的源代码出自于Netty官方提供的demo,我略微做了一些改动，原地址是：<a href="https://github.com/netty/netty/tree/4.1/example/src/main/java/io/netty/example/http/helloworld" target="_blank" rel="noopener">https://github.com/netty/netty/tree/4.1/example/src/main/java/io/netty/example/http/helloworld</a></p>
+<p>源代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpHelloWorldServer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> SSL = System.getProperty(<span class="string">"ssl"</span>) != <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = Integer.parseInt(System.getProperty(<span class="string">"port"</span>, SSL ? <span class="string">"8443"</span> : <span class="string">"8080"</span>));</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> SslContext sslContext;</span><br><span class="line">        <span class="comment">//判断SSL是否为true,为true表示使用HTTPS连接，反之，使用HTTP</span></span><br><span class="line">        <span class="keyword">if</span> (SSL) &#123;</span><br><span class="line">            <span class="comment">//使用Netty自带的证书工具生成一个数字证书</span></span><br><span class="line">            SelfSignedCertificate certificate = <span class="keyword">new</span> SelfSignedCertificate();</span><br><span class="line">            sslContext = SslContextBuilder.forServer(certificate.certificate(), certificate.privateKey()).build();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            sslContext = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        EventLoopGroup boss = <span class="keyword">new</span> NioEventLoopGroup(<span class="number">1</span>);</span><br><span class="line">        EventLoopGroup worker = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ServerBootstrap bootstrap = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">            bootstrap.group(boss, worker)</span><br><span class="line">                    .channel(NioServerSocketChannel.class)</span><br><span class="line">                    .handler(<span class="keyword">new</span> LoggingHandler(LogLevel.INFO))</span><br><span class="line">                    .childHandler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                        <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                            ChannelPipeline pipeline = ch.pipeline();</span><br><span class="line">                            <span class="keyword">if</span> (sslContext != <span class="keyword">null</span>) &#123;</span><br><span class="line">                                pipeline.addLast(sslContext.newHandler(ch.alloc()));</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="comment">//添加一个HTTP的编解码器</span></span><br><span class="line">                            pipeline.addLast(<span class="keyword">new</span> HttpServerCodec());</span><br><span class="line">                            <span class="comment">//添加HTTP消息聚合器</span></span><br><span class="line">                            pipeline.addLast(<span class="keyword">new</span> HttpObjectAggregator(<span class="number">64</span> * <span class="number">1024</span>));</span><br><span class="line">                            <span class="comment">//添加一个自定义服务端Handler</span></span><br><span class="line">                            pipeline.addLast(<span class="keyword">new</span> HttpHelloWorldServerHandler());</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">            ChannelFuture future = bootstrap.bind(PORT).sync();</span><br><span class="line">            System.err.println(<span class="string">"Open your web browser and navigate to "</span> +</span><br><span class="line">                    (SSL? <span class="string">"https"</span> : <span class="string">"http"</span>) + <span class="string">"://127.0.0.1:"</span> + PORT + <span class="string">'/'</span>);</span><br><span class="line"></span><br><span class="line">            future.channel().closeFuture().sync();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            boss.shutdownGracefully().sync();</span><br><span class="line">            worker.shutdownGracefully().sync();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="代码解读"><a href="#代码解读" class="headerlink" title="代码解读"></a>代码解读</h3><p>首先判断系统属性ssl是否存在，如果存在，则表明使用安全连接，反之，则使用一般的HTTP连接。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> SslContext sslContext;</span><br><span class="line">      <span class="keyword">if</span> (SSL) &#123;</span><br><span class="line">          SelfSignedCertificate certificate = <span class="keyword">new</span> SelfSignedCertificate();</span><br><span class="line">          sslContext = SslContextBuilder.forServer(certificate.certificate(), certificate.privateKey()).build();</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          sslContext = <span class="keyword">null</span>;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码所示，当SSL为true时，使用Netty自带的签名证书工具自定义服务端发送给客户端的数字证书。</p>
+<p>接下来和一般的Netty服务端程序步骤一样，先创建 <code>ServerBootstrap</code>启动类，设置和绑定 <code>NioEventLoopGroup</code>线程池，创建服务端 Channel，添加ChannelHandler。值得注意的是，添加的ChannelHandler都是与HTTP相关的Handler。</p>
+<h4 id="HttpHelloWorldServerHandler"><a href="#HttpHelloWorldServerHandler" class="headerlink" title="HttpHelloWorldServerHandler"></a>HttpHelloWorldServerHandler</h4><p>自定义的Handler代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HttpHelloWorldServerHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelInboundHandler</span>&lt;<span class="title">HttpObject</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AsciiString CONTENT_TYPE = AsciiString.cached(<span class="string">"Content-Type"</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AsciiString CONTENT_LENGTH = AsciiString.cached(<span class="string">"Content-Length"</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AsciiString CONNECTION = AsciiString.cached(<span class="string">"Connection"</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> AsciiString KEEP_ALIVE = AsciiString.cached(<span class="string">"keep-alive"</span>);</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">channelRead0</span><span class="params">(ChannelHandlerContext ctx, HttpObject msg)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (msg <span class="keyword">instanceof</span> HttpRequest) &#123;</span><br><span class="line">            HttpRequest req = (HttpRequest) msg;</span><br><span class="line">            System.out.println(<span class="string">"浏览器请求方式："</span>+req.method().name());</span><br><span class="line">            String content = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (<span class="string">"/hello"</span>.equals(req.uri())) &#123;</span><br><span class="line">                content = <span class="string">"hello world"</span>;</span><br><span class="line">                response2Client(ctx,req,content);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                content = <span class="string">"Connect the Server"</span>;</span><br><span class="line">                response2Client(ctx,req,content);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">response2Client</span><span class="params">(ChannelHandlerContext ctx, HttpRequest req, String content)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> keepAlive = HttpUtil.isKeepAlive(req);</span><br><span class="line">        FullHttpResponse response = <span class="keyword">new</span> DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(content.getBytes()));</span><br><span class="line">        response.headers().set(CONTENT_TYPE, <span class="string">"text/plain"</span>);</span><br><span class="line">        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());</span><br><span class="line">        <span class="keyword">if</span> (!keepAlive) &#123;</span><br><span class="line">            ctx.write(response).addListener(ChannelFutureListener.CLOSE);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            response.headers().set(CONNECTION, KEEP_ALIVE);</span><br><span class="line">            ctx.write(response);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelReadComplete</span><span class="params">(ChannelHandlerContext ctx)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ctx.flush();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">exceptionCaught</span><span class="params">(ChannelHandlerContext ctx, Throwable cause)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        cause.printStackTrace();</span><br><span class="line">        ctx.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在此Handler中处理入站数据流，但该代码只是处理<code>GET</code>请求，没有对<code>POST</code>请求做出处理，所以当浏览器发送一个 <code>GET</code>请求时，此Handler定义一个HTTP响应体 <code>FullHttpResponse</code>，设置一些响应头，如·<code>Content-type</code>、<code>Connection</code>、<code>Content-Length</code>等，设置响应内容，然后通过<code>ctx.write</code>方法写入HTTP消息</p>
+<h4 id="AsciiString"><a href="#AsciiString" class="headerlink" title="AsciiString"></a>AsciiString</h4><p>在设置响应头时我们用到了 <strong>AsciiString</strong>，从Netty 4.1开始，提供了实现了 <code>CharSequence</code> 接口的 <code>AsciiString</code>,至于 <code>CharSequence</code>就是 <code>String</code>的父类。<code>AsciiString</code> 包含的字符只占1个字节，当你处理 US-ASCII 或者 ISO-8859-1 字符串时可以节省空间。例如，HTTP编解码器使用 <code>AsciiString</code>处理 header name ,因为将<code>AsciiString</code>编码到 <code>ByteBuf</code>中不会有类型转换的代价，其内部实现就是用的 <code>byte</code>，而对于<code>String</code>来说，内部是存 <code>char[]</code>,使用 String就需要将 char转换成 byte，所以<code>AsciiString</code> 比String类型有更好的性能。</p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>客户端测试：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/curlHttp.png" alt="curl"></p>
+<p>服务端日志：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/server_log.png" alt="server"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上总结了如何使用Netty构建一个简单的HTTP/HTTPS应用程序。当然上面的程序参考的是Netty官方提供的Demo，Netty官方还提供了很多其他方面的例子，对于入门学习来说还不错，详细地址是： <a href="https://github.com/netty/netty/tree/4.1/example/src/main/java/io/netty/example" target="_blank" rel="noopener">https://github.com/netty/netty/tree/4.1/example/src/main/java/io/netty/example</a></p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="http://www.ruanyifeng.com/blog/2014/02/ssl_tls.html" target="_blank" rel="noopener">SSL/TLS协议运行机制的概述</a></li>
+<li><a href="https://blog.helong.info/blog/2015/09/07/tls-protocol-analysis-and-crypto-protocol-design/" target="_blank" rel="noopener">TLS协议分析 与 现代加密通信协议设计</a></li>
+<li><a href="https://book.douban.com/subject/27038538/" target="_blank" rel="noopener">Netty In Action</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/" data-id="cjmho5l3b0018pcr9e7151shs" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/">Comentarios</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/23/Netty系列文章之服务端启动分析/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Más viejo</strong>
+            <div class="article-nav-title">Netty系列文章之服务端启动分析</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Categorias</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archivos</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Etiquetas</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jwt/">jwt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nube de etiquetas</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 10px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/jwt/" style="font-size: 10px;">jwt</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/';
+        
+        this.page.identifier = 'Netty系列文章之构建HTTP-HTTPS-应用程序';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
