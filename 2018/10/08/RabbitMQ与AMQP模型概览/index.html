@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>RabbitMQ与AMQP模型概览 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="RabbitMQ 简介RabbitMQ是采用 Erlang语言实现AMQP协议的消息中间件，AMQP全称是 Advanced Message Queue Protocolg，高级消息队列协议。它是应用层协议的一个开放标准，为面向消息的中间件设计，基于此协议的客户端与消息中间件可传递消息，并不受产品、开放语言等条件的限制。">
+<meta name="keywords" content="RabbitMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ与AMQP模型概览">
+<meta property="og:url" content="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="RabbitMQ 简介RabbitMQ是采用 Erlang语言实现AMQP协议的消息中间件，AMQP全称是 Advanced Message Queue Protocolg，高级消息队列协议。它是应用层协议的一个开放标准，为面向消息的中间件设计，基于此协议的客户端与消息中间件可传递消息，并不受产品、开放语言等条件的限制。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/p2p_queue.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/pub_sub.jpg">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/rabbitmq_amqp_model.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/exchange-direct.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/exchange-fanout.png">
+<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/exchange-topic.png">
+<meta property="og:updated_time" content="2018-10-08T14:35:39.031Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMQ与AMQP模型概览">
+<meta name="twitter:description" content="RabbitMQ 简介RabbitMQ是采用 Erlang语言实现AMQP协议的消息中间件，AMQP全称是 Advanced Message Queue Protocolg，高级消息队列协议。它是应用层协议的一个开放标准，为面向消息的中间件设计，基于此协议的客户端与消息中间件可传递消息，并不受产品、开放语言等条件的限制。">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/p2p_queue.png">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Entradas',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                46
+                <span>Entradas</span>
+            </div>
+            <div class="article-info-block">
+                25
+                <span>Etiquetas</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-RabbitMQ与AMQP模型概览" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            RabbitMQ与AMQP模型概览
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/10/08/RabbitMQ与AMQP模型概览/">
+            <time datetime="2018-10-08T14:35:38.000Z" itemprop="datePublished">2018-10-08</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/RabbitMQ/">RabbitMQ</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/RabbitMQ/">RabbitMQ</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catálogo</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#RabbitMQ-简介"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息模型"><span class="toc-number">2.</span> <span class="toc-text">消息模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AMQP-模型简介"><span class="toc-number">3.</span> <span class="toc-text">AMQP 模型简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AMQP-的基本概念"><span class="toc-number">4.</span> <span class="toc-text">AMQP 的基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Exchange-和-Exchange-类型"><span class="toc-number">4.1.</span> <span class="toc-text">Exchange 和 Exchange 类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#关于默认-Exchange"><span class="toc-number">4.1.1.</span> <span class="toc-text">关于默认 Exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Direct-Exchange"><span class="toc-number">4.1.2.</span> <span class="toc-text">Direct Exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fanout-exchange"><span class="toc-number">4.1.3.</span> <span class="toc-text">fanout exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#topic-exchange"><span class="toc-number">4.1.4.</span> <span class="toc-text">topic exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#header-exchange"><span class="toc-number">4.1.5.</span> <span class="toc-text">header exchange</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Queue"><span class="toc-number">4.2.</span> <span class="toc-text">Queue</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#队列名"><span class="toc-number">4.2.1.</span> <span class="toc-text">队列名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#持久队列"><span class="toc-number">4.2.2.</span> <span class="toc-text">持久队列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#队列的绑定"><span class="toc-number">4.2.3.</span> <span class="toc-text">队列的绑定</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消费者"><span class="toc-number">4.3.</span> <span class="toc-text">消费者</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#消息的-ACK"><span class="toc-number">4.3.1.</span> <span class="toc-text">消息的 ACK</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#拒绝消息"><span class="toc-number">4.3.2.</span> <span class="toc-text">拒绝消息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#预读消息"><span class="toc-number">4.3.3.</span> <span class="toc-text">预读消息</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#连接"><span class="toc-number">4.4.</span> <span class="toc-text">连接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#通道-Channel"><span class="toc-number">4.5.</span> <span class="toc-text">通道 (Channel)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#虚拟主机-vhost"><span class="toc-number">4.6.</span> <span class="toc-text">虚拟主机(vhost)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消息属性和有效载荷-消息主体"><span class="toc-number">4.7.</span> <span class="toc-text">消息属性和有效载荷(消息主体)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">6.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="RabbitMQ-简介"><a href="#RabbitMQ-简介" class="headerlink" title="RabbitMQ 简介"></a>RabbitMQ 简介</h2><p><strong>RabbitMQ是采用 Erlang语言实现AMQP协议的消息中间件，AMQP全称是 Advanced Message Queue Protocolg，高级消息队列协议</strong>。它是应用层协议的一个开放标准，为面向消息的中间件设计，基于此协议的客户端与消息中间件可传递消息，<strong>并不受产品、开放语言等条件的限制</strong>。</p>
+<a id="more"></a>
+<h2 id="消息模型"><a href="#消息模型" class="headerlink" title="消息模型"></a>消息模型</h2><p>所有MQ(消息中间件)一般有两种传递模式：<strong>点对点模式和发布/订阅模式</strong>。</p>
+<p>点对点模式是基于队列的，消息生产者创建消息，然后发送消息给队列，消费者订阅队列，并从队列中获取消息。模型如下图所示:</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/p2p_queue.png" alt="queue"></p>
+<p>点对点模型的特点：</p>
+<ul>
+<li>queue 不能存储已经消费的消息，消费者不可能消息到已经被消费的消息</li>
+<li>每个消息只有一个消费者和一个生产者</li>
+<li>生产者发消息和消费者消费消息是异步解耦的</li>
+<li>消费者接收到消息后，需要发送ACK确认。</li>
+</ul>
+<p>发布订阅模式定义了如何向一个内容节点发送和订阅消息，消息发送者将消息发送到某一主题(Topic)上，消息订阅者从主题中订阅消息。发布/订阅在一对多广播时使用。模型如图所示：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/pub_sub.jpg" alt="pub/sub"></p>
+<p>发布/订阅模型的特点:</p>
+<ul>
+<li>每条消息都可以有多个消费者</li>
+<li>针对某个Topic，消息者必须订阅后才可以消息它的消息</li>
+<li>Topic中的消息可被重复消费</li>
+</ul>
+<h2 id="AMQP-模型简介"><a href="#AMQP-模型简介" class="headerlink" title="AMQP 模型简介"></a>AMQP 模型简介</h2><p>RabbitMQ是AMQP协议的一个开源实现，其内部模型实际上也是 AMQP的内部模型，如下图所示：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/rabbitmq_amqp_model.png" alt="rabbitmq_model"></p>
+<p>AMQP模型的工作流程如下：消息(Message) 被发布者 (publisher) 发送给交换机(exchange)，交换机常常被比喻成邮局或者邮箱，然后交换机将收到的消息根据路由规则分发给绑定的队列(queue)，最后AMQP代理会将消息投递给订阅此队列的消费者，或者消费者按照需求从队列中拉取消息。</p>
+<p>由于网络的不可靠，接收消息的应用也有可能在处理消息的时候失败，基于此原因，AMQP模型中有一个消息确认的概念：当一个消息从队列中投递给消费者后，消息者会通知一下消息代理(Broker),这个可以是自动的也可以是手动的。当”消息确认”被启用的时候，消息代理不会完全将消息从队列中删除，直到它收到来自消费者的确认回执（ACK)。</p>
+<p>在AMQP中，为什么不直接将消息传到队列中，而是先通过 Exchange转发呢？在网上看到一则还不错的回答：</p>
+<blockquote>
+<p>AMQP协议中的核心思想就是生产者和消息者隔离，生产者从不直接将消息发送给队列。生产者通常不知道是否一个消息会被发送到队列中，只是将消息发送到一个交换机。先由 Exchange 来接收，然后 Exchange 按照特定的路由规则转发到 Queue 进行存储。</p>
+</blockquote>
+<h2 id="AMQP-的基本概念"><a href="#AMQP-的基本概念" class="headerlink" title="AMQP 的基本概念"></a>AMQP 的基本概念</h2><h3 id="Exchange-和-Exchange-类型"><a href="#Exchange-和-Exchange-类型" class="headerlink" title="Exchange 和 Exchange 类型"></a>Exchange 和 Exchange 类型</h3><p>交换器，生产者将消息发送到交换器，交换器根据路由规则将消息路由一个或多个队列中。而路由规则受 Exchange 的类型和绑定(binding) 关系的影响。AMQP 0-9-1 broker 提供了如下 四个 exchange 类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>默认预定义的名字</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direct Exchange</td>
+<td>空字符串和 amq.direct</td>
+</tr>
+<tr>
+<td>Fanout Exchange</td>
+<td>amq.fanout</td>
+</tr>
+<tr>
+<td>Topic Exchange</td>
+<td>amq.topic</td>
+</tr>
+<tr>
+<td>Headers Exchange</td>
+<td>amq.match （在 RabbitMQ 中，额外提供 amq.headers)</td>
+</tr>
+</tbody>
+</table>
+<p>每个Exchange 都有如下几个属性：</p>
+<ul>
+<li><strong>Name</strong> : Exchange的名字</li>
+<li><strong>Durability</strong>: 是否是持久的 Exchange，当为真时，broker 重启后也会保留 此 Exchange，反之，broker重启后 Exchange 不存在</li>
+<li><strong>Auto-delete</strong>: 当为真时，如果所有绑定的 Queue 都不再使用时，此 Exchange  会自动删除</li>
+<li><strong>Arguments</strong>: 可选属性，由插件和消息代理的特定功能使用</li>
+</ul>
+<h4 id="关于默认-Exchange"><a href="#关于默认-Exchange" class="headerlink" title="关于默认 Exchange"></a>关于默认 Exchange</h4><p>默认的 exchange 是一个由 broker 预创建的 匿名的 (即名字为空字符串) direct Exchange，对于简单的程序来说，默认的 exchange 有一个实用的属性： 如果没有显示的绑定 Exchange ,那么 创建 的每个 queue 都会自动绑定到这个默认的 exchange中，并且此时这个 queue的route key 就是这个 queue的名字。</p>
+<p>下面举个例子来说明：</p>
+<p><strong>发送端</strong>：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbitmqProducer0</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_NAME = <span class="string">"hello"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String IP_ADDRESS = <span class="string">"127.0.0.1"</span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * RabbitMQ服务端默认端口号为5672</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">5672</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, TimeoutException </span>&#123;</span><br><span class="line">        <span class="comment">//连接工厂</span></span><br><span class="line">        ConnectionFactory factory = <span class="keyword">new</span> ConnectionFactory();</span><br><span class="line">        <span class="comment">//设置ip</span></span><br><span class="line">        factory.setHost(IP_ADDRESS);</span><br><span class="line">        <span class="comment">//设置端口</span></span><br><span class="line">        factory.setPort(PORT);</span><br><span class="line">        <span class="comment">//设置账号</span></span><br><span class="line">        factory.setUsername(<span class="string">"root"</span>);</span><br><span class="line">        <span class="comment">//设置密码</span></span><br><span class="line">        factory.setPassword(<span class="string">"root"</span>);</span><br><span class="line">        <span class="comment">//创建连接</span></span><br><span class="line">        Connection connection = factory.newConnection();</span><br><span class="line">        <span class="comment">//创建信道</span></span><br><span class="line">        Channel channel = connection.createChannel();</span><br><span class="line">        channel.queueDeclare(QUEUE_NAME, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">        String message = <span class="string">"hello world "</span>;</span><br><span class="line">        channel.basicPublish(<span class="string">""</span>, QUEUE_NAME, <span class="keyword">new</span> AMQP.BasicProperties.Builder().contentType(<span class="string">"text/plain"</span>).deliveryMode(<span class="number">2</span>).priority(<span class="number">1</span>).userId(<span class="string">"root"</span>).build(), message.getBytes()</span><br><span class="line">        );</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//关闭资源</span></span><br><span class="line">        channel.close();</span><br><span class="line">        connection.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>接收端</strong>：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbitmqConsumer0</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_NAME = <span class="string">"hello"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String IP_ADDRESS = <span class="string">"39.106.63.214"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">5672</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, TimeoutException, InterruptedException </span>&#123;</span><br><span class="line">        Address[] addresses = <span class="keyword">new</span> Address[]&#123;</span><br><span class="line">                <span class="keyword">new</span> Address(IP_ADDRESS, PORT)</span><br><span class="line">        &#125;;</span><br><span class="line">        ConnectionFactory factory = <span class="keyword">new</span> ConnectionFactory();</span><br><span class="line">        factory.setUsername(<span class="string">"root"</span>);</span><br><span class="line">        factory.setPassword(<span class="string">"root"</span>);</span><br><span class="line">        Connection connection = factory.newConnection(addresses);</span><br><span class="line">        <span class="comment">//创建信道</span></span><br><span class="line">        <span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">        Consumer consumer = <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"recv message: "</span> + <span class="keyword">new</span> String(body));</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    TimeUnit.SECONDS.sleep(<span class="number">5</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//消费者显示调用Basic.Ack命令</span></span><br><span class="line">                <span class="comment">//deliveryTag可以看做是消息的编号，它是一个位的长整型值</span></span><br><span class="line">                channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="comment">//可以指定autoAck为false,RabbitMQ会等待消费者显式地回复确认信号后才从内存中移去消息</span></span><br><span class="line">        channel.basicConsume(QUEUE_NAME, consumer);</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">5</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在上面的例子中，我们没有定义Exchange,也没有显示地将 queue 绑定到 exchange 中，因此 名为 “hello” 的queue 会自动绑定到默认的 exchange，即名字为空字符串的 exchange中。并且在这个默认的 exchange中，其 route key 和 queue名字一致。简言之，消息就以 route key为 “hello” 投递到默认的 exchange中，并被路由到 “hello” 这个queue中。</p>
+<h4 id="Direct-Exchange"><a href="#Direct-Exchange" class="headerlink" title="Direct Exchange"></a>Direct Exchange</h4><p>direct exchange 根据消息携带的 routing key 将消息投递到不同的 queue中，direct exchange 适用于消息的单播发送。工作流程如下：</p>
+<ul>
+<li>将一个队列绑定到某个交换机上，同时赋予该绑定 一个 route key。</li>
+<li>当一个携带 route key为R 的消息被发送到 direct exchange 时，exchange 会将消息路由到 绑定值同样为 R 的队列。<strong>注意Route Key和绑定值要完全匹配才行</strong>。</li>
+</ul>
+<p>direct exchange 经常用于在 多个 worker 中分配任务，当这样做时，需注意，在AMQP 0-9-1中，消息的负载均衡发生在 consumer之间，而不是在 queue之间。</p>
+<p>direct exchange 图示：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/exchange-direct.png" alt="exchange-direct"></p>
+<h4 id="fanout-exchange"><a href="#fanout-exchange" class="headerlink" title="fanout exchange"></a>fanout exchange</h4><p>一个 fanout exchange 会将消息分发给所有绑定到此 exchange 的queue中，不管 queue中的 route key。如果有 N 个 Queue 绑定到 一个 fanout exchange 时，那么此时 exchange 收到消息时，会将此消息分发到 这 N 个 queue中，由于此性质， fanout exchange 也常用消息的广播。</p>
+<p>fanout exchange图示：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/exchange-fanout.png" alt="exchange-fanout"></p>
+<h4 id="topic-exchange"><a href="#topic-exchange" class="headerlink" title="topic exchange"></a>topic exchange</h4><p>topic exchange 会根据 route key 将消息分发到与此消息的 route key <strong>相匹配</strong>的并且绑定此exchange的一个或多个 queue。这里的<strong>“相匹配”</strong>与 direct exchange的完全匹配的路由规则不一样，topic exchange 在匹配规则上进行了扩展，规则如下：</p>
+<ul>
+<li>RoutingKey（路由键）为一个点号 “.” 分隔的字符串，如 “com.rabbitmq.client”、”java.util.concurrent”、”com.hidden.client”等</li>
+<li>BindingKey（绑定键) 和 RoutingKey一样也是点号 “.” 分隔的字符串</li>
+<li>BindingKey （绑定键） 中可以存在两种 特殊字符串 “<em>“ 和 “#” ，用于做模糊匹配，其中 “ # “ 用于匹配一个单词，” </em> “用于匹配多个单词</li>
+</ul>
+<p>topic exchange 经常用于实现 publish/subscribe模型，即消息的多播模型。前面介绍消息模型也曾提到过消息中间件一般有两种模式：点对点模式和发布/订阅模式。这里的Topic Exchange就适用于发布/订阅模型。RabbitMQ的一个原则就是，消息不能直接投递到 Queue中，必须先将消息投递到 Exchange中，然后由Exchange 按照路由规则将消息投递到对应的 Queue中。至于点对点模型就可以用 Direct Exchange来实现，利用完全匹配的路由规则。</p>
+<p>topic exchange 图示：</p>
+<p><img src="http://osvtz719h.bkt.clouddn.com/exchange-topic.png" alt="exchange-topic"></p>
+<h4 id="header-exchange"><a href="#header-exchange" class="headerlink" title="header exchange"></a>header exchange</h4><p>header exchange 不依赖于路由器的匹配规则来路由消息，而是根据发送的消息内容中的 headers 属性进行匹配。</p>
+<h3 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h3><p>Queue: 队列，是RabbitMQ的内部对象，用于存储消息，RabbitMQ中的消息只能存储在队列中。它有几个重要的属性：</p>
+<ul>
+<li><code>Name</code>: 名字</li>
+<li><code>Durable</code>: 是否是持久的，当为真时，即使消息代理 重启时，此 queue 也不会被删除</li>
+<li><code>Exclusive</code>: 是否是独占的，当为真时，表示此 queue只能有一个消费者，并且当此消费者的连接断开时，此 queue 会被删除</li>
+<li><code>Auto-delete</code>: 当为真时，此队列会在最后一个消费者取消订阅时被删除</li>
+<li><code>Arguments</code>: 可选属性，由插件和消息代理的特定功能使用，例如消息TTL、队列长度限制等</li>
+</ul>
+<p>在使用一个队列时，需要先进行声明，如果我们声明的队列不存在，那么 broker 会自动创建它，但是如果队列已经存在，我们需要注意的是我们声明的队列的属性和已存在的的队列的属性是否一致，如果一致，则不会有任何问题，如果前后不一致，那就会 <code>PRECONDITION_FAILED</code>错误(错误码 406)</p>
+<h4 id="队列名"><a href="#队列名" class="headerlink" title="队列名"></a>队列名</h4><p>AMQP的队列名 不能为 “amq.” 开头，因为这样的队列名是 AMQP broker 内部所使用的，当我们使用了这样的队列名时，那么会有一个 <code>ACCESS_REFUSED</code> 错误 （错误码为 403）</p>
+<h4 id="持久队列"><a href="#持久队列" class="headerlink" title="持久队列"></a>持久队列</h4><p>持久队列会被持久化到磁盘中去，因此即使 broker 重启了，持久队列依然存在。持久队列和消息的持久化不同，当broker 重启时，持久队列会自动重新声明，而只有队列中的持久化消息(persistent message) 才会被恢复</p>
+<h4 id="队列的绑定"><a href="#队列的绑定" class="headerlink" title="队列的绑定"></a>队列的绑定</h4><p>队列的绑定关系是 exchange 用于消息路由的规则，即一个 exchange 能够将消息路由到某个队列的前提是队列已经绑定到这个 exchange中了，当队列绑定到一个 exchange中时，我们设置了一个 route key，或者叫做绑定键，这个key 会被 direct exchange 和 topic exchange 作为额外的路由信息使用。</p>
+<p>当exchange 没有任何的 queue 绑定时，那么此时会根据消息的属性来决定 是将此消息丢弃还是返回给生产者。</p>
+<h3 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h3><p>AMQP 0-9-1 支持两种消息分发模式：</p>
+<ul>
+<li>push模式，即broker 主动推送消息给 消费者</li>
+<li>pull模式，即消费者主动从 broker 中拉取消息</li>
+</ul>
+<p>在push模式中，消费者订阅一个消息主题，当有消息传递到消息主题时，broker主动将消息推送给订阅该主题的所有消费者。每个消费者都有一个唯一的标识符，即 consumer tag。我们也可以用这个 tag来取消一个消费者对某个主题的订阅。push模式下一般使用 Channel类的 <code>basicConsume</code>方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">String <span class="title">basicConsume</span><span class="params">(String queue, Consumer callback)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line"></span><br><span class="line"><span class="function">String <span class="title">basicConsume</span><span class="params">(String queue, DeliverCallback deliverCallback, CancelCallback cancelCallback)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line"></span><br><span class="line"><span class="function">String <span class="title">basicConsume</span><span class="params">(String queue, DeliverCallback deliverCallback, ConsumerShutdownSignalCallback shutdownSignalCallback)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>该方法有几种重载形式，更多的信息可以参阅 API文档。</p>
+<p>而pull（拉）模式，消费者主动从 broker 中拉取消息，通过 <code>channel.basicGet</code>方法可以单条地获取消息，其返回值是 <code>GetResponse</code>：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">GetResponse <span class="title">basicGet</span><span class="params">(String queue, <span class="keyword">boolean</span> autoAck)</span> <span class="keyword">throws</span> IOException</span>;</span><br></pre></td></tr></table></figure></p>
+<p>其中 queue 代表队列的名称，如果设置 autoAck 为 true，即消息自动ACK模式，为false,则为消息手动确认模式，同样需要调用 <code>channel.basicAck</code>来确认消息已被成功接收。下面将仔细阐述消息的ACK.</p>
+<h4 id="消息的-ACK"><a href="#消息的-ACK" class="headerlink" title="消息的 ACK"></a>消息的 ACK</h4><p>AMQP 0-9-1 有两种消息 ACK 模式：</p>
+<ul>
+<li>自动 ACK 模式</li>
+<li>手动 ACK 模式</li>
+</ul>
+<p><strong>在自动 ACK 模式下，当 broker 发送消息成功后，会立即将此消息 从消息队列中 删除，而不会消费者的 ACK回复</strong>。示例程序如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Address[] addresses = <span class="keyword">new</span> Address[]&#123;</span><br><span class="line">        <span class="keyword">new</span> Address(IP_ADDRESS, PORT)</span><br><span class="line">&#125;;</span><br><span class="line">ConnectionFactory factory = <span class="keyword">new</span> ConnectionFactory();</span><br><span class="line">factory.setUsername(<span class="string">"root"</span>);</span><br><span class="line">factory.setPassword(<span class="string">"root"</span>);</span><br><span class="line">Connection connection = factory.newConnection(addresses);</span><br><span class="line"><span class="comment">//创建信道</span></span><br><span class="line"><span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">Consumer consumer = <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"recv message: "</span> + <span class="keyword">new</span> String(body));</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">5</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">channel.basicConsume(QUEUE_NAME,<span class="keyword">true</span>,consumer);</span><br></pre></td></tr></table></figure></p>
+<p>在 <code>channel.basicConsume(String queue, boolean autoAck, Consumer callback)</code>设置 autoAck参数。</p>
+<p>而在手动的 ACK模式下，当 broker 发送消息给消费者时，不会立即将此消息删除，而是需要等待消息的消费者的ACK回复后才会删除消息，因此在手动 ACK模式下，当消费者收到消息并处理完成后，需要向 broker 显示地发送 ACK指令。示例程序如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Address[] addresses = <span class="keyword">new</span> Address[]&#123;</span><br><span class="line">        <span class="keyword">new</span> Address(IP_ADDRESS, PORT)</span><br><span class="line">&#125;;</span><br><span class="line">ConnectionFactory factory = <span class="keyword">new</span> ConnectionFactory();</span><br><span class="line">factory.setUsername(<span class="string">"root"</span>);</span><br><span class="line">factory.setPassword(<span class="string">"root"</span>);</span><br><span class="line">Connection connection = factory.newConnection(addresses);</span><br><span class="line"><span class="comment">//创建信道</span></span><br><span class="line"><span class="keyword">final</span> Channel channel = connection.createChannel();</span><br><span class="line">Consumer consumer = <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"recv message: "</span> + <span class="keyword">new</span> String(body));</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">5</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//消费者显示调用Basic.Ack命令</span></span><br><span class="line">        <span class="comment">//deliveryTag可以看做是消息的编号，它是一个位的长整型值</span></span><br><span class="line">        channel.basicAck(envelope.getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//这里还可以指定autoAck为false,RabbitMQ会等待消费者显式地回复确认信号后才从内存中移去消息</span></span><br><span class="line">channel.basicConsume(QUEUE_NAME,consumer);</span><br></pre></td></tr></table></figure></p>
+<p>在手动 ACK模式下，如果消费者 因为意外的 crash 而没有发送 ACK 给 broker,那么此时 broker会将消息转发给其他的消费者 (如果此时没有消费者了，那么 broker 会缓存 此消息，直到有新的消费者注册)</p>
+<h4 id="拒绝消息"><a href="#拒绝消息" class="headerlink" title="拒绝消息"></a>拒绝消息</h4><p>当一个 消费者处理消息失败或者此时不能处理消息时，那么可以给 broker 发送一个拒接消息的指令，并且可以要求 broker 丢弃或者重新分发此消息。不过需要的注意的是，如果此时只有一个消费者，那么此时消费者拒收消息并要求 broker 重新分发此消息时，那么就会造成此消息不断的分发和拒收，形成了死循环。拒收的方法如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">basicReject</span><span class="params">(<span class="keyword">long</span> deliveryTag, <span class="keyword">boolean</span> requeue)</span> <span class="keyword">throws</span> IOException</span>;</span><br></pre></td></tr></table></figure></p>
+<p>通过调用 <code>channel.basicReject</code>方法来告诉 RabbitMQ拒绝某个消息。其中 <code>deliveryTag</code> 可以看做是消息的编号，它是一个 64位的长整型值。如果 <code>requeue</code> 为 true, <strong>broker会重新将这条消息存入 队列</strong>，以便发送给下一个订阅的消费者。如果为false,则 broker<strong>会立即把消息从队列中移除，而不会把它发送给新的消费者</strong>。</p>
+<h4 id="预读消息"><a href="#预读消息" class="headerlink" title="预读消息"></a>预读消息</h4><p>通过 预读消息机制，消费者可以一次性批量取出消息，然后在处理后对这些消息进行统一的 ACK,这样可以提高消息的吞吐量。不过需要注意的是，RabbitMQ 仅支持 channel级别的预读消息的数量配置，不支持基于连接的预读消息数量配置。</p>
+<h3 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h3><p>AMQP的连接是长连接，它是一个使用 TCP作为可靠传输的应用层协议。AMQP使用认证机制并且体用 TLS(SSL) 保护。当一个应用不再需要连接到 AMQP代理的时候，需要优雅的释放掉AMQP连接，而不是直接将TCP连接关闭。</p>
+<h3 id="通道-Channel"><a href="#通道-Channel" class="headerlink" title="通道 (Channel)"></a>通道 (Channel)</h3><p>有些应用需要与 AMQP代理(Broker)建立多个连接，无论怎样，同时开启多个 TCP连接都是不合适的，因为这样做会消耗掉过多的系统资源并且使得防火墙的配置更加困难。AMQP 0-9-1提供了 Channel 来处理多个连接，可以把Channel理解为 共享 一个TCP连接的多个轻量化连接。（PS:这里让我想到了多路复用模型，原理相似）</p>
+<p>在涉及多线程/进程的应用中，为每个线程/进程开启一个通道 (channel) 是很常见的，并且这些通道不能被线程/进程共享。</p>
+<h3 id="虚拟主机-vhost"><a href="#虚拟主机-vhost" class="headerlink" title="虚拟主机(vhost)"></a>虚拟主机(vhost)</h3><p>为了在一个单独的代理上实现多个隔离的环境(用户、用户组、交换机、队列等)，AMQP提供了一个 虚拟主机 (virtual hosts -vhosts)的概念。这与 虚拟机的概念相似，这为AMQP提供了完全隔离的环境。当连接被建立时，AMQP客户端指定使用哪个虚拟主机。</p>
+<h3 id="消息属性和有效载荷-消息主体"><a href="#消息属性和有效载荷-消息主体" class="headerlink" title="消息属性和有效载荷(消息主体)"></a>消息属性和有效载荷(消息主体)</h3><p>AMQP模型中的消息 (Message)对象是带有 属性(Attributes)的。有些属性非常常见，例如：</p>
+<ul>
+<li><code>Content type</code>: 内容类型</li>
+<li><code>Content encoding</code>: 内容编码</li>
+<li><code>Routing Key</code>: 路由键</li>
+<li><code>Delivery mode</code>: 投递方式(持久化 or 非持久化)</li>
+<li><code>Message priority</code>: 消息优先权</li>
+<li><code>Message publishing timestamp</code>: 消息发布的时间戳</li>
+<li><code>Expiration period</code>: 消息的有效期</li>
+<li><code>Publisher application id</code>: 发布应用的id</li>
+</ul>
+<p>有些属性是被 AMQP代理所使用的，比如 <code>Routing Key</code>，但是大多数是对给接收消息的消费者使用的，有些属性是可选为做消息头的。它们与HTTP协议的 <code>X-headers</code>很相似，比如 <code>Content type</code>、<code>Content encoding</code> 。</p>
+<p><strong>AMQP的消息除属性外，还含有一个消息体，即消息实际携带的数据，它对AMQP代理不透明。broker 不会检查或修改消息体，但是消息可以只包含属性而不携带消息体</strong>。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文参考了 <a href="https://www.rabbitmq.com/tutorials/amqp-concepts.html#messages" target="_blank" rel="noopener">AMQP 0-9-1 Model Explained</a>官方文档及其相关译本，果然，官方文档是最权威的，也解决了我之前对于RabbitMQ的很多疑惑。这里参照网上资料整理出来一篇文章，算是对 RabbiMQ及AMQP模型有一个大致的认识。光看文档还不够，还需多去实战才能加深对RabbitMQ的理解和认识。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://www.rabbitmq.com/tutorials/amqp-concepts.html#messages" target="_blank" rel="noopener">AMQP 0-9-1 Model Explained</a></li>
+<li><a href="http://rabbitmq.mr-ping.com/AMQP/AMQP_0-9-1_Model_Explained.html" target="_blank" rel="noopener">AMQP 0-9-1 简介</a></li>
+<li><a href="https://segmentfault.com/a/1190000007123977" target="_blank" rel="noopener">RabbitMQ AMQP 消息模型攻略</a></li>
+<li><a href="https://www.jianshu.com/p/79ca08116d57" target="_blank" rel="noopener">消息队列之 RabbitMQ</a></li>
+<li><a href="https://book.douban.com/subject/27591386/" target="_blank" rel="noopener">RabbitMQ 实战指南</a></li>
+<li><a href="http://techblog.ppdai.com/2018/07/17/20180717/" target="_blank" rel="noopener">消息模型</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/" data-id="cjn0eh3yt00226sr9mrtlwx8i" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/">Comentarios</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Más viejo</strong>
+            <div class="article-nav-title">Netty系列文章之构建HTTP(HTTPS)应用程序</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Categorias</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archivos</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Etiquetas</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nube de etiquetas</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12.5px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/';
+        
+        this.page.identifier = 'RabbitMQ与AMQP模型概览';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
