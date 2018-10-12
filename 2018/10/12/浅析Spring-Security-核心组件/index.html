@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>浅析Spring Security 核心组件 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言近几天在网上找了一个 Spring Security 和JWT 的例子来学习，项目地址是: https://github.com/szerhusenBC/jwt-spring-security-demo  作为学习Spring Security还是不错的，通过研究该 demo 发现自己对 Spring Security一知半解，并没有弄清楚Spring Seurity的流程，所以才想写一篇文章">
+<meta name="keywords" content="Spring Security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析Spring Security 核心组件">
+<meta property="og:url" content="https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="前言近几天在网上找了一个 Spring Security 和JWT 的例子来学习，项目地址是: https://github.com/szerhusenBC/jwt-spring-security-demo  作为学习Spring Security还是不错的，通过研究该 demo 发现自己对 Spring Security一知半解，并没有弄清楚Spring Seurity的流程，所以才想写一篇文章">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-10-12T13:37:30.431Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅析Spring Security 核心组件">
+<meta name="twitter:description" content="前言近几天在网上找了一个 Spring Security 和JWT 的例子来学习，项目地址是: https://github.com/szerhusenBC/jwt-spring-security-demo  作为学习Spring Security还是不错的，通过研究该 demo 发现自己对 Spring Security一知半解，并没有弄清楚Spring Seurity的流程，所以才想写一篇文章">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                47
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                26
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-浅析Spring-Security-核心组件" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            浅析Spring Security 核心组件
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/10/12/浅析Spring-Security-核心组件/">
+            <time datetime="2018-10-12T13:37:30.000Z" itemprop="datePublished">2018-10-12</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Spring-Security/">Spring Security</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Spring-Security/">Spring Security</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Security的核心类"><span class="toc-number">2.</span> <span class="toc-text">Spring Security的核心类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SecurityContextHolder、Securityontext和Authentication"><span class="toc-number">2.1.</span> <span class="toc-text">SecurityContextHolder、Securityontext和Authentication</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AuthenticationManager、ProviderManager-和-AuthenticationProvider"><span class="toc-number">2.2.</span> <span class="toc-text">AuthenticationManager、ProviderManager 和 AuthenticationProvider</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#认证成功后清除验证信息"><span class="toc-number">2.2.1.</span> <span class="toc-text">认证成功后清除验证信息</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UserDetailsService-和-UserDetails"><span class="toc-number">2.3.</span> <span class="toc-text">UserDetailsService 和 UserDetails</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#认证过程样本示例"><span class="toc-number">3.</span> <span class="toc-text">认证过程样本示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">5.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>近几天在网上找了一个 Spring Security 和JWT 的例子来学习，项目地址是: <a href="https://github.com/szerhusenBC/jwt-spring-security-demo" target="_blank" rel="noopener">https://github.com/szerhusenBC/jwt-spring-security-demo</a>  作为学习Spring Security还是不错的，通过研究该 demo 发现自己对 <code>Spring Security</code>一知半解，并没有弄清楚Spring Seurity的流程，所以才想写一篇文章先来分析分析Spring Security的核心组件，其中参考了官方文档及其一些大佬写的Spring Security分析文章，有雷同的地方还请见谅。</p>
+<a id="more"></a>
+<h2 id="Spring-Security的核心类"><a href="#Spring-Security的核心类" class="headerlink" title="Spring Security的核心类"></a>Spring Security的核心类</h2><p>Spring Security的核心类主要包括以下几个：</p>
+<ul>
+<li><strong>SecurityContextHolder</strong>:        存放身份信息的容器</li>
+<li><strong>Authentication</strong>:  身份信息的抽象接口</li>
+<li><strong>AuthenticationManager</strong>: 身份认证器，认证的核心接口</li>
+<li><strong>UserDetailsService</strong>： 一般用于从数据库中加载身份信息</li>
+<li><strong>UserDetails</strong>: 相比Authentication，有更详细的身份信息</li>
+</ul>
+<h3 id="SecurityContextHolder、Securityontext和Authentication"><a href="#SecurityContextHolder、Securityontext和Authentication" class="headerlink" title="SecurityContextHolder、Securityontext和Authentication"></a>SecurityContextHolder、Securityontext和Authentication</h3><p><code>SecurityContextHolder</code>用于存储安全上下文(security context)的信息，即一个存储身份信息，认证信息等的容器。<code>SecurityContextHolder</code>默认使用 <code>ThreadLocal</code>策略来存储认证信息，即一种与线程绑定的策略，每个线程执行时都可以获取该线程中的 安全上下文(security context)，各个线程中的安全上下文互不影响。而且如果说要在请求结束后清除安全上下文中的信息，利用该策略Spring Security也可以轻松搞定。</p>
+<p>因为身份信息时与线程绑定的，所以我们可以在程序的任何地方使用静态方法获取用户信息，一个获取当前登录用户的姓名的例子如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (principal <span class="keyword">instanceof</span> UserDetails) &#123;</span><br><span class="line">String username = ((UserDetails)principal).getUsername();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">String username = principal.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>getAuthentication()</code>方法返回了认证信息，准确的说是一个 <code>Authentication</code>实例，<code>Authentication</code>是 Spring Security 中的一个重要接口，直接继承自 Principal类，该接口表示对用户身份信息的抽象，接口源码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Authentication</span> <span class="keyword">extends</span> <span class="title">Principal</span>, <span class="title">Serializable</span> </span>&#123; </span><br><span class="line">    <span class="comment">//权限信息列表，默认是 GrantedAuthority接口的一些实现</span></span><br><span class="line">    Collection&lt;? extends GrantedAuthority&gt; getAuthorities(); </span><br><span class="line">    <span class="comment">//密码信息，用户输入的密码字符串，认证后通常会被移除，用于保证安全</span></span><br><span class="line">    <span class="function">Object <span class="title">getCredentials</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//细节信息，web应用中通常的接口为 WebAuthenticationDetails，它记录了访问者的ip地址和sessionId的值</span></span><br><span class="line">    <span class="function">Object <span class="title">getDetails</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//身份信息，返回UserDetails的实现类</span></span><br><span class="line">    <span class="function">Object <span class="title">getPrincipal</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//认证状态，默认为false,认证成功后为 true</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isAuthenticated</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//上述身份信息是否经过身份认证 </span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setAuthenticated</span><span class="params">(<span class="keyword">boolean</span> var1)</span> <span class="keyword">throws</span> IllegalArgumentException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="AuthenticationManager、ProviderManager-和-AuthenticationProvider"><a href="#AuthenticationManager、ProviderManager-和-AuthenticationProvider" class="headerlink" title="AuthenticationManager、ProviderManager 和 AuthenticationProvider"></a>AuthenticationManager、ProviderManager 和 AuthenticationProvider</h3><p>AuthenticationManager是身份认证器，认证的核心接口，接口源码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AuthenticationManager</span> </span>&#123;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Attempts to authenticate the passed &#123;<span class="doctag">@link</span> Authentication&#125; object, returning a</span></span><br><span class="line"><span class="comment">	 * fully populated &lt;code&gt;Authentication&lt;/code&gt; object (including granted authorities)</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> authentication the authentication request object</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> a fully authenticated object including credentials</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> AuthenticationException if authentication fails</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function">Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> AuthenticationException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>该接口只有一个 <code>authenticate()</code>方法，用于身份信息的认证，如果认证成功，将会返回一个带了完整信息的<code>Authentication</code>，在之前提到的<code>Authentication</code>所有的属性都会被填充。</p>
+<p>在Spring Security中，<code>AuthenticationManager</code>默认的实现类是 <code>ProviderManager</code>，<code>ProviderManager</code>并不是自己直接对请求进行验证，而是将其委派给一个 <code>AuthenticationProvider</code>列表。列表中的每一个 <code>AuthenticationProvider</code>将会被依次查询是否需要通过其进行验证,每个 provider的验证结果只有两个情况：抛出一个异常或者完全填充一个 <code>Authentication</code>对象的所有属性。<code>ProviderManager</code>中的部分源码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProviderManager</span> <span class="keyword">implements</span> <span class="title">AuthenticationManager</span>, <span class="title">MessageSourceAware</span>,</span></span><br><span class="line"><span class="class">		<span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//维护一个AuthenticationProvider 列表</span></span><br><span class="line">	<span class="keyword">private</span> List&lt;AuthenticationProvider&gt; providers = Collections.emptyList();</span><br><span class="line">	<span class="keyword">private</span> AuthenticationManager parent;</span><br><span class="line">	<span class="comment">//构造器，初始化 AuthenticationProvider 列表</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ProviderManager</span><span class="params">(List&lt;AuthenticationProvider&gt; providers)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>(providers, <span class="keyword">null</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ProviderManager</span><span class="params">(List&lt;AuthenticationProvider&gt; providers,</span></span></span><br><span class="line"><span class="function"><span class="params">			AuthenticationManager parent)</span> </span>&#123;</span><br><span class="line">		Assert.notNull(providers, <span class="string">"providers list cannot be null"</span>);</span><br><span class="line">		<span class="keyword">this</span>.providers = providers;</span><br><span class="line">		<span class="keyword">this</span>.parent = parent;</span><br><span class="line">		checkState();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">		Class&lt;? extends Authentication&gt; toTest = authentication.getClass();</span><br><span class="line">		AuthenticationException lastException = <span class="keyword">null</span>;</span><br><span class="line">		Authentication result = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">boolean</span> debug = logger.isDebugEnabled();</span><br><span class="line">        <span class="comment">// AuthenticationProvider 列表中每个Provider依次进行认证</span></span><br><span class="line">		<span class="keyword">for</span> (AuthenticationProvider provider : getProviders()) &#123;</span><br><span class="line">			<span class="keyword">if</span> (!provider.supports(toTest)) &#123;</span><br><span class="line">				<span class="keyword">continue</span>;</span><br><span class="line">			&#125;</span><br><span class="line">            ...</span><br><span class="line">			<span class="keyword">try</span> &#123; </span><br><span class="line">			    <span class="comment">//调用 AuthenticationProvider 的 authenticate()方法进行认证</span></span><br><span class="line">				result = provider.authenticate(authentication);</span><br><span class="line">				<span class="keyword">if</span> (result != <span class="keyword">null</span>) &#123;</span><br><span class="line">					copyDetails(authentication, result);</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			...</span><br><span class="line">			<span class="keyword">catch</span> (AuthenticationException e) &#123;</span><br><span class="line">				lastException = e;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">// 如果 AuthenticationProvider 列表中的Provider都认证失败，且之前有构造一个 AuthenticationManager 实现类，那么利用AuthenticationManager 实现类 继续认证</span></span><br><span class="line">		<span class="keyword">if</span> (result == <span class="keyword">null</span> &amp;&amp; parent != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="comment">// Allow the parent to try.</span></span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				result = parent.authenticate(authentication);</span><br><span class="line">			&#125;</span><br><span class="line">            ...</span><br><span class="line">			<span class="keyword">catch</span> (AuthenticationException e) &#123;</span><br><span class="line">				lastException = e;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">//认证成功</span></span><br><span class="line">		<span class="keyword">if</span> (result != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span> (eraseCredentialsAfterAuthentication</span><br><span class="line">					&amp;&amp; (result <span class="keyword">instanceof</span> CredentialsContainer)) &#123;</span><br><span class="line">				<span class="comment">// Authentication is complete. Remove credentials and other secret data</span></span><br><span class="line">				<span class="comment">// from authentication</span></span><br><span class="line">				<span class="comment">//成功认证后删除验证信息</span></span><br><span class="line">				((CredentialsContainer) result).eraseCredentials();</span><br><span class="line">			&#125;</span><br><span class="line">            <span class="comment">//发布登录成功事件</span></span><br><span class="line">			eventPublisher.publishAuthenticationSuccess(result);</span><br><span class="line">			<span class="keyword">return</span> result;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 没有认证成功，抛出一个异常</span></span><br><span class="line">		<span class="keyword">if</span> (lastException == <span class="keyword">null</span>) &#123;</span><br><span class="line">			lastException = <span class="keyword">new</span> ProviderNotFoundException(messages.getMessage(</span><br><span class="line">					<span class="string">"ProviderManager.providerNotFound"</span>,</span><br><span class="line">					<span class="keyword">new</span> Object[] &#123; toTest.getName() &#125;,</span><br><span class="line">					<span class="string">"No AuthenticationProvider found for &#123;0&#125;"</span>));</span><br><span class="line">		&#125;</span><br><span class="line">		prepareException(lastException, authentication);</span><br><span class="line">		<span class="keyword">throw</span> lastException;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ProviderManager中的 <code>authenticationManager</code>列表依次去尝试认证，认证成功即返回，认证失败返回null，如果所有的 Provider都认证失败， <code>ProviderManager</code>将会抛出一个 <code>ProviderNotFoundException</code>异常。</p>
+<p>事实上，<code>AuthenticationProvider</code>是一个接口，接口定义如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AuthenticationProvider</span> </span>&#123;</span><br><span class="line">    <span class="comment">//认证方法</span></span><br><span class="line">	<span class="function">Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> AuthenticationException</span>;</span><br><span class="line">    <span class="comment">//该Provider是否支持对应的Authentication</span></span><br><span class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">supports</span><span class="params">(Class&lt;?&gt; authentication)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在 <code>ProviderManager</code>的 Javadoc曾提到,</p>
+<blockquote>
+<p>If more than one AuthenticationProvider  supports the passed Authentication object, the first one able to successfully authenticate the Authentication object determines the result, overriding any possible AuthenticationException   thrown by earlier supporting AuthenticationProvider s. On successful authentication, no subsequent AuthenticationProvider s will be tried. If authentication was not successful by any supporting AuthenticationProvider the last thrown  AuthenticationException will be rethrown</p>
+</blockquote>
+<p>大致意思是： </p>
+<blockquote>
+<p>如果有多个 AuthenticationProvider 都支持同一个Authentication 对象，那么<strong>第一个 能够成功验证Authentication的 Provder</strong> 将填充其属性并返回结果，从而覆盖早期支持的 AuthenticationProvider抛出的任何可能的 AuthenticationException。一旦成功验证后，将不会尝试后续的 AuthenticationProvider。如果所有的 <code>AuthenticationProvider</code>都没有成功验证 Authentication，那么将抛出最后一个Provider抛出的AuthenticationException。(AuthenticationProvider可以在Spring Security配置类中配置)</p>
+</blockquote>
+<p><strong>PS</strong>:</p>
+<blockquote>
+<p>当然有时候我们有多个不同的 <code>AuthenticationProvider</code>，它们分别支持不同的 <code>Authentication</code>对象，那么当一个具体的 <code>AuthenticationProvier</code>传进入 <code>ProviderManager</code>的内部时，就会在 <code>AuthenticationProvider</code>列表中挑选其对应支持的provider对相应的 Authentication对象进行验证。</p>
+</blockquote>
+<p>不同的登录方式认证逻辑是不一样的，即 <code>AuthenticationProvider</code>会不一样，如果使用用户名和密码登录，那么在Spring Security 提供了一个 <code>AuthenticationProvider</code>的简单实现 <code>DaoAuthenticationProvider</code>，这也是框架最早的 provider，它使用了一个 <code>UserDetailsService</code>来查询用户名、密码和 <code>GrantedAuthority</code>，一般我们要实现<code>UserDetailsService</code>接口，，并在Spring Security配置类中将其配置进去，这样也促使使用<code>DaoAuthenticationProvider</code>进行认证，然后该接口返回一个<code>UserDetails</code>，它包含了更加详细的身份信息，比如从数据库拿取的密码和权限列表，AuthenticationProvider 的认证核心就是加载对应的 <code>UserDetails</code>来检查用户输入的密码是否与其匹配，即UserDetails和Authentication两者的密码（关于 <code>UserDetailsService</code>和<code>UserDetails</code>的介绍在下面小节介绍。）。<strong>而如果是使用第三方登录，比如QQ登录，那么就需要设置对应的 <code>AuthenticationProvider</code></strong>，这里就不细说了。</p>
+<h4 id="认证成功后清除验证信息"><a href="#认证成功后清除验证信息" class="headerlink" title="认证成功后清除验证信息"></a>认证成功后清除验证信息</h4><p>在上面ProviderManager的源码中我还发现一点，在认证成功后清除验证信息，如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (eraseCredentialsAfterAuthentication</span><br><span class="line">		&amp;&amp; (result <span class="keyword">instanceof</span> CredentialsContainer)) &#123;</span><br><span class="line">	<span class="comment">// Authentication is complete. Remove credentials and other secret data</span></span><br><span class="line">	<span class="comment">// from authentication</span></span><br><span class="line">	<span class="comment">//成功认证后删除验证信息</span></span><br><span class="line">	((CredentialsContainer) result).eraseCredentials();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从 spring Security 3.1之后，在请求认证成功后 <code>ProviderManager</code>将会删除 <code>Authentication</code>中的认证信息，准确的说，一般删除的是 密码信息，这可以保证密码的安全。我跟了一下源码，实际上执行删除操作的步骤如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UsernamePasswordAuthenticationToken</span> <span class="keyword">extends</span> <span class="title">AbstractAuthenticationToken</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">eraseCredentials</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.eraseCredentials();</span><br><span class="line">        <span class="comment">//使密码为null</span></span><br><span class="line">        <span class="keyword">this</span>.credentials = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractAuthenticationToken</span> <span class="keyword">implements</span> <span class="title">Authentication</span>, <span class="title">CredentialsContainer</span> </span>&#123;</span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">eraseCredentials</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//擦除密码</span></span><br><span class="line">    <span class="keyword">this</span>.eraseSecret(<span class="keyword">this</span>.getCredentials());</span><br><span class="line">    <span class="keyword">this</span>.eraseSecret(<span class="keyword">this</span>.getPrincipal());</span><br><span class="line">    <span class="keyword">this</span>.eraseSecret(<span class="keyword">this</span>.details);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">eraseSecret</span><span class="params">(Object secret)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (secret <span class="keyword">instanceof</span> CredentialsContainer) &#123;</span><br><span class="line">        ((CredentialsContainer)secret).eraseCredentials();</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从源码就可以看出实际上就是擦除密码操作。</p>
+<h3 id="UserDetailsService-和-UserDetails"><a href="#UserDetailsService-和-UserDetails" class="headerlink" title="UserDetailsService 和 UserDetails"></a>UserDetailsService 和 UserDetails</h3><p><strong><code>UserDetailsService</code>简单说就是加载对应的<code>UserDetails</code>的接口(一般从数据库)，而<code>UserDetails</code>包含了更详细的用户信息</strong>，定义如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDetails</span> <span class="keyword">extends</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   Collection&lt;? extends GrantedAuthority&gt; getAuthorities();</span><br><span class="line"></span><br><span class="line">   <span class="function">String <span class="title">getPassword</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="function">String <span class="title">getUsername</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">boolean</span> <span class="title">isAccountNonExpired</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">boolean</span> <span class="title">isAccountNonLocked</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">boolean</span> <span class="title">isCredentialsNonExpired</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">boolean</span> <span class="title">isEnabled</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>UserDetails 接口与 Authentication接口相似，它们都有 username、authorities。它们的区别如下：</p>
+<ul>
+<li>Authentication 的 getCredentials() 与 UserDetails 中的 getPassword() 不一样，前者是用户提交的密码凭证，后者是用户正确的密码，(一般是从数据库中载入的密码)，<code>AuthenticationProvider</code>就会对两者进行对比。</li>
+<li>Authentication 中的 getAuthorities() 实际上是由 UserDetails 的 getAuthorities()传递形成的。</li>
+<li>Authentication 中的 getUserDetails() 中的 UserDetails 用户详细信息时经过 <code>AuthenticationProvider</code>认证之后填充的。</li>
+</ul>
+<h2 id="认证过程样本示例"><a href="#认证过程样本示例" class="headerlink" title="认证过程样本示例"></a>认证过程样本示例</h2><p>下面来看一个<a href="https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#what-is-authentication-in-spring-security" target="_blank" rel="noopener">官方文档</a>提供的例子，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringSecuriryTestDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> AuthenticationManager am = <span class="keyword">new</span> SampleAuthenticationManager();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        BufferedReader in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(System.in));</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">"Please enter your username:"</span>);</span><br><span class="line">            String name = in.readLine();</span><br><span class="line">            System.out.println(<span class="string">"Please enter your password:"</span>);</span><br><span class="line">            String password = in.readLine();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Authentication request = <span class="keyword">new</span> UsernamePasswordAuthenticationToken(name, password);</span><br><span class="line">                Authentication result = am.authenticate(request);</span><br><span class="line">                SecurityContextHolder.getContext().setAuthentication(request);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (AuthenticationException e) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Authentication failed: "</span> + e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"Successfully authenticated. Security context contains: "</span> + SecurityContextHolder.getContext().getAuthentication());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SampleAuthenticationManager</span> <span class="keyword">implements</span> <span class="title">AuthenticationManager</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> List&lt;GrantedAuthority&gt; AUTHORITIES = <span class="keyword">new</span> ArrayList&lt;GrantedAuthority&gt;();</span><br><span class="line">        <span class="keyword">static</span> &#123;</span><br><span class="line">            AUTHORITIES.add(<span class="keyword">new</span> SimpleGrantedAuthority(<span class="string">"ROLE_USER"</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (authentication.getName().equals(authentication.getCredentials())) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials(), AUTHORITIES);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> BadCredentialsException(<span class="string">"Bad Credentials"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>测试如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Please enter your username:</span><br><span class="line">pjmike</span><br><span class="line">Please enter your password:</span><br><span class="line">123</span><br><span class="line">Authentication failed: Bad Credentials</span><br><span class="line">Please enter your username:</span><br><span class="line">pjmike</span><br><span class="line">Please enter your password:</span><br><span class="line">pjmike</span><br><span class="line">Successfully authenticated. </span><br><span class="line">Security context contains: org.springframework.security.authentication.UsernamePasswordAuthenticationToken@441d0230:</span><br><span class="line">Principal: pjmike; </span><br><span class="line">Credentials: [PROTECTED];</span><br><span class="line">Authenticated: true; Details: null; </span><br><span class="line">Granted Authorities: ROLE_USER</span><br></pre></td></tr></table></figure></p>
+<p>上面的例子很简单，不是源码，只是为了演示认证过程编写的Demo，而且也缺少过滤器链，但是麻雀虽小，五脏俱全，基本包括了Spring Security的核心组件，表达了Spring Security 认证的基本思想。解读一下：</p>
+<ul>
+<li>用户名和密码被封装到 <code>UsernamePasswordAuthentication</code>的实例中(该类是 <code>Authentication</code>接口的实现)</li>
+<li>该 <code>Authentication</code>传递给 <code>AuthenticationManager</code>进行身份验证</li>
+<li>认证成功后，<code>AuthenticationManager</code>会返回一个完全填充的 <code>Authentication</code>实例，该实例包含权限信息，身份信息，细节信息，但是密码通常会被移除</li>
+<li>通过调用 <code>SecurityContextHolder.getContext().setAuthentication(…)</code>传入上面返回的填充了信息的 <code>Authentication</code>对象</li>
+</ul>
+<p>通过上面一个简单示例，我们大致明白了Spring Security的基本思想，但是要真正理清楚Spring Security的认证流程这还不够，我们需要深入源码去探究，后续文章会更加详细的分析Spring Security的认证过程。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这篇文章主要分析了Spring Security的一些核心组件，参考了官方文档及其相关译本，对核心组件有一个基本认识后，才便于后续更加详细的分析Spring Security的认证过程。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#tech-intro-access-control" target="_blank" rel="noopener">Spring Security Reference</a></li>
+<li><a href="http://www.tianshouzhi.com/api/tutorials/spring_security_4/278" target="_blank" rel="noopener">SPRING SECURITY 4官方文档中文翻译与源码解读</a></li>
+<li><a href="https://www.cnkirito.moe/spring-security-1/" target="_blank" rel="noopener">Spring Security(一)–Architecture Overview</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/" data-id="cjn625ix1003x8kr9hcznxo0g" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/10/08/RabbitMQ与AMQP模型概览/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">RabbitMQ与AMQP模型概览</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.5px;">Java</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12.5px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring-Security/" style="font-size: 10px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/';
+        
+        this.page.identifier = '浅析Spring-Security-核心组件';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
