@@ -13,17 +13,17 @@
 <meta property="og:site_name" content="风居者的街道">
 <meta property="og:description" content="RabbitMQ 简介RabbitMQ是采用 Erlang语言实现AMQP协议的消息中间件，AMQP全称是 Advanced Message Queue Protocolg，高级消息队列协议。它是应用层协议的一个开放标准，为面向消息的中间件设计，基于此协议的客户端与消息中间件可传递消息，并不受产品、开放语言等条件的限制。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/p2p_queue.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/pub_sub.jpg">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/rabbitmq_amqp_model.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/exchange-direct.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/exchange-fanout.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/exchange-topic.png">
-<meta property="og:updated_time" content="2018-10-08T15:16:28.879Z">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/p2p_queue.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/pub_sub.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/rabbitmq_amqp_model.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/exchange-direct.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/exchange-fanout.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/exchange-topic.png">
+<meta property="og:updated_time" content="2018-11-05T13:23:58.018Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RabbitMQ与AMQP模型概览">
 <meta name="twitter:description" content="RabbitMQ 简介RabbitMQ是采用 Erlang语言实现AMQP协议的消息中间件，AMQP全称是 Advanced Message Queue Protocolg，高级消息队列协议。它是应用层协议的一个开放标准，为面向消息的中间件设计，基于此协议的客户端与消息中间件可传递消息，并不受产品、开放语言等条件的限制。">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/p2p_queue.png">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/p2p_queue.png">
     
 
     
@@ -91,7 +91,7 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
@@ -110,10 +110,10 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Entradas',
+            POSTS: 'Posts',
             PAGES: 'Pages',
-            CATEGORIES: 'Categorias',
-            TAGS: 'Etiquetas',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
             UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
@@ -140,7 +140,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
     </div>
 
                 </td>
@@ -160,16 +160,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 50
-                <span>Entradas</span>
+                <span>posts</span>
             </div>
             <div class="article-info-block">
                 27
-                <span>Etiquetas</span>
+                <span>tags</span>
             </div>
         </div>
         
@@ -260,7 +260,7 @@
         
             
                 <div id="toc" class="toc-article">
-                <strong class="toc-title">Catálogo</strong>
+                <strong class="toc-title">Catalogue</strong>
                     <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#RabbitMQ-简介"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息模型"><span class="toc-number">2.</span> <span class="toc-text">消息模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AMQP-模型简介"><span class="toc-number">3.</span> <span class="toc-text">AMQP 模型简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AMQP-的基本概念"><span class="toc-number">4.</span> <span class="toc-text">AMQP 的基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Exchange-和-Exchange-类型"><span class="toc-number">4.1.</span> <span class="toc-text">Exchange 和 Exchange 类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#关于默认-Exchange"><span class="toc-number">4.1.1.</span> <span class="toc-text">关于默认 Exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Direct-Exchange"><span class="toc-number">4.1.2.</span> <span class="toc-text">Direct Exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fanout-exchange"><span class="toc-number">4.1.3.</span> <span class="toc-text">fanout exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#topic-exchange"><span class="toc-number">4.1.4.</span> <span class="toc-text">topic exchange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#header-exchange"><span class="toc-number">4.1.5.</span> <span class="toc-text">header exchange</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Queue"><span class="toc-number">4.2.</span> <span class="toc-text">Queue</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#队列名"><span class="toc-number">4.2.1.</span> <span class="toc-text">队列名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#持久队列"><span class="toc-number">4.2.2.</span> <span class="toc-text">持久队列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#队列的绑定"><span class="toc-number">4.2.3.</span> <span class="toc-text">队列的绑定</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消费者"><span class="toc-number">4.3.</span> <span class="toc-text">消费者</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#消息的-ACK"><span class="toc-number">4.3.1.</span> <span class="toc-text">消息的 ACK</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#拒绝消息"><span class="toc-number">4.3.2.</span> <span class="toc-text">拒绝消息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#预读消息"><span class="toc-number">4.3.3.</span> <span class="toc-text">预读消息</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#连接"><span class="toc-number">4.4.</span> <span class="toc-text">连接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#通道-Channel"><span class="toc-number">4.5.</span> <span class="toc-text">通道 (Channel)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#虚拟主机-vhost"><span class="toc-number">4.6.</span> <span class="toc-text">虚拟主机(vhost)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消息属性和有效载荷-消息主体"><span class="toc-number">4.7.</span> <span class="toc-text">消息属性和有效载荷(消息主体)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">6.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
                 </div>
             
@@ -268,7 +268,7 @@
 <a id="more"></a>
 <h2 id="消息模型"><a href="#消息模型" class="headerlink" title="消息模型"></a>消息模型</h2><p>所有MQ(消息中间件)一般有两种传递模式：<strong>点对点模式和发布/订阅模式</strong>。</p>
 <p>点对点模式是基于队列的，消息生产者创建消息，然后发送消息给队列，消费者订阅队列，并从队列中获取消息。模型如下图所示:</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/p2p_queue.png" alt="queue"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/p2p_queue.png" alt="queue"></p>
 <p>点对点模型的特点：</p>
 <ul>
 <li>queue 不能存储已经消费的消息，消费者不可能消息到已经被消费的消息</li>
@@ -277,7 +277,7 @@
 <li>消费者接收到消息后，需要发送ACK确认。</li>
 </ul>
 <p>发布订阅模式定义了如何向一个内容节点发送和订阅消息，消息发送者将消息发送到某一主题(Topic)上，消息订阅者从主题中订阅消息。发布/订阅在一对多广播时使用。模型如图所示：</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/pub_sub.jpg" alt="pub/sub"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/pub_sub.jpg" alt="pub/sub"></p>
 <p>发布/订阅模型的特点:</p>
 <ul>
 <li>每条消息都可以有多个消费者</li>
@@ -285,7 +285,7 @@
 <li>Topic中的消息可被重复消费</li>
 </ul>
 <h2 id="AMQP-模型简介"><a href="#AMQP-模型简介" class="headerlink" title="AMQP 模型简介"></a>AMQP 模型简介</h2><p>RabbitMQ是AMQP协议的一个开源实现，其内部模型实际上也是 AMQP的内部模型，如下图所示：</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/rabbitmq_amqp_model.png" alt="rabbitmq_model"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/rabbitmq_amqp_model.png" alt="rabbitmq_model"></p>
 <p>AMQP模型的工作流程如下：消息(Message) 被发布者 (publisher) 发送给交换机(exchange)，交换机常常被比喻成邮局或者邮箱，然后交换机将收到的消息根据路由规则分发给绑定的队列(queue)，最后AMQP代理会将消息投递给订阅此队列的消费者，或者消费者按照需求从队列中拉取消息。</p>
 <p>由于网络的不可靠，接收消息的应用也有可能在处理消息的时候失败，基于此原因，AMQP模型中有一个消息确认的概念：当一个消息从队列中投递给消费者后，消息者会通知一下消息代理(Broker),这个可以是自动的也可以是手动的。当”消息确认”被启用的时候，消息代理不会完全将消息从队列中删除，直到它收到来自消费者的确认回执（ACK)。</p>
 <p>在AMQP中，为什么不直接将消息传到队列中，而是先通过 Exchange转发呢？在网上看到一则还不错的回答：</p>
@@ -338,10 +338,10 @@
 </ul>
 <p>direct exchange 经常用于在 多个 worker 中分配任务，当这样做时，需注意，在AMQP 0-9-1中，消息的负载均衡发生在 consumer之间，而不是在 queue之间。</p>
 <p>direct exchange 图示：</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/exchange-direct.png" alt="exchange-direct"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/exchange-direct.png" alt="exchange-direct"></p>
 <h4 id="fanout-exchange"><a href="#fanout-exchange" class="headerlink" title="fanout exchange"></a>fanout exchange</h4><p>一个 fanout exchange 会将消息分发给所有绑定到此 exchange 的queue中，不管 queue中的 route key。如果有 N 个 Queue 绑定到 一个 fanout exchange 时，那么此时 exchange 收到消息时，会将此消息分发到 这 N 个 queue中，由于此性质， fanout exchange 也常用消息的广播。</p>
 <p>fanout exchange图示：</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/exchange-fanout.png" alt="exchange-fanout"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/exchange-fanout.png" alt="exchange-fanout"></p>
 <h4 id="topic-exchange"><a href="#topic-exchange" class="headerlink" title="topic exchange"></a>topic exchange</h4><p>topic exchange 会根据 route key 将消息分发到与此消息的 route key <strong>相匹配</strong>的并且绑定此exchange的一个或多个 queue。这里的<strong>“相匹配”</strong>与 direct exchange的完全匹配的路由规则不一样，topic exchange 在匹配规则上进行了扩展，规则如下：</p>
 <ul>
 <li>RoutingKey（路由键）为一个点号 “.” 分隔的字符串，如 “com.rabbitmq.client”、”java.util.concurrent”、”com.hidden.client”等</li>
@@ -350,7 +350,7 @@
 </ul>
 <p>topic exchange 经常用于实现 publish/subscribe模型，即消息的多播模型。前面介绍消息模型也曾提到过消息中间件一般有两种模式：点对点模式和发布/订阅模式。这里的Topic Exchange就适用于发布/订阅模型。RabbitMQ的一个原则就是，消息不能直接投递到 Queue中，必须先将消息投递到 Exchange中，然后由Exchange 按照路由规则将消息投递到对应的 Queue中。至于点对点模型就可以用 Direct Exchange来实现，利用完全匹配的路由规则。</p>
 <p>topic exchange 图示：</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/exchange-topic.png" alt="exchange-topic"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/exchange-topic.png" alt="exchange-topic"></p>
 <h4 id="header-exchange"><a href="#header-exchange" class="headerlink" title="header exchange"></a>header exchange</h4><p>header exchange 不依赖于路由器的匹配规则来路由消息，而是根据发送的消息内容中的 headers 属性进行匹配。</p>
 <h3 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h3><p>Queue: 队列，是RabbitMQ的内部对象，用于存储消息，RabbitMQ中的消息只能存储在队列中。它有几个重要的属性：</p>
 <ul>
@@ -422,7 +422,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/" data-id="cjo49m3t5002aqcr98y3vttqi" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/" data-id="cjo4c790z000v14r9pcvtkyzd" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -490,7 +490,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/">Comments</a>
     
 
         </footer>
@@ -500,7 +500,7 @@
 <nav id="article-nav">
     
         <a href="/2018/10/12/浅析Spring-Security-核心组件/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más nuevo</strong>
+            <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
                     浅析Spring Security 核心组件
@@ -510,7 +510,7 @@
     
     
         <a href="/2018/09/25/Netty系列文章之构建HTTP-HTTPS-应用程序/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más viejo</strong>
+            <strong class="article-nav-caption">Older</strong>
             <div class="article-nav-title">Netty系列文章之构建HTTP(HTTPS)应用程序</div>
         </a>
     
@@ -537,7 +537,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Categorias</h3>
+        <h3 class="widget-title">categories</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
@@ -546,7 +546,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Archivos</h3>
+        <h3 class="widget-title">archives</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -555,7 +555,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Etiquetas</h3>
+        <h3 class="widget-title">tags</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -564,7 +564,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Nube de etiquetas</h3>
+        <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
@@ -573,7 +573,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">Links</h3>
+        <h3 class="widget-title">links</h3>
         <div class="widget">
             <ul>
                 

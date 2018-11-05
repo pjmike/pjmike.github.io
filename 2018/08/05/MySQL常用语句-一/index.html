@@ -84,7 +84,7 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
@@ -103,10 +103,10 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Entradas',
+            POSTS: 'Posts',
             PAGES: 'Pages',
-            CATEGORIES: 'Categorias',
-            TAGS: 'Etiquetas',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
             UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
@@ -133,7 +133,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
     </div>
 
                 </td>
@@ -153,16 +153,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 50
-                <span>Entradas</span>
+                <span>posts</span>
             </div>
             <div class="article-info-block">
                 27
-                <span>Etiquetas</span>
+                <span>tags</span>
             </div>
         </div>
         
@@ -253,7 +253,7 @@
         
             
                 <div id="toc" class="toc-article">
-                <strong class="toc-title">Catálogo</strong>
+                <strong class="toc-title">Catalogue</strong>
                     <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#关于Show语句"><span class="toc-number">1.</span> <span class="toc-text">关于Show语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#show-variables-查看系统变量"><span class="toc-number">1.1.</span> <span class="toc-text">show variables 查看系统变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#show-grants-查看用户权限"><span class="toc-number">1.2.</span> <span class="toc-text">show grants 查看用户权限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#show-columns-from-TABLES-查看表的列信息"><span class="toc-number">1.3.</span> <span class="toc-text">show columns from TABLES 查看表的列信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#show-status-显示广泛的服务器状态信息"><span class="toc-number">1.4.</span> <span class="toc-text">show status 显示广泛的服务器状态信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#show-create-table-表-显示创建数据表的MySQL语句"><span class="toc-number">1.5.</span> <span class="toc-text">show create table [表] 显示创建数据表的MySQL语句</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查询语句"><span class="toc-number">2.</span> <span class="toc-text">查询语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#DISTINCT关键字"><span class="toc-number">2.1.</span> <span class="toc-text">DISTINCT关键字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LIMIT"><span class="toc-number">2.2.</span> <span class="toc-text">LIMIT</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#排序检索"><span class="toc-number">3.</span> <span class="toc-text">排序检索</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ORDER-BY"><span class="toc-number">3.1.</span> <span class="toc-text">ORDER BY</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#排序方向-DESC关键字"><span class="toc-number">3.2.</span> <span class="toc-text">排序方向-DESC关键字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ORDER-BY-和Limit组合"><span class="toc-number">3.3.</span> <span class="toc-text">ORDER BY 和Limit组合</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#过滤数据"><span class="toc-number">4.</span> <span class="toc-text">过滤数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#where子句操作符"><span class="toc-number">4.1.</span> <span class="toc-text">where子句操作符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#空值检查"><span class="toc-number">4.2.</span> <span class="toc-text">空值检查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AND操作符"><span class="toc-number">4.3.</span> <span class="toc-text">AND操作符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#OR操作符"><span class="toc-number">4.4.</span> <span class="toc-text">OR操作符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#计算次序"><span class="toc-number">4.5.</span> <span class="toc-text">计算次序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#IN操作符"><span class="toc-number">4.6.</span> <span class="toc-text">IN操作符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NOT操作符"><span class="toc-number">4.7.</span> <span class="toc-text">NOT操作符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用通配符进行过滤"><span class="toc-number">5.</span> <span class="toc-text">用通配符进行过滤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LIKE操作符"><span class="toc-number">5.1.</span> <span class="toc-text">LIKE操作符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用正则表达式进行匹配"><span class="toc-number">6.</span> <span class="toc-text">使用正则表达式进行匹配</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本字符匹配"><span class="toc-number">6.1.</span> <span class="toc-text">基本字符匹配</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#计算字段"><span class="toc-number">7.</span> <span class="toc-text">计算字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#拼接字段"><span class="toc-number">7.1.</span> <span class="toc-text">拼接字段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用数据处理函数"><span class="toc-number">8.</span> <span class="toc-text">使用数据处理函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用文本处理函数"><span class="toc-number">8.1.</span> <span class="toc-text">常用文本处理函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#日期和时间处理函数"><span class="toc-number">8.2.</span> <span class="toc-text">日期和时间处理函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数值处理函数"><span class="toc-number">8.3.</span> <span class="toc-text">数值处理函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#聚集函数汇总数据"><span class="toc-number">9.</span> <span class="toc-text">聚集函数汇总数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AVG-函数"><span class="toc-number">9.1.</span> <span class="toc-text">AVG()函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#COUNT-函数"><span class="toc-number">9.2.</span> <span class="toc-text">COUNT()函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MAX-函数"><span class="toc-number">9.3.</span> <span class="toc-text">MAX()函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MIN-函数"><span class="toc-number">9.4.</span> <span class="toc-text">MIN()函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SUM函数"><span class="toc-number">9.5.</span> <span class="toc-text">SUM函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#聚集不同值"><span class="toc-number">9.6.</span> <span class="toc-text">聚集不同值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分组数据"><span class="toc-number">10.</span> <span class="toc-text">分组数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GROUP-BY语句"><span class="toc-number">10.1.</span> <span class="toc-text">GROUP BY语句</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#过滤分组-HAVING关键字"><span class="toc-number">10.2.</span> <span class="toc-text">过滤分组(HAVING关键字)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分组和排序"><span class="toc-number">10.3.</span> <span class="toc-text">分组和排序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文章"><span class="toc-number">11.</span> <span class="toc-text">参考文章</span></a></li></ol>
                 </div>
             
@@ -359,7 +359,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/" data-id="cjo49m3pu000pqcr96miy3mwk" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/" data-id="cjo4c7900000h14r9lj20l3x5" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -427,7 +427,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/">Comentarios</a>
+        <a href="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/05/MySQL常用语句-一/">Comments</a>
     
 
         </footer>
@@ -437,7 +437,7 @@
 <nav id="article-nav">
     
         <a href="/2018/08/07/动态代理的原理及其应用/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más nuevo</strong>
+            <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
                     动态代理的原理及其应用
@@ -446,9 +446,9 @@
         </a>
     
     
-        <a href="/2018/07/22/leetcode题解-98-验证二叉搜索树/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más viejo</strong>
-            <div class="article-nav-title">leetcode题解 98 验证二叉搜索树</div>
+        <a href="/2018/07/22/leecode题解-二叉搜索树迭代器/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">leecode题解 二叉搜索树迭代器</div>
         </a>
     
 </nav>
@@ -474,7 +474,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Categorias</h3>
+        <h3 class="widget-title">categories</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
@@ -483,7 +483,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Archivos</h3>
+        <h3 class="widget-title">archives</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -492,7 +492,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Etiquetas</h3>
+        <h3 class="widget-title">tags</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -501,7 +501,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Nube de etiquetas</h3>
+        <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
@@ -510,7 +510,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">Links</h3>
+        <h3 class="widget-title">links</h3>
         <div class="widget">
             <ul>
                 
