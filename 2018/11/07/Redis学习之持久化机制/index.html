@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>Redis学习之持久化机制 | 风居者的街道</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
+<meta name="keywords" content="Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis学习之持久化机制">
+<meta property="og:url" content="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/index.html">
+<meta property="og:site_name" content="风居者的街道">
+<meta property="og:description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_aof_reload.png">
+<meta property="og:updated_time" content="2018-11-07T12:22:32.818Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis学习之持久化机制">
+<meta name="twitter:description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg">
+    
+
+    
+        <link rel="alternate" href="#" title="风居者的街道" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">风居者的街道</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Entradas',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                51
+                <span>Entradas</span>
+            </div>
+            <div class="article-info-block">
+                27
+                <span>Etiquetas</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-Redis学习之持久化机制" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            Redis学习之持久化机制
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/11/07/Redis学习之持久化机制/">
+            <time datetime="2018-11-07T12:21:19.000Z" itemprop="datePublished">2018-11-07</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Redis/">Redis</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Redis/">Redis</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catálogo</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RDB"><span class="toc-number">2.</span> <span class="toc-text">RDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#手动触发"><span class="toc-number">2.1.</span> <span class="toc-text">手动触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自动触发"><span class="toc-number">2.2.</span> <span class="toc-text">自动触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB的相关配置"><span class="toc-number">2.3.</span> <span class="toc-text">RDB的相关配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他机制"><span class="toc-number">2.4.</span> <span class="toc-text">其他机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AOF"><span class="toc-number">3.</span> <span class="toc-text">AOF</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开启AOF"><span class="toc-number">4.</span> <span class="toc-text">开启AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令写入"><span class="toc-number">4.1.</span> <span class="toc-text">命令写入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件同步方式"><span class="toc-number">4.2.</span> <span class="toc-text">文件同步方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重写机制"><span class="toc-number">4.3.</span> <span class="toc-text">重写机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重新加载"><span class="toc-number">4.4.</span> <span class="toc-text">重新加载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">5.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。</p>
+<p>一般有两种持久化方式：</p>
+<ul>
+<li>快照 ： Redis RDB</li>
+<li>写日志： Redis AOF</li>
+</ul>
+<p>下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读 Redis持久化的经典之作——<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">Redis persistence demystified</a></p>
+<a id="more"></a>
+<h2 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h2><p>RDB 持久化是<strong>把当前进程数据生成快照保存到硬盘的过程</strong>，文件格式是二进制文件，这种利用快照方式保存数据，其实在很多领域都比较常见，比如云服务器备份数据，MySQL备份数据等等。</p>
+<p>触发RDB持久化过程一般分为两种方式：</p>
+<ul>
+<li>手动触发</li>
+<li>自动触发</li>
+</ul>
+<h3 id="手动触发"><a href="#手动触发" class="headerlink" title="手动触发"></a>手动触发</h3><p>手动触发又分别有两种命令：</p>
+<ul>
+<li>save命令：阻塞当前的Redis服务器，直到RDB过程完成为止</li>
+<li>bgsave命令（主流的触发RDB持久化方式): Redis 进程执行 fork操作创建子进程，RDB 持久化由子进程负责，完成后自动结束，阻塞只发生在 fork 阶段</li>
+</ul>
+<p><strong>save命令</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; save</span><br><span class="line">OK</span><br></pre></td></tr></table></figure></p>
+<p>执行 <code>save</code>命令阻塞当前Redis，然后完成时返回一个 <code>OK</code></p>
+<p><strong>bgsave</strong></p>
+<p>bgsave的执行流程如下图(出自《Redis开发与运维》)：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg" alt="redis_bgsave"></p>
+<ul>
+<li>执行 bgsave 命令，Redis 父进程 判断当前是否存在正在执行的子进程，如 RDB/AOF子进程，如果存在 bgsave 命令直接返回</li>
+<li>父进程执行 fork 操作创建子进程，fork操作过程中父进程会阻塞，通过 <code>info stats</code> 命令 查看 <code>latest_fork_usec</code> 选项，可以获取最近一个 fork 操作的耗时，单位是 微秒</li>
+<li>父进程 fork 完成后，bgsave 命令 返回 <code>Background saving started</code> 信息并不会阻塞父进程，可以继续响应其他命令</li>
+<li>子进程创建 RDB 文件，根据父进程内存生成临时快照文件，完成后对原有文件进行原子替换</li>
+<li>进程发送信号给父进程表示完成，父进程更新统计信息</li>
+</ul>
+<h3 id="自动触发"><a href="#自动触发" class="headerlink" title="自动触发"></a>自动触发</h3><p>自动触发机制一般是在配置文件中使用 <code>save m n</code>，表示 m 秒内数据集存在 n 次 修改时，自动触发 <code>bgsave</code>，redis 默认的自动触发机制如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># Save the DB on disk:</span><br><span class="line">#</span><br><span class="line">#   save &lt;seconds&gt; &lt;changes&gt;</span><br><span class="line">#</span><br><span class="line">#   Will save the DB if both the given number of seconds and the given</span><br><span class="line">#   number of write operations against the DB occurred.</span><br><span class="line">#</span><br><span class="line">#   In the example below the behaviour will be to save:</span><br><span class="line">#   after 900 sec (15 min) if at least 1 key changed</span><br><span class="line">#   after 300 sec (5 min) if at least 10 keys changed</span><br><span class="line">#   after 60 sec if at least 10000 keys changed</span><br><span class="line">#</span><br><span class="line">#   Note: you can disable saving completely by commenting out all &quot;save&quot; lines.</span><br><span class="line">#</span><br><span class="line">#   It is also possible to remove all the previously configured save</span><br><span class="line">#   points by adding a save directive with a single empty string argument</span><br><span class="line">#   like in the following example:</span><br><span class="line">#</span><br><span class="line">#   save &quot;&quot;</span><br><span class="line"></span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure></p>
+<p>比如 <code>save 900 1</code>就表示当时间到 900s 时，如果Redis数据至少发生了一次修改，那么就会执行 bgsave</p>
+<h3 id="RDB的相关配置"><a href="#RDB的相关配置" class="headerlink" title="RDB的相关配置"></a>RDB的相关配置</h3><p>在 <code>redis.conf</code>有一系列关于 RDB的相关配置，如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 快照的文件名</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"></span><br><span class="line"># 存放快照的目录</span><br><span class="line">dir ./</span><br><span class="line"></span><br><span class="line"># 在进行快照备份时,是否进行压缩。</span><br><span class="line"># yes：压缩，但是需要一些cpu的消耗。</span><br><span class="line"># no：不压缩，需要更多的磁盘空间。</span><br><span class="line">rdbcompression yes</span><br><span class="line"></span><br><span class="line"># 是否开启RDB文件的校验，在写入文件和读取文件时都起作用,关闭时，写入和启动文件有大约10%的性能提升，但无法检查RDB的损坏情况</span><br><span class="line">rdbchecksum yes</span><br><span class="line"></span><br><span class="line">#自动触发</span><br><span class="line">#900秒后且至少1个key发生变化时创建快照  </span><br><span class="line">save 900 1  </span><br><span class="line">#300秒后且至少10个key发生变化时创建快照  </span><br><span class="line">save 300 10  </span><br><span class="line">#60秒后且至少10000个key发生变化时创建快照  </span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure></p>
+<p>一旦数据库出现问题，那么我们的RDB文件中保存的数据并不是全新的，从上次RDB文件生成到Redis停机这段时间的数据全部丢掉了。例如，每隔5分钟或者更长的时间来创建一次快照，Redis停止工作时（例如意外断电）就可能丢失最近几分钟的数据。所以RDB 不适合实时持久化操作</p>
+<h3 id="其他机制"><a href="#其他机制" class="headerlink" title="其他机制"></a>其他机制</h3><ul>
+<li>全量复制： 如果从节点执行全量复制，主节点自动执行 bgsave 命令 生成 RDB 文件并发送给从节点</li>
+<li>debug reload：  重新加载redis会触发 save操作</li>
+<li>shutdown命令：  如果没有开启 AOF 持久化功能则自动执行 <code>bgsave</code></li>
+</ul>
+<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p>AOF (append only file) 持久化： 以独立日志的方式记录每次写命令，重启时再重新执行 AOF 文件中的命令以达到恢复数据的目的，类似于 MySQL binlog。</p>
+<p>与 RDB 相比，AOF 的实时性更好。</p>
+<h2 id="开启AOF"><a href="#开启AOF" class="headerlink" title="开启AOF"></a>开启AOF</h2><p>在 <code>redis.conf</code>配置文件中开启 AOF持久化<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 是否开启AOF，默认关闭（no）</span><br><span class="line">appendonly yes</span><br><span class="line"></span><br><span class="line"># AOF 文件名 (默认: &quot;appendonly.aof&quot;)</span><br><span class="line"></span><br><span class="line">appendfilename &quot;appendonly.aof&quot;</span><br><span class="line"></span><br><span class="line"># 保存路径与 RDB 一样,可配置</span><br><span class="line"></span><br><span class="line">dir ./</span><br></pre></td></tr></table></figure></p>
+<p>使用AOF流程：</p>
+<ul>
+<li>命令写入(append): 所有的写入命令会追加到 aof_buf 缓冲区中</li>
+<li>文件同步(sync):   AOF 缓冲区根据对应的策略向硬盘做同步操作(sync)</li>
+<li>文件重写(rewrite)： 随着AOF文件越来越大，需要定期对AOF文件进行重写，达到压缩的目的</li>
+<li>重启加载(load): 当Redis重启时，加载AOF文件进行数据恢复</li>
+</ul>
+<h3 id="命令写入"><a href="#命令写入" class="headerlink" title="命令写入"></a>命令写入</h3><p> Redis先把命令追加到 <code>aof_buf</code>缓冲区中，该缓冲区是在系统的用户态缓冲区中，更具体的讲是在 Redis的缓冲内存中，缓冲内存主要包括： 客户端缓冲，复制积压缓冲区，AOF缓冲区。所以这里Redis实际上是将命令追加到AOF缓冲区。</p>
+<p> 之所以先写入缓冲区，是为了避免每次写 AOF 文件命令都直接写入硬盘，导致硬盘IO成为Redis负载的瓶颈。</p>
+<p> AOF 命令写入的内容直接是文本协议格式，一种Redis制定的文本协议，详情请查阅相关资料。它是一种纯文本格式，具有很好的兼容性，开启AOF后，所有写入命令都包含追加操作，直接采用 协议格式，避免了二次处理开销。</p>
+<h3 id="文件同步方式"><a href="#文件同步方式" class="headerlink" title="文件同步方式"></a>文件同步方式</h3><p>文件同步本质上将在用户态缓冲区(具体说是AOF缓冲区)中的数据 通过System call 刷入到操作系统的内核态中，进入刷入硬盘中去。</p>
+<p>其实涉及的两个重要的系统调用(System Call)：</p>
+<ul>
+<li><strong>write</strong>： 通过 write 系统调用，将数据写入到内核缓冲区中后直接返回，后面的工作交由操作系统将内核缓冲区的数据写入硬盘，这样的好处是提高了IO性能</li>
+<li><strong>fsync</strong>：通过 fsync 系统调用 将数据提交到硬盘中，强制硬盘同步，将一直阻塞到写入硬盘完成后返回</li>
+</ul>
+<p>而文件同步又有三种策略，可在 <code>redis.conf</code>配置文件中进行配置:</p>
+<ul>
+<li><code>appendfsync always</code>： 单纯靠调用 <code>fsync</code>将数据刷入到硬盘，是最有保证的完全的持久化，但速度也是最慢的，因为<code>fsync</code>存在阻塞，一般不推荐使用。 </li>
+<li><code>appendfsync everysec</code>: 每隔一秒钟，数据会通过write写入到内核缓冲完成后返回。为了进一步保证持久化，又专门后台开一个线程通过fsync将数据刷新到磁盘，以避免内核缓冲内数据因系统故障宕机丢失。在性能和持久化方面做了很好的折中，是受推荐的方式。</li>
+<li><code>appendfsync no</code>: 通过write系统调用将数据写入到内核缓存，然后依赖OS的写入，将数据从内核缓存写入到硬盘，一般为30秒左右一次。性能最好但是持久化最没有保证，不被推荐，如果有系统宕机故障，最近30秒的数据有可能丢失</li>
+</ul>
+<h3 id="重写机制"><a href="#重写机制" class="headerlink" title="重写机制"></a>重写机制</h3><p>随着命令不断写入AOF,文件会越来越大，为了解决这个问题，Redis引入了AOF重写机制压缩文件体积。 经过重写，比如多条命令合并成一条命令等操作，然后重写后的AOF文件可以变小，以便更快被Redis加载</p>
+<p>AOF重写过程分为手动触发和自动触发：</p>
+<ul>
+<li>手动触发：直接调用 <code>bgrewriteaof</code>命令</li>
+<li>自动触发： 两大参数<ul>
+<li><code>auto-aof-rewrite-min-size</code>：表示运行 AOF重写时文件最小体积，默认为64MB</li>
+<li><code>auto-aof-rewrite-percentage</code> ： AOF增长率，当前AOF文件空间和上一次重写后AOF文件空间的比值</li>
+</ul>
+</li>
+</ul>
+<p>在<code>redis.conf</code>配置文件中，自动触发参数设置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#当AOF增长率为100%且达到了64mb时开始自动重写AOF  </span><br><span class="line">auto-aof-rewrite-percentage 100  </span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br></pre></td></tr></table></figure></p>
+<h3 id="重新加载"><a href="#重新加载" class="headerlink" title="重新加载"></a>重新加载</h3><p>Redis 持久化文件加载流程如下，如果 RDB 与 AOF同时开启，优先使用 AOF (下图摘自《Redis开发与运维》)：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_aof_reload.png" alt="redis_aof_reload"></p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://book.douban.com/subject/26971561/" target="_blank" rel="noopener">Redis开发与运维</a></li>
+<li><a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">Redis persistence demystified</a></li>
+<li><a href="https://www.cnblogs.com/kismetv/p/9137897.html" target="_blank" rel="noopener">深入学习Redis（2）：持久化</a></li>
+<li><a href="http://blog.720ui.com/2016/redis_action_03_rdb_aof/" target="_blank" rel="noopener">Redis实战（三） 持久化机制</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/" data-id="cjo74w66p001gtkr94mk0n7jc" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/">Comentarios</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/11/05/Redis学习之管道机制/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Más viejo</strong>
+            <div class="article-nav-title">Redis学习之管道机制</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Categorias</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archivos</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Etiquetas</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nube de etiquetas</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/';
+        
+        this.page.identifier = 'Redis学习之持久化机制';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
