@@ -13,15 +13,15 @@
 <meta property="og:site_name" content="风居者的街道">
 <meta property="og:description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/proxy.jpg">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/cglib-framework.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/rpc.png">
-<meta property="og:updated_time" content="2018-08-07T14:34:11.348Z">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Class%20Diagram.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/proxy.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cglib-framework.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/rpc.png">
+<meta property="og:updated_time" content="2018-11-09T02:06:13.721Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="动态代理的原理及其应用">
 <meta name="twitter:description" content="动态代理的介绍动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。 实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用 与静态代理的比较静态代理提前写好代理类，每个业务类都要对应一个代理类,不灵活">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Class%20Diagram.jpg">
     
 
     
@@ -264,7 +264,7 @@
             
             <h2 id="动态代理的介绍"><a href="#动态代理的介绍" class="headerlink" title="动态代理的介绍"></a>动态代理的介绍</h2><p>动态代理是一种在运行时动态地创建代理对象，动态地处理代理方法调用的机制。</p>
 <p>实际上它是一种代理机制。代理可以看做是对调用目标的一个封装，直接通过代理来实现对目标代码的调用</p>
-<h2 id="与静态代理的比较"><a href="#与静态代理的比较" class="headerlink" title="与静态代理的比较"></a>与静态代理的比较</h2><h3 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a><strong>静态代理</strong></h3><p>提前写好代理类，每个业务类都要对应一个代理类,不灵活<br><img src="http://osvtz719h.bkt.clouddn.com/Class%20Diagram.jpg" alt=""></p>
+<h2 id="与静态代理的比较"><a href="#与静态代理的比较" class="headerlink" title="与静态代理的比较"></a>与静态代理的比较</h2><h3 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a><strong>静态代理</strong></h3><p>提前写好代理类，每个业务类都要对应一个代理类,不灵活<br><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Class%20Diagram.jpg" alt=""></p>
 <a id="more"></a>
 <ul>
 <li>ISubject,该接口是被访问者或者被访问的对象</li>
@@ -286,11 +286,11 @@
 <li>一个要实现接口的数组，从这点就可以看出，要想<strong>使用JDK动态代理，必须要有接口类</strong></li>
 <li>InvocactionHandler接口的一个实现</li>
 </ul>
-<p><img src="http://osvtz719h.bkt.clouddn.com/proxy.jpg" alt="proxy"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/proxy.jpg" alt="proxy"></p>
 <p>动态代理可以将所有调用重定向到调用处理器，因此通常上会向调用处理器的构造器传递一个”实际”对象的引用，从而使得处理器在执行任务时，可以请求转发。</p>
 <h3 id="利用CGLIB实现动态代理"><a href="#利用CGLIB实现动态代理" class="headerlink" title="利用CGLIB实现动态代理"></a>利用CGLIB实现动态代理</h3><p><a href="https://github.com/cglib/cglib" target="_blank" rel="noopener">cglib</a>是一种基于ASM的字节码生成库，用于生成和转换Java字节码.</p>
 <p>而ASM是一个轻量但高性能的字节码操作框架。cglib是基于ASM的上层应用，对于代理没有实现接口的类，cglib非常实用。</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/cglib-framework.png" alt="cglib"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cglib-framework.png" alt="cglib"></p>
 <h4 id="CGLIB动态代理的简单例子"><a href="#CGLIB动态代理的简单例子" class="headerlink" title="CGLIB动态代理的简单例子"></a><strong>CGLIB动态代理的简单例子</strong></h4><p>本质上说，对于需要被代理的类，它只是动态生成一个子类以覆盖非final的方法，同时绑定钩子回调自定义的拦截器。</p>
 <p>添加CGLIB依赖<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">     &lt;groupId&gt;cglib&lt;/groupId&gt;</span><br><span class="line">     &lt;artifactId&gt;cglib&lt;/artifactId&gt;</span><br><span class="line">     &lt;version&gt;3.2.4&lt;/version&gt;</span><br><span class="line">/dependency&gt;</span><br></pre></td></tr></table></figure></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.pjmike.proxy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> net.sf.cglib.proxy.Enhancer;</span><br><span class="line"><span class="keyword">import</span> net.sf.cglib.proxy.MethodInterceptor;</span><br><span class="line"><span class="keyword">import</span> net.sf.cglib.proxy.MethodProxy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * CGLIB动态代理实现</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> pjmike</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span> 2018-08-06 16:55</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CglibProxy</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//Enhancer是CGLIB的核心工具类,是一个字节码增强器，它可以方便的对类进行扩展</span></span><br><span class="line">        Enhancer enhancer = <span class="keyword">new</span> Enhancer();</span><br><span class="line">        enhancer.setSuperclass(PersonService.class);</span><br><span class="line">        <span class="comment">//设置回调所需的拦截器</span></span><br><span class="line">        enhancer.setCallback(<span class="keyword">new</span> MyMethodInterceptor());</span><br><span class="line">        <span class="comment">//通过enhancer.create()方法获取代理对象</span></span><br><span class="line">        <span class="comment">//对代理对象所有非final的方法调用都会转发给MethodInterceptor.intercept方法,</span></span><br><span class="line">        <span class="comment">//作用跟JDK动态代理的InvocationHandler类似</span></span><br><span class="line">        PersonService personService = (PersonService) enhancer.create();</span><br><span class="line">        System.out.println(personService.sayHello(<span class="string">"pjmike"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PersonService</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Hello, "</span> + name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyMethodInterceptor</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Object obj, Method method, Object[] args, MethodProxy methodProxy)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> methodProxy.invokeSuper(obj, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -304,7 +304,7 @@
 <h3 id="应用一-Spring-AOP的动态代理实现"><a href="#应用一-Spring-AOP的动态代理实现" class="headerlink" title="应用一: Spring AOP的动态代理实现"></a>应用一: Spring AOP的动态代理实现</h3><p>Spring AOP的动态代理实现主要有两种方式，JDK动态代理和CGLIB字节码生成。</p>
 <p>默认情况下，如果Spring AOP发现目标对象后实现了相应的interface,则采用JDK动态代理机制为其生成代理对象。如果没有发现接口，则采用CGLIB的方式为目标对象生成动态的代理对象实例</p>
 <h3 id="应用二-RPC框架中的应用"><a href="#应用二-RPC框架中的应用" class="headerlink" title="应用二: RPC框架中的应用"></a>应用二: RPC框架中的应用</h3><p>RPC即远程过程调用，它的实现中使用到了动态代理，关于RPC的具体原理参照<a href="https://www.cnblogs.com/LBSer/p/4853234.html" target="_blank" rel="noopener">你应该知道的RPC原理</a>等文章</p>
-<p><img src="http://osvtz719h.bkt.clouddn.com/rpc.png" alt="rpc"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/rpc.png" alt="rpc"></p>
 <p>实际上RPC框架要解决的一个问题就是: 如何调用他人的远程服务？像调用本地服务一样调用远程服务。</p>
 <p>如何封装数据，通过网络传输给远程服务，使远程接口透明，这就需要动态代理的帮助了。所以透明化远程服务调用就是要利用动态代理，在代理层对数据进行封装，网络传输等操作。</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>实际开发中，我们很多时候都是利用现成的框架和开源库，其中就包含动态代理的应用。只有真正了解了动态代理的知识，才能更好地理解其在框架中的设计，也有利于更好的去使用框架。</p>
@@ -324,7 +324,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/07/动态代理的原理及其应用/" data-id="cjo74w6iw004mtkr9da7um8df" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/08/07/动态代理的原理及其应用/" data-id="cjo9dsmh2003v1cr9u2r2jqrz" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
