@@ -13,18 +13,18 @@
 <meta property="og:site_name" content="十豆杉">
 <meta property="og:description" content="前言Springboot的启动类可以是非常简单，其中最关键的两部分是Annotation定义(@SpringBootApplication)和类定义(SpringApplication.run)，这篇文章主要分析其@SpringBootApplication注解,后续文章再接着分析其类定义。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/springboot.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/importSelector.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/imports.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/8.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/loadFactory.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/auto.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/method.png">
-<meta property="og:updated_time" content="2018-08-18T13:29:20.000Z">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/springboot.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/importSelector.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/imports.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/8.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/loadFactory.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/auto.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/method.png">
+<meta property="og:updated_time" content="2018-11-22T07:34:29.893Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="springboot系列文章之SpringBootApplication注解">
 <meta name="twitter:description" content="前言Springboot的启动类可以是非常简单，其中最关键的两部分是Annotation定义(@SpringBootApplication)和类定义(SpringApplication.run)，这篇文章主要分析其@SpringBootApplication注解,后续文章再接着分析其类定义。">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/springboot.png">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/springboot.png">
     
 
     
@@ -92,7 +92,7 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
@@ -111,10 +111,10 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Posts',
+            POSTS: 'Entradas',
             PAGES: 'Pages',
-            CATEGORIES: 'Categories',
-            TAGS: 'Tags',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
             UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
@@ -141,7 +141,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
     </div>
 
                 </td>
@@ -161,16 +161,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 53
-                <span>posts</span>
+                <span>Entradas</span>
             </div>
             <div class="article-info-block">
                 28
-                <span>tags</span>
+                <span>Etiquetas</span>
             </div>
         </div>
         
@@ -261,7 +261,7 @@
         
             
                 <div id="toc" class="toc-article">
-                <strong class="toc-title">Catalogue</strong>
+                <strong class="toc-title">Catálogo</strong>
                     <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringBootApplication注解"><span class="toc-number">2.</span> <span class="toc-text">@SpringBootApplication注解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Configuration"><span class="toc-number">2.1.</span> <span class="toc-text">@Configuration</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ComponentScan"><span class="toc-number">2.2.</span> <span class="toc-text">@ComponentScan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#EnableAutoConfiguration"><span class="toc-number">2.3.</span> <span class="toc-text">@EnableAutoConfiguration</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#AutoConfigurationImportSelector"><span class="toc-number">2.3.1.</span> <span class="toc-text">AutoConfigurationImportSelector</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#何时被执行"><span class="toc-number">2.3.1.1.</span> <span class="toc-text">何时被执行</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#自动配置的幕后英雄-SpringFactoriesLoader"><span class="toc-number">2.3.1.2.</span> <span class="toc-text">自动配置的幕后英雄:SpringFactoriesLoader</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SpringBootApplication注解中4个方法"><span class="toc-number">2.4.</span> <span class="toc-text">SpringBootApplication注解中4个方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">3.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol>
                 </div>
             
@@ -292,14 +292,23 @@
 </ul>
 <p>而@EnableAutoConfiguration也是借助@Import的帮助，<strong>将所有符合自动配置条件的bean定义加载到Ioc容器，仅此而已</strong></p>
 <p>@EnableAutoConfiguration也是一个复合Annotation，其定义如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(&#123;ElementType.TYPE&#125;)</span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="meta">@AutoConfigurationPackage</span></span><br><span class="line"><span class="meta">@Import</span>(&#123;AutoConfigurationImportSelector.class&#125;)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> EnableAutoConfiguration &#123;</span><br><span class="line">    String ENABLED_OVERRIDE_PROPERTY = <span class="string">"spring.boot.enableautoconfiguration"</span>;</span><br><span class="line"></span><br><span class="line">    Class&lt;?&gt;[] exclude() <span class="keyword">default</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    String[] excludeName() <span class="keyword">default</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>其中，最关键的要属<code>@Import(AutoConfigurationImportSelector.class)</code>,借助<code>AutoConfigurationImportSelector</code>这个类，<code>@EnableAutoConfiguration</code>可以帮助Springboot应用将所有符合条件的@configuration都加载到当前的SpringBoot创建并使用的Ioc容器<br><img src="http://osvtz719h.bkt.clouddn.com/springboot.png" alt="springboot"></p>
+<p>其中，最关键的要属<code>@Import(AutoConfigurationImportSelector.class)</code>,借助<code>AutoConfigurationImportSelector</code>这个类，<code>@EnableAutoConfiguration</code>可以帮助Springboot应用将所有符合条件的@configuration都加载到当前的SpringBoot创建并使用的Ioc容器<br><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/springboot.png" alt="springboot"></p>
 <h4 id="AutoConfigurationImportSelector"><a href="#AutoConfigurationImportSelector" class="headerlink" title="AutoConfigurationImportSelector"></a>AutoConfigurationImportSelector</h4><p>在SpringBoot1.5以前，使用的是<code>EnableAutoConfigurationImportSelector</code>，它继承自<code>AutoConfigurationImportSelector</code>，1.5以后，<code>EnableAutoConfigurationImportSelector</code>已经不再被建议使用，而是推荐使用<code>AutoConfigurationImportSelector</code>。</p>
 <h5 id="何时被执行"><a href="#何时被执行" class="headerlink" title="何时被执行"></a>何时被执行</h5><p>现在我们已经知道了在@EnableAutoConfiguration中引入了AutoConfigurationImportSelector类，那么它是如何被执行的呢？</p>
 <p>Springboot启动时会使用ConfigurationClassParser来解析被@Configuration修饰的配置类，然后再处理这个类内部被其他注解修饰的情况，比如@Import注解，@ComponentScan注解，@Bean注解等。</p>
-<p>如果发现注解中存在@Import(ImportSelector)的情况下，就会创建一个相应的importSelector对象，并调用其selectImports方法，而AutoConfigurationImportSelector就是一个ImportSelector的实现类。更多关于ConfigurationClassParser的分析，参阅文章:<a href="https://fangjian0423.github.io/2017/06/15/spring-bean-register-note/" target="_blank" rel="noopener">Spring类注册笔记</a><br><img src="http://osvtz719h.bkt.clouddn.com/importSelector.png" alt="selector"><br>所以ConfigurationClassParser会实例化一个AutoConfigurationImportSelector 并调用它的 selectImports() 方法<br><img src="http://osvtz719h.bkt.clouddn.com/imports.png" alt="get"><br>在selectImports方法中有使用getCandidateConfigurations()这个方法，这个方法走进去，就可以看到自动配置的幕后英雄:SpringFactoriesLoader<br><img src="http://osvtz719h.bkt.clouddn.com/8.png" alt="loader"></p>
+<p>如果发现注解中存在@Import(ImportSelector)的情况下，就会创建一个相应的importSelector对象，并调用其selectImports方法，而AutoConfigurationImportSelector就是一个ImportSelector的实现类。更多关于ConfigurationClassParser的分析，参阅文章:<a href="https://fangjian0423.github.io/2017/06/15/spring-bean-register-note/" target="_blank" rel="noopener">Spring类注册笔记</a></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/importSelector.png" alt="selector"></p>
+<p>所以ConfigurationClassParser会实例化一个AutoConfigurationImportSelector 并调用它的 selectImports() 方法</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/imports.png" alt="get"></p>
+<p>在selectImports方法中有使用getCandidateConfigurations()这个方法，这个方法走进去，就可以看到自动配置的幕后英雄:SpringFactoriesLoader</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/8.png" alt="loader"></p>
 <h5 id="自动配置的幕后英雄-SpringFactoriesLoader"><a href="#自动配置的幕后英雄-SpringFactoriesLoader" class="headerlink" title="自动配置的幕后英雄:SpringFactoriesLoader"></a>自动配置的幕后英雄:SpringFactoriesLoader</h5><p>SpringFactoriesLoader的主要功能就是从指定的配置文件<code>META/spring.factories</code>加载配置，spring.factories是一个典型的java properties文件，配置格式为Key-Value形式，只不过Key和Value都是Java类型的完整类名。</p>
-<p>进入loadFactoryNames()方法，就发现loadFactoryNames()读取了ClassPath下面的 META-INF/spring.factories 文件。<br><img src="http://osvtz719h.bkt.clouddn.com/loadFactory.png" alt="load"><br>在@EnableAutoConfiguration的场景中，它更多是提供一种配置查找的功能支持，即根据@EnableAutoConfiguration的完整类名org.springframework.boot.autoconfigure.EnableAutoConfiguration作为查找的key,获取对应的一组@Configuration类<br><img src="http://osvtz719h.bkt.clouddn.com/auto.png" alt="auto"></p>
-<h3 id="SpringBootApplication注解中4个方法"><a href="#SpringBootApplication注解中4个方法" class="headerlink" title="SpringBootApplication注解中4个方法"></a>SpringBootApplication注解中4个方法</h3><p>@SpringBootApplication不仅包括上面的三个重要注解，还包含有4个方法:<br><img src="http://osvtz719h.bkt.clouddn.com/method.png" alt="method"></p>
+<p>进入loadFactoryNames()方法，就发现loadFactoryNames()读取了ClassPath下面的 META-INF/spring.factories 文件。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/loadFactory.png" alt="load"></p>
+<p>在@EnableAutoConfiguration的场景中，它更多是提供一种配置查找的功能支持，即根据@EnableAutoConfiguration的完整类名org.springframework.boot.autoconfigure.EnableAutoConfiguration作为查找的key,获取对应的一组@Configuration类</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/auto.png" alt="auto"></p>
+<h3 id="SpringBootApplication注解中4个方法"><a href="#SpringBootApplication注解中4个方法" class="headerlink" title="SpringBootApplication注解中4个方法"></a>SpringBootApplication注解中4个方法</h3><p>@SpringBootApplication不仅包括上面的三个重要注解，还包含有4个方法:</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/method.png" alt="method"></p>
 <ul>
 <li><code>Class&lt;?&gt;[] exclude() default {};</code>       根据Class来排除特定的类加入Spring容器，传入参数是class类型</li>
 <li><code>String[] excludeName() default {};</code>  根据Class name排除特定的类加入spring容器，传入参数是class的全类名字符串数组</li>
@@ -330,7 +339,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/18/springboot系列文章之SpringBootApplication注解/" data-id="cjoqxmzhg002kkgr93wm0jt21" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/08/18/springboot系列文章之SpringBootApplication注解/" data-id="cjosaomih0026b8r9dqs2xrh4" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -398,7 +407,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/18/springboot系列文章之SpringBootApplication注解/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/18/springboot系列文章之SpringBootApplication注解/">Comments</a>
+        <a href="https://pjmike.github.io/2018/08/18/springboot系列文章之SpringBootApplication注解/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/18/springboot系列文章之SpringBootApplication注解/">Comentarios</a>
     
 
         </footer>
@@ -408,7 +417,7 @@
 <nav id="article-nav">
     
         <a href="/2018/08/19/MySQL常用基础类型详解/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
+            <strong class="article-nav-caption">Más nuevo</strong>
             <div class="article-nav-title">
                 
                     MySQL常用基础类型详解
@@ -418,7 +427,7 @@
     
     
         <a href="/2018/08/16/springboot系列文章之启动时初始化数据/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Older</strong>
+            <strong class="article-nav-caption">Más viejo</strong>
             <div class="article-nav-title">springboot系列文章之启动时初始化数据</div>
         </a>
     
@@ -445,7 +454,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">categories</h3>
+        <h3 class="widget-title">Categorias</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">10</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
@@ -454,7 +463,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">archives</h3>
+        <h3 class="widget-title">Archivos</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -463,7 +472,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tags</h3>
+        <h3 class="widget-title">Etiquetas</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -472,7 +481,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag cloud</h3>
+        <h3 class="widget-title">Nube de etiquetas</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
@@ -481,7 +490,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">links</h3>
+        <h3 class="widget-title">Links</h3>
         <div class="widget">
             <ul>
                 
