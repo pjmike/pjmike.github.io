@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>探索Java内存模型 | 十豆杉</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言本文主要是对《深入理解 Java 内存模型——程晓明》和《深入理解Java虚拟机》内存模型部分的一个知识总结，其中也参考了一些其他优秀文章。 操作系统语义计算机在运行程序时，每条指令都是在CPU中执行的，而程序运行的数据都存在主存里，但是读写主存中的数据没有CPU中执行指令的速度快，如果每次都读取主存。效率就会比较低，所以现代操作系统都不得不加入一层读写速度尽可能接近处理器运算速度的高速缓存(">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="探索Java内存模型">
+<meta property="og:url" content="https://pjmike.github.io/2018/11/23/探索Java内存模型/index.html">
+<meta property="og:site_name" content="十豆杉">
+<meta property="og:description" content="前言本文主要是对《深入理解 Java 内存模型——程晓明》和《深入理解Java虚拟机》内存模型部分的一个知识总结，其中也参考了一些其他优秀文章。 操作系统语义计算机在运行程序时，每条指令都是在CPU中执行的，而程序运行的数据都存在主存里，但是读写主存中的数据没有CPU中执行指令的速度快，如果每次都读取主存。效率就会比较低，所以现代操作系统都不得不加入一层读写速度尽可能接近处理器运算速度的高速缓存(">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cpu_cache_2.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/os_save_structure.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cpu_cache.JPG">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_memory.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_memory_message.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_resort.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_processor_A_B.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_processor_memory.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/happen_before_jmm.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Java_volatile_resort_table.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile_write.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile_read.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile_read_and_write.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_concurrent.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/happen_before.png">
+<meta property="og:updated_time" content="2018-11-23T08:08:10.195Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="探索Java内存模型">
+<meta name="twitter:description" content="前言本文主要是对《深入理解 Java 内存模型——程晓明》和《深入理解Java虚拟机》内存模型部分的一个知识总结，其中也参考了一些其他优秀文章。 操作系统语义计算机在运行程序时，每条指令都是在CPU中执行的，而程序运行的数据都存在主存里，但是读写主存中的数据没有CPU中执行指令的速度快，如果每次都读取主存。效率就会比较低，所以现代操作系统都不得不加入一层读写速度尽可能接近处理器运算速度的高速缓存(">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cpu_cache_2.jpg">
+    
+
+    
+        <link rel="alternate" href="#" title="十豆杉" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">十豆杉</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Articles',
+            PAGES: 'Pages',
+            CATEGORIES: 'Catégories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SUIVRE</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                54
+                <span>Articles</span>
+            </div>
+            <div class="article-info-block">
+                28
+                <span>Tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-探索Java内存模型" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            探索Java内存模型
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/11/23/探索Java内存模型/">
+            <time datetime="2018-11-23T08:05:23.000Z" itemprop="datePublished">2018-11-23</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Java/">Java</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#操作系统语义"><span class="toc-number">2.</span> <span class="toc-text">操作系统语义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java-内存模型的抽象结构"><span class="toc-number">3.</span> <span class="toc-text">Java 内存模型的抽象结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#线程间通信"><span class="toc-number">3.1.</span> <span class="toc-text">线程间通信</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-内存模型抽象"><span class="toc-number">3.2.</span> <span class="toc-text">Java 内存模型抽象</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#重排序"><span class="toc-number">4.</span> <span class="toc-text">重排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#处理器重排序"><span class="toc-number">4.1.</span> <span class="toc-text">处理器重排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内存屏障指令"><span class="toc-number">4.2.</span> <span class="toc-text">内存屏障指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#happens-before-简介"><span class="toc-number">4.3.</span> <span class="toc-text">happens-before 简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据依赖性"><span class="toc-number">4.4.</span> <span class="toc-text">数据依赖性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#as-if-serial-语义"><span class="toc-number">4.5.</span> <span class="toc-text">as-if-serial 语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#程序顺序规则"><span class="toc-number">4.6.</span> <span class="toc-text">程序顺序规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重排序对多线程的影响"><span class="toc-number">4.7.</span> <span class="toc-text">重排序对多线程的影响</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volatile-的内存语义"><span class="toc-number">5.</span> <span class="toc-text">volatile 的内存语义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile的特性"><span class="toc-number">5.1.</span> <span class="toc-text">volatile的特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile-写-读的内存语义"><span class="toc-number">5.2.</span> <span class="toc-text">volatile 写-读的内存语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile内存语义的实现"><span class="toc-number">5.3.</span> <span class="toc-text">volatile内存语义的实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁的内部语义"><span class="toc-number">6.</span> <span class="toc-text">锁的内部语义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#锁的释放和获取的内存语义"><span class="toc-number">6.1.</span> <span class="toc-text">锁的释放和获取的内存语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#锁内存语义的实现"><span class="toc-number">6.2.</span> <span class="toc-text">锁内存语义的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#concurrent包的实现"><span class="toc-number">6.3.</span> <span class="toc-text">concurrent包的实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#final的内存语义"><span class="toc-number">7.</span> <span class="toc-text">final的内存语义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#final-域的重排序规则"><span class="toc-number">7.1.</span> <span class="toc-text">final 域的重排序规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#写-final-域的重排序规则"><span class="toc-number">7.2.</span> <span class="toc-text">写 final 域的重排序规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读-final-域的重排序规则"><span class="toc-number">7.3.</span> <span class="toc-text">读 final 域的重排序规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#final-域为引用类型"><span class="toc-number">7.4.</span> <span class="toc-text">final 域为引用类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java-内存模型总结"><span class="toc-number">8.</span> <span class="toc-text">Java 内存模型总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">9.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">10.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文主要是对《深入理解 Java 内存模型——程晓明》和《深入理解Java虚拟机》内存模型部分的一个知识总结，其中也参考了一些其他优秀文章。</p>
+<h2 id="操作系统语义"><a href="#操作系统语义" class="headerlink" title="操作系统语义"></a>操作系统语义</h2><p>计算机在运行程序时，每条指令都是在CPU中执行的，而程序运行的数据都存在主存里，但是读写主存中的数据没有CPU中执行指令的速度快，如果每次都读取主存。效率就会比较低，所以现代操作系统都不得不加入一层读写速度尽可能接近处理器运算速度的<strong>高速缓存(Cache)</strong> 来作为内存与处理器之间的缓冲：<strong>将运算需要使用到的数据复制到缓存中，让运算能快速进行，当运算结束后再从缓存同步回内存之中，这样处理器就无需等待缓慢的内存读写了</strong>，其中大致结构如下图所示：</p>
+<a id="more"></a>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cpu_cache_2.jpg" alt="cpu_cache"></p>
+<p>cpu cache 作为主内存和CPU寄存器之间的缓冲区，以便CPU可以快速的读写数据。<strong>高速缓存本质是为了调和CPU得过快访问速度和内存过慢的速度的一个硬件</strong>，现代计算机一般都有三级高速缓存，L1、L2、L3，访问速度依次递减。因为CPU要从内存中读取数据的时候会很慢，大部分时间会浪费在等待上，所以引入cache，把预计将要读取的数据先存放到cache中，这样CPU就可以先到cache中读取，从而节约了等待时间，如果cache中没有要读取的数据，那么继续往下到内存中读取。以上提及的CPU cache,寄存器和主存实际上都属于计算机存储结构的内容，如下图所示(摘自 <a href="https://blog.csdn.net/qq_27680317/article/details/78486220" target="_blank" rel="noopener">https://blog.csdn.net/qq_27680317/article/details/78486220</a>)</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/os_save_structure.jpg" alt="os_save_structure"></p>
+<p>关于计算机存储结构更细致的介绍，可以查阅经典书籍《深入理解计算机系统-第六章》的内容。</p>
+<p>CPU高速缓存虽好，但是它却带来了一个问题就是：<strong>缓存一致性问题</strong>。在多处理器系统中，每个处理器都有自己的高速缓存，而它们又共享同一主内存，当多个处理器都有自己的运算任务都涉及同一块主内存区域时，将可能导致各自的缓存数据不一致的问题，比较典型的就是执行 <strong>i++</strong> 这类非原子操作。</p>
+<p>为了解决缓存一致性问题，需要各个处理器访问缓存时遵循<strong>缓存一致性协议</strong>（最常见的MESI协议)，在读写时要根据协议来进行操作。在一致性协议下，处理器、高速缓存、主内存间的交换关系可以像下图这样描述<br>(出自《深入理解Java虚拟机》)：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cpu_cache.JPG" alt="cpu_cache"></p>
+<p>而内存模型也由此孕育而生，<strong>内存模型可以理解为在特定的操作协议对特定的内存或高速缓存进行读写访问的过程抽象。不同架构的物理机器可以拥有不同的内存模型，而JVM也有自己的内存模型</strong>(后面要谈到的Java内存模型)。在内存模型中也存在处理器的重排序，对输入代码进行乱序执行进而达到优化的目的。</p>
+<p>下面将进入本文的主题Java内存模型的介绍</p>
+<h2 id="Java-内存模型的抽象结构"><a href="#Java-内存模型的抽象结构" class="headerlink" title="Java 内存模型的抽象结构"></a>Java 内存模型的抽象结构</h2><p>Java虚拟机规范试图定义一种Java内存模型来屏蔽掉各种硬件和操作系统的内存访问差异，以实现让Java 程序在各种平台下都能达到一致的内存访问结果。下面从线程通信的角度来看一下Java内存模型是如何定义的</p>
+<h3 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h3><p>线程之间的通信机制有两种：<strong>共享内存和消息传递</strong>，当然在进程间通信也有这两种机制。在共享内存中，线程之间共享程序的公共状态，通过写-读内存中的公共状态进行隐式通信；而在消息传递的并发模型中，线程之间没有公共状态，线程之间必须通过发送消息来显示进行通信。</p>
+<p><strong>Java并发采用的是共享内存模型，Java 线程之间的通信总是隐式进行的。这里的共享内存指的是当多个线程处于同一进程时，多个线程共享进程的地址空间和其他资源等，简单说就是有一个内存区域供多个线程共同使用</strong>。</p>
+<p>Java 线程之间的通信由 Java 内存模型(简称JMM)控制，JMM决定一个线程对共享变量的写入何时对另一个线程可见。</p>
+<h3 id="Java-内存模型抽象"><a href="#Java-内存模型抽象" class="headerlink" title="Java 内存模型抽象"></a>Java 内存模型抽象</h3><p>从抽象的角度看，JMM定义了线程与主内存之间的抽象关系：线程之间的共享变量存储在主内存中，每一个线程都有一个私有的本地内存，本地内存中存储了该线程以读/写 共享变量的副本。本地内存是JMM的一个抽象概念，并不真实存在。JMM抽象示意图如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_memory.png" alt="java_memory"></p>
+<ul>
+<li>线程A 把本地内存A 中更新过的共享变量刷新到主内存中去</li>
+<li>线程B到主内存中去读取线程A之前已更新过的共享变量</li>
+</ul>
+<p>线程之间的通信图如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_memory_message.png" alt="java_memory_message"></p>
+<p>从上图看出线程A向线程B发送消息，要经历主内存。</p>
+<p><strong>总结一下，JMM是一种规范，或者说一种抽象模型，目的是解决由于多线程通过共享内存进行通信时，存在的本地内存数据不一致、编译器重排序、处理器重排序造成的问题。</strong></p>
+<h2 id="重排序"><a href="#重排序" class="headerlink" title="重排序"></a>重排序</h2><p>为了提高性能，编译器和处理器常常会对指令做重排序，分为以下三种类型：</p>
+<ul>
+<li><strong>编译器优化的重排序</strong>。编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序</li>
+<li><strong>指令级并行的重排序</strong>。现代处理器采用了指令级并行技术来将多条指令重叠执行。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序</li>
+<li><strong>内存系统的重排序</strong>：由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。</li>
+</ul>
+<p>从Java 源代码到最终实际执行的指令序列，会分别经历下面 3 种重排序，如图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_resort.png" alt="java_resort"></p>
+<p>上述的<strong>1属于编译器重排序，2 和 3 属于处理器重排序</strong>。这些重排序可能会导致多线程程序出现内存可见性问题。</p>
+<p><strong>这里的处理器重排序与CPU多级缓存之间会出现乱序执行优化操作含义一样</strong></p>
+<h3 id="处理器重排序"><a href="#处理器重排序" class="headerlink" title="处理器重排序"></a>处理器重排序</h3><p><strong>现代的处理器使用写缓冲区临时保存向内存写入的数据</strong>。写缓冲区可以保证指令流水线持续运行，它可以避免由于处理器停顿下来等待向内存写入数据而产生的延迟。同时，通过以批处理的方式刷新写缓冲区，以及合并写缓冲区中对同一内存地址的多次写，可以减少对内存总线的占用。</p>
+<p>每个处理器上的写缓冲区，仅对它所在的处理器可见，这个特性会对内存操作的执行顺序产生影响：处理器对内存的读 / 写操作的执行顺序，不一定与内存实际发生的读 / 写操作顺序一致！</p>
+<p>举个例子说明：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_processor_A_B.png" alt="java_processor"></p>
+<p>假设处理器 A 和处理器 B 按程序的顺序并行执行内存访问，最终却可能得到 x = y = 0 的结果。具体的原因如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_processor_memory.png" alt="java_processor_memory"></p>
+<p>这里处理器 A 和处理器 B 可以同时把共享变量写入自己的写缓冲区（A1，B1），然后从内存中读取另一个共享变量（A2，B2），最后才把自己写缓存区中保存的脏数据刷新到内存中（A3，B3）。当以这种时序执行时，程序就可以得到 x = y = 0 的结果。</p>
+<p>以处理器A以例，虽然处理器A 执行内存操作的顺序为：A1——&gt;A2 ，但内存操作实际发生的顺序是 A2 ——&gt; A1 ，这就发生了写-读操作重排序。现代的处理器都会允许对 写-读操作进行重排序。</p>
+<h3 id="内存屏障指令"><a href="#内存屏障指令" class="headerlink" title="内存屏障指令"></a>内存屏障指令</h3><p><strong>为了保证内存的可见性，Java编译器在生成指令序列的适当位置会插入内存屏障指令来禁止特定类型的处理器重排序</strong>。JMM把内存屏障指令分为4类，如表所示：</p>
+<table>
+<thead>
+<tr>
+<th>屏障类型</th>
+<th>指令示例</th>
+<th>说明</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoadLoad Barriers</td>
+<td>Load1; LoadLoad; Load2</td>
+<td>确保 Load1 数据的装载，之前于 Load2 及所有后续装载指令的装载。</td>
+<td></td>
+</tr>
+<tr>
+<td>StoreStore Barriers</td>
+<td>Store1; StoreStore; Store2</td>
+<td>确保 Store1 数据对其他处理器可见（刷新到内存），之前于 Store2 及所有后续存储指令的存储。</td>
+<td></td>
+</tr>
+<tr>
+<td>LoadStore Barriers</td>
+<td>Load1; LoadStore; Store2</td>
+<td>确保 Load1 数据装载，之前于 Store2 及所有后续的存储指令刷新到内存。</td>
+<td></td>
+</tr>
+<tr>
+<td>StoreLoad Barriers</td>
+<td>Store1; StoreLoad; Load2</td>
+<td><strong>确保 Store1 数据对其他处理器变得可见（指刷新到内存），之前于 Load2 及所有后续装载指令的装载。   StoreLoad Barriers 会使该屏障之前的所有内存访问指令（存储和装载指令）完成之后，才执行该屏障之后的内存访问指令</strong>。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="happens-before-简介"><a href="#happens-before-简介" class="headerlink" title="happens-before 简介"></a>happens-before 简介</h3><p>JSR-133 内存模型使用 happens-before 的概念来阐述操作之间的内存可见性。在 JMM 中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须要存在 happens-before 关系。这里提到的两个操作既可以是在一个线程之内，也可以是在不同线程之间。</p>
+<p>与程序员密切相关的 happends-before 规则如下：</p>
+<ul>
+<li><strong>程序顺序规则</strong>：一个线程中的每个操作，happens-before 于该线程中的任意后续操作</li>
+<li><strong>监视器锁规则</strong>：对一个锁的解锁，happens-before 于随后对这个锁的加锁</li>
+<li><strong>volatile 变量规则</strong>：对一个 volatile域的写，happens-before 于任意后续对这个 volatile 域的读</li>
+<li><strong>传递性</strong>：如果 A happens-before B,且 B happens-before C，那么 A happens-before C.</li>
+</ul>
+<p>happens-before 的本质是要求前一个操作(执行的结果)对后一个操作可见，且前一个操作按顺序排在第二个操作之前。这不意味着 前一个操作必须在后一个操作之前执行。</p>
+<p>happens-before 与 JMM 的关系如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/happen_before_jmm.png" alt="happen-before"></p>
+<p>如上图所示，一个 happens-before 规则对应于一个或多个编译器和处理器重排序规则。</p>
+<h3 id="数据依赖性"><a href="#数据依赖性" class="headerlink" title="数据依赖性"></a>数据依赖性</h3><p>如果两个操作访问同一个变量，且这两个操作中有一个为写操作，此时这两个操作之间就存在数据依赖性。数据依赖分为如下3种类型：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>代码示例</th>
+<th>说明</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>写后读</td>
+<td>a = 1;b=2</td>
+<td>写一个变量后，再读这个变量</td>
+<td></td>
+</tr>
+<tr>
+<td>写后写</td>
+<td>a = 1;a=2</td>
+<td>写一个变量后，再写这个变量</td>
+<td></td>
+</tr>
+<tr>
+<td>读后写</td>
+<td>a = b;b =1</td>
+<td>读一个变量后，再写这个变量</td>
+</tr>
+</tbody>
+</table>
+<p><strong>编译器和处理器在重排序时，会遵守数据依赖性，编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序</strong></p>
+<p><strong>注意：这里说的数据依赖性仅针对单个处理器中执行的指令序列和单个线程中执行的操作，不同处理器之间和不同线程之间的数据依赖性不被编译器和处理器考虑，实际开发中，还是多线程居多</strong></p>
+<h3 id="as-if-serial-语义"><a href="#as-if-serial-语义" class="headerlink" title="as-if-serial 语义"></a>as-if-serial 语义</h3><p>as-if-serial 语义的意思是： <strong>不管怎样重排序，单线程程序的执行结果不会被改变，编译器，runtime和处理器都必须遵循as-if-serial 语义</strong></p>
+<p><strong>为了遵守 as-if-serial 编译器和处理器不会对存在数据依赖关系的操作做重排序</strong>，因为这种重排序会改变执行结果。但是如果操作之间没有数据依赖关系，这些操作就可能被编译器和处理器重排序。</p>
+<h3 id="程序顺序规则"><a href="#程序顺序规则" class="headerlink" title="程序顺序规则"></a>程序顺序规则</h3><p>程序的执行顺序实际上是<strong>根据 happens-before 的程序顺序规则</strong>，JMM仅仅要求前一个操作(执行的结果)对后一个操作可见，且前一个操作按顺序排在第二个操作之前，至于执行顺序就不一定。</p>
+<h3 id="重排序对多线程的影响"><a href="#重排序对多线程的影响" class="headerlink" title="重排序对多线程的影响"></a>重排序对多线程的影响</h3><p>在单线程程序中，对存在控制依赖的操作做重排序，不会改变执行结果(这也是 as-if-serial 语义允许对存在控制的操作做重排序的原因)；但在多线程程序中，对存在控制依赖的重排序操作，可能会改变程序的执行结果。</p>
+<h2 id="volatile-的内存语义"><a href="#volatile-的内存语义" class="headerlink" title="volatile 的内存语义"></a>volatile 的内存语义</h2><h3 id="volatile的特性"><a href="#volatile的特性" class="headerlink" title="volatile的特性"></a>volatile的特性</h3><p>举例说明：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileExample</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">long</span> vl = <span class="number">0L</span>;<span class="comment">//使用volatile声明64位的long型变量</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getVl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> vl;  <span class="comment">//单个volatile变量的读</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setVl</span><span class="params">(<span class="keyword">long</span> vl)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.vl = vl; <span class="comment">//单个 volatile变量的写</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getAndIncrement</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        vl++; <span class="comment">//复合(多个) volatile变量的读/写</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>假设有多个线程分别调用上面程序的三个方法，这个程序在语义上和下面程序等价:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileExample</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">long</span> vl = <span class="number">0L</span>;<span class="comment">//声明64位的long型普通变量</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">long</span> <span class="title">getVl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> vl;  <span class="comment">//对单个普通变量的读用一个锁同步</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setVl</span><span class="params">(<span class="keyword">long</span> vl)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.vl = vl; <span class="comment">//对单个普通变量的写用一个锁同步</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getAndIncrement</span><span class="params">()</span> </span>&#123; <span class="comment">//普通方法调用</span></span><br><span class="line">        <span class="keyword">long</span> temp = getVl();        <span class="comment">//调用已同步的读方法</span></span><br><span class="line">        temp += <span class="number">1L</span>;                 <span class="comment">//普通写操作</span></span><br><span class="line">        setVl(temp);                <span class="comment">//调用已同步的写操作</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>一个volatile变量的单个读/写操作，与一个普通变量的读/写操作都是使用一个锁来来同步，它们之间的执行效果相同</strong></p>
+<p>锁的 happens-before 规则来保证释放锁和获取锁的两个线程之间的内存可见性，这意味着<strong>对一个 volatile变量的读，总是能看到任意线程对这个 volatile变量最后的写入</strong>。</p>
+<p><strong>锁的语义决定了临界区代码的执行具有原子性</strong>，这一点跟进程间同步机制是类似的。多个volatile操作或类似于 volatile ++ 这种复合操作，这些不具有原子性。比如我将上面那段代码中的<code>getAndIncrement()</code>用 <code>javap</code>反编译得到如下字节码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getAndIncrement</span><span class="params">()</span></span>;</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">5</span>, locals=<span class="number">1</span>, args_size=<span class="number">1</span></span><br><span class="line">         <span class="number">0</span>: aload_0</span><br><span class="line">         <span class="number">1</span>: dup</span><br><span class="line">         2: getfield      #2                  // Field vl:J</span><br><span class="line">         <span class="number">5</span>: lconst_1</span><br><span class="line">         <span class="number">6</span>: ladd</span><br><span class="line">         7: putfield      #2                  // Field vl:J</span><br><span class="line">        <span class="number">10</span>: <span class="keyword">return</span></span><br></pre></td></tr></table></figure></p>
+<p>原方法中只有 <code>v1++</code>一条语句，通过反编译得到的字节码却有好几条，这也说明<code>v1++</code>是个复合操作。</p>
+<p>当 getfield访问字段指令将 v1的值放在操作数栈顶时，volatile保证了 v1 此时是正确的，但是在执行 lconst_1、ladd这些指令时，其他线程可能已经把v1的值增大了，而在操作数栈顶的值就变成了过期的数据，所以 putfield 执行后就可能把较小的值同步回主内存中。</p>
+<p>总之，volatile变量有如下特性：</p>
+<ul>
+<li><strong>可见性</strong>： 对一个 volatile变量的读，总是能看到任意线程对这个 volatile变量最后的写入</li>
+<li><strong>原子性</strong>：对任意单个 volatile 变量的读/写具有原子性，但类似于 volatile++ 这种复合操作不具有原子性</li>
+</ul>
+<h3 id="volatile-写-读的内存语义"><a href="#volatile-写-读的内存语义" class="headerlink" title="volatile 写-读的内存语义"></a>volatile 写-读的内存语义</h3><p>volatile 写-读的内存语义 是：</p>
+<ul>
+<li>当写一个 volatile 变量时，JMM 会把该线程对应的本地内存中的共享变量值刷新到主内存。</li>
+<li>当读一个volatile变量时，JMM会把该线程对应的本地内存置为无效。线程接下来将从主内存读取共享变量</li>
+</ul>
+<p>假定一个volatile 变量 flag,普通变量 a,下面图示展示了共享变量的状态示意图：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile.png" alt="java_volatile"></p>
+<h3 id="volatile内存语义的实现"><a href="#volatile内存语义的实现" class="headerlink" title="volatile内存语义的实现"></a>volatile内存语义的实现</h3><p>下表是 JMM 针对 编译器制定的 volatile 重排序规则表：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Java_volatile_resort_table.jpg" alt="java_volatile_resort_table"></p>
+<p>从表中可以看出：</p>
+<ul>
+<li>当第二个操作为 volatile 写时，不管第一个操作是什么，都不能重排序。这个规则保证 volatile 写之前的操作不会被 编译器重排序到 volatile 写之后</li>
+<li>当第一个操作为 volatile 读时，不管第二个操作是什么，都不能重排序，这个规则确保 volatile 读之后的操作不会被编译器重排序到 volatile 读之前。</li>
+</ul>
+<p>为了实现 volatile 的内存语义，编译器在生成字节码时，会在指令序列中插入内存屏障来禁止特定类型的处理器重排序。对于编译器来说，发现一个最优布置来最小化插入屏障的总数几乎不可能，为此，JMM采用保守策略，下面是基于保守策略的JMM内存屏障插入策略：</p>
+<ul>
+<li>在每个 volatile <strong>写操作的前面</strong>插入一个 StoreStore 屏障</li>
+<li>在每个 volatile <strong>写操作的后面</strong>插入一个 StoreLoad 屏障</li>
+<li>在每个 volatile <strong>读操作的后面</strong>插入一个 LoadLoad屏障</li>
+<li>在每个 volatile <strong>读操作的后面</strong>插入一个 LoadStore屏障</li>
+</ul>
+<p>下面是保守策略下，<strong>volatile 写操作</strong> 插入内存屏障后生成的指令序列示意图：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile_write.jpg" alt="java_volatile_write"></p>
+<p>下面是保守策略下，<strong>volatile 读操作</strong>插入内存屏障后生成的指令序列示意图</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile_read.jpg" alt="java_volatile_read"></p>
+<p>在实际执行时，只要不改变 volatile 写 - 读 的内存语义，编译器可以根据具体情况省略不必要的屏障。示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileTest2</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">int</span> v1 = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">int</span> v2 = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">readAndWrite</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = v1;     <span class="comment">//第一个volatile 读</span></span><br><span class="line">        <span class="keyword">int</span> j = v2;     <span class="comment">//第二个volatile 读</span></span><br><span class="line">        a = i + j;      <span class="comment">//普通写</span></span><br><span class="line">        v1 = i + <span class="number">1</span>;     <span class="comment">//第一个volatile 写</span></span><br><span class="line">        v2 = j * <span class="number">2</span>;     <span class="comment">//第二个volatile 写</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>针对 readAndWrite() 方法，编译器在生成字节码时可以做如下优化：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_volatile_read_and_write.png" alt="java_volatile_read_and_write"></p>
+<h2 id="锁的内部语义"><a href="#锁的内部语义" class="headerlink" title="锁的内部语义"></a>锁的内部语义</h2><h3 id="锁的释放和获取的内存语义"><a href="#锁的释放和获取的内存语义" class="headerlink" title="锁的释放和获取的内存语义"></a>锁的释放和获取的内存语义</h3><ul>
+<li>当线程释放锁时，JMM会把该线程对应的本地内存中的共享变量刷新到主内存中去</li>
+<li>当线程获取锁时，JMM会把该线程对应的本地内存置为无效。从而使得被监视器保护的临界区代码必须从主内存中读取共享变量。</li>
+</ul>
+<h3 id="锁内存语义的实现"><a href="#锁内存语义的实现" class="headerlink" title="锁内存语义的实现"></a>锁内存语义的实现</h3><p>在Java中一般有两种同步方式：Synchronized和可重入锁ReentrantLock。《并发编程的艺术》书中是借助 <strong>ReentrantLock</strong>  来分析锁内存语义的实现的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReentrantLockExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line">    ReentrantLock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">writer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        lock.lock();               <span class="comment">//获取锁</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            a++;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlock();         <span class="comment">//释放锁</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reader</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        lock.lock();               <span class="comment">//获取锁</span></span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">int</span> i = a;</span><br><span class="line">            System.out.println(<span class="string">"i : "</span> + a);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlock();         <span class="comment">//释放锁</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 RenntrantLock中，调用 lock() 方法获取锁，调用 unlock() 方法释放锁</p>
+<p>而 ReentrantLock 的实现依赖于 Java 同步器框架 AbstractQueuedSynchronizer (简称AQS)，AQS 使用一个整型的 volatile 变量来维护同步状态，这个 volatile 变量是 ReentrantLock 内存语义实现的关键。</p>
+<h3 id="concurrent包的实现"><a href="#concurrent包的实现" class="headerlink" title="concurrent包的实现"></a>concurrent包的实现</h3><p>仔细分析 concurrent 包的源代码实现，会发现一个通用化的实现模式</p>
+<ul>
+<li>首先，声明共享变量为 volatile</li>
+<li>然后，使用 CAS 的原子条件更新来实现线程之间的同步</li>
+<li>同时，配合以volatile 的读/写和 CAS 所具有的 volatile 读和写的内存语义来实现线程之间的通信</li>
+</ul>
+<p>AQS(Java 同步器框架 AbstractQueuedSynchronizer)，非阻塞数据结构和原子变量类 (java.util.concurrent.atomic 包中的类),这些 concurrent 包中的基础类都是使用 这种模式来实现的，而 concurrent 包中的高层类又是依赖于 这些基础来实现的。从整体来看，concurrent包的示意图如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/java_concurrent.png" alt="java_concurrent"></p>
+<h2 id="final的内存语义"><a href="#final的内存语义" class="headerlink" title="final的内存语义"></a>final的内存语义</h2><h3 id="final-域的重排序规则"><a href="#final-域的重排序规则" class="headerlink" title="final 域的重排序规则"></a>final 域的重排序规则</h3><p>对于 final域，编译器和处理器要遵守两个 重排序规则。</p>
+<ul>
+<li>在构造函数内对一个final域的写入，与随后把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序</li>
+<li>初次读一个包含 final 域 的对象的引用，与随后初次读这个 final 域，这两个操作之间不能重排序</li>
+</ul>
+<h3 id="写-final-域的重排序规则"><a href="#写-final-域的重排序规则" class="headerlink" title="写 final 域的重排序规则"></a>写 final 域的重排序规则</h3><p>写 final 域的 重排序规则禁止把 final 域 的写重排序到构造函数之外。这个规则的实现 包含下面 2个方面：</p>
+<ul>
+<li>JMM 禁止编译器把 final 域的写重排序到构造函数之外</li>
+<li>编译器会在 final 域的写之后，构造函数 return 之前，插入一个 StoreStore 屏障，这个屏障禁止处理器把 final 域的写重排序到构造函数之外</li>
+</ul>
+<h3 id="读-final-域的重排序规则"><a href="#读-final-域的重排序规则" class="headerlink" title="读 final 域的重排序规则"></a>读 final 域的重排序规则</h3><p>读 final 域的重排序规则是，在一个线程中，初次读对象引用 与初次读该对象包含的 final 域，JMM 禁止 处理器重排序这两个操作（注意，这个规则仅仅针对 处理器)。编译器会在读 final 域操作的前面插入一个 LoadLoad屏障</p>
+<h3 id="final-域为引用类型"><a href="#final-域为引用类型" class="headerlink" title="final 域为引用类型"></a>final 域为引用类型</h3><p>对于 引用类型，写 final 域的重排序规则对编译器和处理器增加了如下约束：</p>
+<p>在构造函数内对一个 <strong>final 引用 的对象 的成员域的写入</strong>，与随后在构造函数 外把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序。</p>
+<h2 id="Java-内存模型总结"><a href="#Java-内存模型总结" class="headerlink" title="Java 内存模型总结"></a>Java 内存模型总结</h2><p>Java 内存模型可以说是围绕着在并发过程中如何处理原子性、可见性和有序性这3个特征来建立的：</p>
+<p><strong>原子性</strong></p>
+<blockquote>
+<p>即一个操作或者多个操作，要么全部执行并且执行的过程不会被任何因素打断，要么不执行</p>
+</blockquote>
+<p>在单线程环境下我们一般的操作都是原子性操作，Java内存模型中的 volatile 关键字也只是保证操作在单线程环境下是原子的，但是在多线程环境下，Java 只保证了基本类型的变量和赋值操作才是原子性的。（（注：在32位的JDK环境下，对64位数据的读取不是原子性操作，如long、double）。要想在多线程环境下保证原子性，则可以通过锁、synchronized来确保。</p>
+<p><strong>可见性</strong></p>
+<blockquote>
+<p>可见性是指当一个线程修改了共享变量的值，其他线程能够立即得知这个修改</p>
+</blockquote>
+<p>比如对于 volatile变量，Java内存模型是通过在变量修改后将新值立即同步回主内部才能，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方式来实现可见性</p>
+<p><strong>有序性</strong></p>
+<blockquote>
+<p>有序性是指程序执行的顺序按照代码的先后顺序执行</p>
+</blockquote>
+<p>在Java内存模型中，为了效率会发生编译器重排序和处理器重排序，重排序一般不会影响单线程的执行结果，但是会对多线程产生影响</p>
+<p>Java提供了 volatile 和 synchronized 关键字来保证线程之间操作的有序性，volatile 关键字本身就包含了 禁止指令重排序的语义，而synchronized 则是由 “一个变量在同一时刻只允许一条线程对其进行Lock操作”。</p>
+<p>再来说说 happens -before 原则，它阐述了操作之间的内存可见性，这个在Java内存模型中比较重要。JMM 把 happens-before 要求禁止的重排序分为下面两类：</p>
+<ul>
+<li>会改变程序执行结果的重排序</li>
+<li>不会改变程序执行结果的重排序</li>
+</ul>
+<p>JMM 对这两种不同性质的重排序，采用了不同的策略，如下：</p>
+<ul>
+<li>对于会改变程序执行结果的重排序，JMM要求编译器和处理器必须禁止这种重排序</li>
+<li>对于不会改变程序执行结果的重排序，JMM对编译器和处理器不做要求 (JMM允许这种重排序)</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/happen_before.png" alt="happen_before"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上内容是一个关于Java内存模型的知识笔记，算是对Java内存模型的一个大致认识。要认识Java内存模型，首先我们应该了解CPU的高速缓存机制，认识操作系统层面的内存模型，然后再到Java虚拟机定义的内存模型，Java虚拟机定义Java内存模型是为了屏蔽掉各种硬件和操作系统的内存访问差异，最后是Java内存模型中的一些核心内容，比如重排序，Volatile内存语义，锁的内存语义等等。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="http://ifeve.com/java-memory-model-0/" target="_blank" rel="noopener">深入理解Java内存模型</a></li>
+<li><a href="https://book.douban.com/subject/24722612/" target="_blank" rel="noopener">深入理解Java虚拟机</a></li>
+<li><a href="http://cmsblogs.com/?p=2092" target="_blank" rel="noopener">深入分析volatile的实现原理</a></li>
+<li><a href="http://www.hollischuang.com/archives/2550" target="_blank" rel="noopener">再有人问你Java内存模型是什么，就把这篇文章发给他</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2018/11/23/探索Java内存模型/" data-id="cjotqute9003a3kr94b569dl2" class="article-share-link"><i class="fas fa-share"></i>Partager</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2018/11/23/探索Java内存模型/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/11/23/探索Java内存模型/">Commentaires</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/11/21/浅析-Spring-的IOC容器/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Plus ancien</strong>
+            <div class="article-nav-title">浅析 Spring 的IOC容器</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Catégories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nuage de tags</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Liens</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2018/11/23/探索Java内存模型/';
+        
+        this.page.identifier = '探索Java内存模型';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
