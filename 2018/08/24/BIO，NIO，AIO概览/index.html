@@ -13,17 +13,17 @@
 <meta property="og:site_name" content="十豆杉">
 <meta property="og:description" content="前言在Java中，有三种IO模型： BIO，NIO，AIO。介绍这三种IO模型之前，需要介绍一下同步，异步与阻塞，非阻塞的概念，然后再从Java和Linux OS的角度去分析BIO,NIO和AIO">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E9%98%BB%E5%A1%9EIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E9%9D%9E%E9%98%BB%E5%A1%9EIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E4%BF%A1%E5%8F%B7%E5%BC%8FIO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E5%BC%82%E6%AD%A5IO.png">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/5%E7%A7%8DIO%E6%A8%A1%E5%9E%8B%E6%AF%94%E8%BE%83.png">
-<meta property="og:updated_time" content="2018-09-11T09:32:23.844Z">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%98%BB%E5%A1%9EIO.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%9D%9E%E9%98%BB%E5%A1%9EIO.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%BF%A1%E5%8F%B7%E5%BC%8FIO.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E6%AD%A5IO.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/5%E7%A7%8DIO%E6%AF%94%E8%BE%83.png">
+<meta property="og:updated_time" content="2018-11-23T13:21:54.307Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="BIO，NIO，AIO概览">
 <meta name="twitter:description" content="前言在Java中，有三种IO模型： BIO，NIO，AIO。介绍这三种IO模型之前，需要介绍一下同步，异步与阻塞，非阻塞的概念，然后再从Java和Linux OS的角度去分析BIO,NIO和AIO">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/%E9%98%BB%E5%A1%9EIO.png">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%98%BB%E5%A1%9EIO.png">
     
 
     
@@ -91,7 +91,7 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
@@ -110,9 +110,9 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Articles',
+            POSTS: 'Posts',
             PAGES: 'Pages',
-            CATEGORIES: 'Catégories',
+            CATEGORIES: 'Categories',
             TAGS: 'Tags',
             UNTITLED: '(Untitled)',
         },
@@ -140,7 +140,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Rechercher" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
     </div>
 
                 </td>
@@ -160,16 +160,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">SUIVRE</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 54
-                <span>Articles</span>
+                <span>posts</span>
             </div>
             <div class="article-info-block">
                 28
-                <span>Tags</span>
+                <span>tags</span>
             </div>
         </div>
         
@@ -302,7 +302,7 @@
 </ul>
 <h2 id="Linux的5种-I-O模型"><a href="#Linux的5种-I-O模型" class="headerlink" title="Linux的5种 I/O模型"></a>Linux的5种 I/O模型</h2><p>上面简单介绍了Java中的三种IO模型，三种模型提供的与IO有关的API,在文件处理时，底层实际上是依赖操作系统层面的IO操作实现的，比如在Linux 2.6以后，Java中的NIO和AIO都是通过 epoll来实现的，关于epoll等概念后面也会阐述。</p>
 <p>而实际上在Linux(Unix)操作系统中，共有五种 IO模型，分别是：<strong>阻塞IO模型</strong>、<strong>非阻塞IO模型</strong>、<strong>IO复用模型</strong>、<strong>信号驱动IO模型</strong>以及<strong>异步IO模型</strong>，而4种都是同步的，只有最后一种是异步的。下面的分析主要参考了<a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a>中的介绍。</p>
-<h3 id="阻塞IO模型-BIO"><a href="#阻塞IO模型-BIO" class="headerlink" title="阻塞IO模型 - BIO"></a>阻塞IO模型 - BIO</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E9%98%BB%E5%A1%9EIO.png" alt="阻塞IO"></p>
+<h3 id="阻塞IO模型-BIO"><a href="#阻塞IO模型-BIO" class="headerlink" title="阻塞IO模型 - BIO"></a>阻塞IO模型 - BIO</h3><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%98%BB%E5%A1%9EIO.png" alt="阻塞IO"></p>
 <p>一个输入操作通常包括两个不同的阶段:</p>
 <ul>
 <li>等待数据准备好</li>
@@ -311,10 +311,10 @@
 <p>对于一个套接字上的输入操作，第一步通常涉及等待数据从网络中到达，当所等待分组到达时，它被复制到内核中的某个缓冲区，第二步就是把数据从内核缓冲区复制到应用进程缓冲区。</p>
 <p>从上图可以看出，<strong>应用进程通过 系统调用 <code>recvfrom</code> 去接收数据，而由于内核数据没有准备好，应用进程就会阻塞，直到内核准备好数据并将其从内核复制到应用进程的缓冲区中或者发生错误才返回</strong>。最常见的错误就是系统调用被信号中断。进程从调用recvfrom开始到它返回的整段时间内是被阻塞的。</p>
 <p>Linux下的阻塞式I/O模型就对应了Java下的BIO模型，BIO的底层实现是调用操作系统的API去执行的，也就是调用操作系统的Socket套接字。</p>
-<h3 id="非阻塞式I-O模型-NIO"><a href="#非阻塞式I-O模型-NIO" class="headerlink" title="非阻塞式I/O模型 - NIO"></a>非阻塞式I/O模型 - NIO</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E9%9D%9E%E9%98%BB%E5%A1%9EIO.png" alt="非阻塞IO"></p>
+<h3 id="非阻塞式I-O模型-NIO"><a href="#非阻塞式I-O模型-NIO" class="headerlink" title="非阻塞式I/O模型 - NIO"></a>非阻塞式I/O模型 - NIO</h3><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%9D%9E%E9%98%BB%E5%A1%9EIO.png" alt="非阻塞IO"></p>
 <p>应用进程通过系统调用 <code>recvfrom</code> 不断的去和内核交互，直到内核数据报准备好，而如果内核无数据准备好，转而立即返回一个 <code>EWOULDBLOCK</code>的错误，过一段时间再次发送 <code>recvfrom</code>请求，在此期间进程可以做其他事情，不用一直等待，这就是非阻塞。</p>
 <p>当一个应用进程循环调用 <code>recvfrom</code>时，我们称之为<strong>轮询(polling)</strong>，应用进程持续轮询内核，以查看某个操作是否就绪。Java的NIO映射到Linux操作系统就是如上图所示的非阻塞I/O模型</p>
-<h3 id="I-O复用模型"><a href="#I-O复用模型" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h3><p><img src="http://osvtz719h.bkt.clouddn.com/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png" alt="IO复用模型"></p>
+<h3 id="I-O复用模型"><a href="#I-O复用模型" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h3><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8.png" alt="IO复用模型"></p>
 <p>IO多路复用使用<code>select/poll/epoll</code>函数，多个进程的IO都可以注册在同一个 <code>select</code> 上，当用户进程调用该 <code>select</code>时，<code>select</code>去监听所有注册好的IO,<strong>如果所有被监听的IO需要的数据都没有准备好，那么 <code>select</code>调用进程会被阻塞</strong>，只要任意一个IO的数据报套接字变为可读，即数据报已经准备好，<code>select</code> 就返回套接字可读这一条件，然后调用 <code>recvfrom</code>把所读数据报复制到应用进程缓冲区。</p>
 <p><strong>强调一点就是，IO多路复用模型并没有涉及到非阻塞</strong>，进程在发出<code>select</code>后，要一直阻塞等待其监听的所有IO操作至少有一个数据准备好才返回，强调阻塞状态，不存在非阻塞。</p>
 <p>而在 Java NIO中也可以实现多路复用，主要是利用多路复用器 <strong>Selector</strong>，与这里的 <code>select</code>函数类型，<strong>Selector</strong>会不断轮询注册在其上的通道Channel，如果有某一个Channel上面发生读或写事件，这个Channel处于就绪状态，就会被Selector轮询出来。关于Java NIO实现多路复用更多的介绍请查询相关文章。</p>
@@ -324,14 +324,14 @@
 <li>服务器需要同时处理多种网络协议的套接字</li>
 </ul>
 <h4 id="I-O多路复用的系统调用函数"><a href="#I-O多路复用的系统调用函数" class="headerlink" title="I/O多路复用的系统调用函数"></a>I/O多路复用的系统调用函数</h4><p>目前支持I/O 多路复用的系统调用函数有 <code>select，pselect，poll，epoll</code>。在Linux 网络编程中，很长一段时间都使用<code>select</code> 做轮询和网络事件通知。然而因为select的一些固有缺陷导致它的应用受到了很大的限制，比如select 单个进程打开的最大句柄数是有限的。最终在 Linux 2.6 选择<strong>epoll</strong> 替代了select,Java NIO和AIO底层就是用epoll。更多关于这些系统调用的介绍与使用，请参阅 <a href="https://book.douban.com/subject/4859464/" target="_blank" rel="noopener">《UNIX网络编程 卷1：套接字联网API（第3版）</a></p>
-<h3 id="信号驱动式I-O模型"><a href="#信号驱动式I-O模型" class="headerlink" title="信号驱动式I/O模型"></a>信号驱动式I/O模型</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E4%BF%A1%E5%8F%B7%E5%BC%8FIO.png" alt="信号"></p>
+<h3 id="信号驱动式I-O模型"><a href="#信号驱动式I-O模型" class="headerlink" title="信号驱动式I/O模型"></a>信号驱动式I/O模型</h3><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%BF%A1%E5%8F%B7%E5%BC%8FIO.png" alt="信号"></p>
 <p>应用进程预先向内核安装一个信号处理函数，然后立即返回，进程继续工作，不阻塞，当数据报准备好读取时，内核就为该进程产生一个信号通知进程，然后进程再调用recvfrom读取数据报。</p>
 <h4 id="信号驱动式IO不是异步的"><a href="#信号驱动式IO不是异步的" class="headerlink" title="信号驱动式IO不是异步的"></a>信号驱动式IO不是异步的</h4><p>信号驱动式IO在数据准备阶段是异步的，当内核中有数据报准备后再通知进程，但是在调用 recvfrom操作进行数据拷贝时是同步的，所以总体来说，整个IO过程不能是异步的。</p>
-<h3 id="异步I-O模型-AIO"><a href="#异步I-O模型-AIO" class="headerlink" title="异步I/O模型 - AIO"></a>异步I/O模型 - AIO</h3><p><img src="http://osvtz719h.bkt.clouddn.com/%E5%BC%82%E6%AD%A5IO.png" alt="异步IO"></p>
+<h3 id="异步I-O模型-AIO"><a href="#异步I-O模型-AIO" class="headerlink" title="异步I/O模型 - AIO"></a>异步I/O模型 - AIO</h3><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E6%AD%A5IO.png" alt="异步IO"></p>
 <p>应用进程调用<code>aio_read</code>函数，给内核传递描述符，缓存区指针，缓存区大小和文件偏移，并告诉内核当整个操作完成时如何通知进程，然后该系统调用立即返回，而且在等待I/O完成期间，我们的进程不被阻塞，进程可以去干其他事情，然后内核开始等待数据准备，数据准备好以后再拷贝数据到进程缓冲区，最后通知整个IO操作已完成。</p>
 <p>Java的AIO提供了异步通道API，其操作系统底层实现就是这个异步I/O模型</p>
 <h4 id="与信号驱动式I-O的区别"><a href="#与信号驱动式I-O的区别" class="headerlink" title="与信号驱动式I/O的区别"></a>与信号驱动式I/O的区别</h4><p>主要区别在于: 信号驱动式I/O是由内核通知我们何时去启动一个I/O操作，而异步I/O模型是由内核通知我们I/O操作何时完成。</p>
-<h3 id="5种I-O模型的比较"><a href="#5种I-O模型的比较" class="headerlink" title="5种I/O模型的比较"></a>5种I/O模型的比较</h3><p><img src="http://osvtz719h.bkt.clouddn.com/5%E7%A7%8DIO%E6%A8%A1%E5%9E%8B%E6%AF%94%E8%BE%83.png" alt="5"></p>
+<h3 id="5种I-O模型的比较"><a href="#5种I-O模型的比较" class="headerlink" title="5种I/O模型的比较"></a>5种I/O模型的比较</h3><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/5%E7%A7%8DIO%E6%AF%94%E8%BE%83.png" alt="5"></p>
 <p>由上图可以再次看出，IO操作主要分为两个阶段:</p>
 <ul>
 <li>等待数据报准备阶段</li>
@@ -356,7 +356,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjotqut8700043kr93gkfegza" class="article-share-link"><i class="fas fa-share"></i>Partager</a>
+    <a data-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/" data-id="cjou85jim0008r4r9w7fc9lcj" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -424,7 +424,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/">Commentaires</a>
+        <a href="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/08/24/BIO，NIO，AIO概览/">Comments</a>
     
 
         </footer>
@@ -434,7 +434,7 @@
 <nav id="article-nav">
     
         <a href="/2018/08/27/一文读懂一个URL请求的过程是怎样的/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Plus récent</strong>
+            <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
                     一文读懂一个URL请求的过程是怎样的
@@ -444,7 +444,7 @@
     
     
         <a href="/2018/08/21/探究MySQL中的日志文件/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Plus ancien</strong>
+            <strong class="article-nav-caption">Older</strong>
             <div class="article-nav-title">探究MySQL中的日志文件</div>
         </a>
     
@@ -471,7 +471,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Catégories</h3>
+        <h3 class="widget-title">categories</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
@@ -480,7 +480,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Archives</h3>
+        <h3 class="widget-title">archives</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -489,7 +489,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Tags</h3>
+        <h3 class="widget-title">tags</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -498,7 +498,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Nuage de tags</h3>
+        <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 14px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
@@ -507,7 +507,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">Liens</h3>
+        <h3 class="widget-title">links</h3>
         <div class="widget">
             <ul>
                 
