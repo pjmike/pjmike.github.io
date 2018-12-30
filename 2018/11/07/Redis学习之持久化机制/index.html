@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Redis学习之持久化机制 | 十豆杉</title>
+    <title>Redis学习之持久化机制 | pjmike的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
 <meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis学习之持久化机制">
 <meta property="og:url" content="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/index.html">
-<meta property="og:site_name" content="十豆杉">
+<meta property="og:site_name" content="pjmike的博客">
 <meta property="og:description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg">
@@ -23,7 +23,7 @@
     
 
     
-        <link rel="alternate" href="#" title="十豆杉" type="application/atom+xml" />
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
     
 
     
@@ -62,7 +62,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 <i class="logo"></i>
-                <span class="site-title">十豆杉</span>
+                <span class="site-title">pjmike的博客</span>
             </a>
             <nav id="main-nav">
                 
@@ -354,7 +354,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/" data-id="cjou85jlw001zr4r9m3634hqq" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/" data-id="cjqb24apv003cl0td65a8a4px" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

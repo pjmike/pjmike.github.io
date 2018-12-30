@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     
-    <title>探索Java内存模型 | 十豆杉</title>
+    <title>探索Java内存模型 | pjmike的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="前言本文主要是对《深入理解 Java 内存模型——程晓明》和《深入理解Java虚拟机》内存模型部分的一个知识总结，其中也参考了一些其他优秀文章。 操作系统语义计算机在运行程序时，每条指令都是在CPU中执行的，而程序运行的数据都存在主存里，但是读写主存中的数据没有CPU中执行指令的速度快，如果每次都读取主存。效率就会比较低，所以现代操作系统都不得不加入一层读写速度尽可能接近处理器运算速度的高速缓存(">
 <meta name="keywords" content="Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="探索Java内存模型">
 <meta property="og:url" content="https://pjmike.github.io/2018/11/23/探索Java内存模型/index.html">
-<meta property="og:site_name" content="十豆杉">
+<meta property="og:site_name" content="pjmike的博客">
 <meta property="og:description" content="前言本文主要是对《深入理解 Java 内存模型——程晓明》和《深入理解Java虚拟机》内存模型部分的一个知识总结，其中也参考了一些其他优秀文章。 操作系统语义计算机在运行程序时，每条指令都是在CPU中执行的，而程序运行的数据都存在主存里，但是读写主存中的数据没有CPU中执行指令的速度快，如果每次都读取主存。效率就会比较低，所以现代操作系统都不得不加入一层读写速度尽可能接近处理器运算速度的高速缓存(">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/cpu_cache_2.jpg">
@@ -37,7 +37,7 @@
     
 
     
-        <link rel="alternate" href="#" title="十豆杉" type="application/atom+xml" />
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
     
 
     
@@ -76,7 +76,7 @@
         <div class="outer">
             <a href="/" id="logo">
                 <i class="logo"></i>
-                <span class="site-title">十豆杉</span>
+                <span class="site-title">pjmike的博客</span>
             </a>
             <nav id="main-nav">
                 
@@ -516,7 +516,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/23/探索Java内存模型/" data-id="cjou85jpc004hr4r9z9xz5gog" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2018/11/23/探索Java内存模型/" data-id="cjqb24avf0067l0tdv63eyg5p" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
