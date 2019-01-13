@@ -5,20 +5,20 @@
     
     <title>浅析MySQL InnoDB中的B+树索引 | pjmike的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？   B+树索引介绍 众所周知，一颗传统的M阶B+树需要满足以下几个要求：  从根节点到叶节点的所有路径都具有相同的长度 所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在 根节点至少拥有两个子树 每个树节点最多拥有M个子树 每个树节点(除了根">
+    <meta name="description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？">
 <meta name="keywords" content="MySQL">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅析MySQL InnoDB中的B+树索引">
 <meta property="og:url" content="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/index.html">
 <meta property="og:site_name" content="pjmike的博客">
-<meta property="og:description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？   B+树索引介绍 众所周知，一颗传统的M阶B+树需要满足以下几个要求：  从根节点到叶节点的所有路径都具有相同的长度 所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在 根节点至少拥有两个子树 每个树节点最多拥有M个子树 每个树节点(除了根">
+<meta property="og:description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%20tree.jpg">
-<meta property="og:updated_time" content="2019-01-13T11:34:29.237Z">
+<meta property="og:updated_time" content="2019-01-13T11:41:16.720Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅析MySQL InnoDB中的B+树索引">
-<meta name="twitter:description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？   B+树索引介绍 众所周知，一颗传统的M阶B+树需要满足以下几个要求：  从根节点到叶节点的所有路径都具有相同的长度 所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在 根节点至少拥有两个子树 每个树节点最多拥有M个子树 每个树节点(除了根">
+<meta name="twitter:description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？">
 <meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg">
     
 
@@ -260,7 +260,7 @@
 <li>B+树索引是什么？</li>
 <li>为什么说B+树比B树更适合数据库索引？</li>
 </ol>
-<!---->
+<a id="more"></a>
 <h2 id="B-树索引介绍"><a href="#B-树索引介绍" class="headerlink" title="B+树索引介绍"></a>B+树索引介绍</h2><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg" alt="B+tree"></p>
 <p>众所周知，一颗传统的M阶B+树需要满足以下几个要求：</p>
 <ul>
@@ -332,7 +332,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" data-id="cjqutq0dk001hjstd43celd4y" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" data-id="cjqutxe2r001908td6a0e0hy1" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding

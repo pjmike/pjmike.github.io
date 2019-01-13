@@ -250,75 +250,14 @@
         
         <div class="article-entry" itemprop="articleBody">
         
-            
-            <p>首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：</p>
+            <p><p>首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：</p>
 <ol>
 <li>B+树索引是什么？</li>
 <li>为什么说B+树比B树更适合数据库索引？</li>
-</ol>
-<!---->
-<h2 id="B-树索引介绍"><a href="#B-树索引介绍" class="headerlink" title="B+树索引介绍"></a>B+树索引介绍</h2><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg" alt="B+tree"></p>
-<p>众所周知，一颗传统的M阶B+树需要满足以下几个要求：</p>
-<ul>
-<li>从根节点到叶节点的所有路径都具有相同的长度</li>
-<li>所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在</li>
-<li>根节点至少拥有两个子树</li>
-<li>每个树节点最多拥有M个子树</li>
-<li>每个树节点(除了根节点)拥有至少M/2个子树</li>
-</ul>
-<p><strong>B+树是为了磁盘及其他存储辅助设备而设计的一种平衡查找树(不是二叉树)，在B+树中，所有记录的节点按大小顺序存放在同一层的叶节点中，各叶子节点用指针进行连接,而B+树索引本质上就是B+树在数据库中的实现，与纯粹的B+树数据结构还是有点区别</strong>。</p>
-<p>B+树与B+树索引的区别如下：</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>B+树</th>
-<th>B+树索引</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>存储位置</td>
-<td>内存</td>
-<td>磁盘</td>
-</tr>
-<tr>
-<td>扇出率</td>
-<td>低</td>
-<td>高</td>
-</tr>
-<tr>
-<td>并发控制</td>
-<td>可以不考虑</td>
-<td>需考虑</td>
-</tr>
-<tr>
-<td>分裂方向</td>
-<td>不需要考虑</td>
-<td>向左、向右</td>
-</tr>
-</tbody>
-</table>
-<p>通常来说，B+树索引用于基于磁盘的数据库系统，即数据最后持久化存放在磁盘上，每个页的叶子节点一般包含较多的记录，因此具有较高的扇出。这意味着在数据库中B+树索引高度一般较小，在2~3层，其高度也决定了磁盘I/O搜索的次数</p>
-<p>还有一点需要注意的是，实际上根据B+树索引并不能找到一个给定值的具体行，B+树索引能找到的只是查找数据行所在的页。然后数据库通过把数据页读入内存，再在内存中进行查找，最后得到查找的数据。</p>
-<h2 id="为什么说B-树比B树更适合数据库索引？"><a href="#为什么说B-树比B树更适合数据库索引？" class="headerlink" title="为什么说B+树比B树更适合数据库索引？"></a>为什么说B+树比B树更适合数据库索引？</h2><p>B+树是上世纪70年代针对硬盘和单核处理器设计的，为了减少机械硬盘的寻道次数，它采用了多叉树结构，降低了索引结构的深度，IO读写次数减少。</p>
-<p>熟悉数据结构的同学都知道，B树也是多叉树结构，一种自平衡的树，而且B+树是从B树演化而来的，那么为什么不使用B+树的前身B树呢？一些资料也表明B树也适用于读写相对大的数据块的存储系统，例如磁盘。下面来看下用B树做索引的结构：</p>
-<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%20tree.jpg" alt="b tree"></p>
-<p>上图小红方块表示文件内容在硬盘中的存储位置。B树相比B+树的一个主要区别就在于B树的分支节点上存储着数据，而B+树的分支节点只是叶子节点的索引而已。</p>
-<p>从上面比较B+树和B树的结构，可以得出为什么使用B+树做索引的一些原因(其实网上写B+树索引谈到的大都是以下这些原因)：</p>
-<p><strong>1. B+树的磁盘读取代价低</strong></p>
-<p>B+-tree的内部节点并没有指向关键字具体信息的指针，换句话说，即分支节点没有存储数据，因此其内部节点相对B 树更小。如果把所有同一内部节点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。</p>
-<p><strong>2. B+树的查询效率更加稳定</strong></p>
-<p>在B+树中，由于分支节点并不是最终指向文件内容的节点，分支节点只是叶子节点的索引，所以对于任意关键字的查找都必须从根节点走到分支节点，所有关键字查询路径长度相同，每个数据查询效率相当。而对于B树而言，其分支节点上也保存有数据，对于每一个数据的查询所走的路径长度是不一样的，效率也不一样。</p>
-<p><strong>3. B+树便于执行扫库操作</strong></p>
-<p>由于B+树的数据都存储在叶子节点上，分支节点均为索引，方便扫库，只需扫一遍叶子即可。但是B树在分支节点上都保存着数据，要找到具体的顺序数据，需要执行一次中序遍历来查找。所以B+树更加适合范围查询的情况，在解决磁盘IO性能的同时解决了B树元素遍历效率低下的问题</p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>再次总结下B+树索引，它采用了多叉树的结构，降低了索引结构的深度，避免了传统二叉树结构中绝大部分的随机访问操作，有效减少了磁盘磁头的寻道次数。B+树索引查询效率稳定，也有利于进行范围查询。</p>
-<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
-<li><a href="http://mysql.taobao.org/monthly/2018/09/01/#" target="_blank" rel="noopener">MySQL · 引擎特性 · B+树并发控制机制的前世今生</a></li>
-<li><a href="https://blog.csdn.net/xlgen157387/article/details/79450295" target="_blank" rel="noopener">为什么MySQL数据库索引选择使用B+树？</a></li>
-<li><a href="https://read.douban.com/ebook/15233230/" target="_blank" rel="noopener">MySQL技术内幕 InnoDB存储引擎 姜承尧 第2版</a></li>
-</ul>
-
+</ol></p>
+            <p class="article-more-link">
+                <a href="/2019/01/13/浅析MySQL-InnoDB中的B-树索引/#more">Read More</a>
+            </p>
         
         </div>
         <footer class="article-footer">
@@ -328,7 +267,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" data-id="cjqutq0dk001hjstd43celd4y" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" data-id="cjqutxe2r001908td6a0e0hy1" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -462,7 +401,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/23/探索Java内存模型/" data-id="cjqutq1uj006ajstd25g6rasg" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/11/23/探索Java内存模型/" data-id="cjqutxel6006d08tdsj4vvleh" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -598,7 +537,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/21/浅析-Spring-的IOC容器/" data-id="cjqutq12z004ojstdrb2mapvz" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/11/21/浅析-Spring-的IOC容器/" data-id="cjqutxeda004n08tdbj53o76t" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -737,7 +676,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/20/Java并发编程知识概览-一/" data-id="cjqutq1km005hjstdcxb6ht8j" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/11/20/Java并发编程知识概览-一/" data-id="cjqutxein005g08td005p2zed" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -876,7 +815,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/" data-id="cjqutq0wn003fjstdrtd2gmzk" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/" data-id="cjqutxean003f08tdezvtaovz" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1015,7 +954,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/05/Redis学习之管道机制/" data-id="cjqutq07q000rjstd5cc4wca4" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/11/05/Redis学习之管道机制/" data-id="cjqutxe1m000g08tdejg5ttrh" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1155,7 +1094,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/10/28/springboot-整合-Netty-实战/" data-id="cjqutq1l1005ljstdsppj6ann" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/10/28/springboot-整合-Netty-实战/" data-id="cjqutxeiz005m08tdjxw9fs1q" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1289,7 +1228,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/10/15/浅析Spring-Security的认证过程及相关过滤器/" data-id="cjqutq1uv006djstdxkd117wj" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/10/15/浅析Spring-Security的认证过程及相关过滤器/" data-id="cjqutxel3006a08tdrmxauy0p" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1422,7 +1361,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/" data-id="cjqutq1lp005ujstdl3dcahq4" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/10/12/浅析Spring-Security-核心组件/" data-id="cjqutxejb005u08tdgsv5r2re" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1555,7 +1494,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/" data-id="cjqutq1kv005jjstd71ga5kkr" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2018/10/08/RabbitMQ与AMQP模型概览/" data-id="cjqutxeit005j08tdl7079w4y" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
