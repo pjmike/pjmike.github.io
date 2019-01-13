@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>浅析MySQL InnoDB中的B+树索引 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？   B+树索引介绍 众所周知，一颗传统的M阶B+树需要满足以下几个要求：  从根节点到叶节点的所有路径都具有相同的长度 所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在 根节点至少拥有两个子树 每个树节点最多拥有M个子树 每个树节点(除了根">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析MySQL InnoDB中的B+树索引">
+<meta property="og:url" content="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？   B+树索引介绍 众所周知，一颗传统的M阶B+树需要满足以下几个要求：  从根节点到叶节点的所有路径都具有相同的长度 所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在 根节点至少拥有两个子树 每个树节点最多拥有M个子树 每个树节点(除了根">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%20tree.jpg">
+<meta property="og:updated_time" content="2019-01-13T11:34:29.237Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅析MySQL InnoDB中的B+树索引">
+<meta name="twitter:description" content="首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：  B+树索引是什么？ 为什么说B+树比B树更适合数据库索引？   B+树索引介绍 众所周知，一颗传统的M阶B+树需要满足以下几个要求：  从根节点到叶节点的所有路径都具有相同的长度 所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在 根节点至少拥有两个子树 每个树节点最多拥有M个子树 每个树节点(除了根">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Entradas',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categorias',
+            TAGS: 'Etiquetas',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                55
+                <span>Entradas</span>
+            </div>
+            <div class="article-info-block">
+                28
+                <span>Etiquetas</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-浅析MySQL-InnoDB中的B-树索引" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            浅析MySQL InnoDB中的B+树索引
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2019/01/13/浅析MySQL-InnoDB中的B-树索引/">
+            <time datetime="2019-01-13T11:27:04.000Z" itemprop="datePublished">2019-01-13</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/MySQL/">MySQL</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>首先列举下在面试过程中对于B+树索引常见的两个问题，希望通过本文简要解决这些问题：</p>
+<ol>
+<li>B+树索引是什么？</li>
+<li>为什么说B+树比B树更适合数据库索引？</li>
+</ol>
+<!---->
+<h2 id="B-树索引介绍"><a href="#B-树索引介绍" class="headerlink" title="B+树索引介绍"></a>B+树索引介绍</h2><p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%2Btree.jpg" alt="B+tree"></p>
+<p>众所周知，一颗传统的M阶B+树需要满足以下几个要求：</p>
+<ul>
+<li>从根节点到叶节点的所有路径都具有相同的长度</li>
+<li>所有数据信息都存储在叶子节点，非叶子节点仅作为叶节点的索引存在</li>
+<li>根节点至少拥有两个子树</li>
+<li>每个树节点最多拥有M个子树</li>
+<li>每个树节点(除了根节点)拥有至少M/2个子树</li>
+</ul>
+<p><strong>B+树是为了磁盘及其他存储辅助设备而设计的一种平衡查找树(不是二叉树)，在B+树中，所有记录的节点按大小顺序存放在同一层的叶节点中，各叶子节点用指针进行连接,而B+树索引本质上就是B+树在数据库中的实现，与纯粹的B+树数据结构还是有点区别</strong>。</p>
+<p>B+树与B+树索引的区别如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>B+树</th>
+<th>B+树索引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>存储位置</td>
+<td>内存</td>
+<td>磁盘</td>
+</tr>
+<tr>
+<td>扇出率</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>并发控制</td>
+<td>可以不考虑</td>
+<td>需考虑</td>
+</tr>
+<tr>
+<td>分裂方向</td>
+<td>不需要考虑</td>
+<td>向左、向右</td>
+</tr>
+</tbody>
+</table>
+<p>通常来说，B+树索引用于基于磁盘的数据库系统，即数据最后持久化存放在磁盘上，每个页的叶子节点一般包含较多的记录，因此具有较高的扇出。这意味着在数据库中B+树索引高度一般较小，在2~3层，其高度也决定了磁盘I/O搜索的次数</p>
+<p>还有一点需要注意的是，实际上根据B+树索引并不能找到一个给定值的具体行，B+树索引能找到的只是查找数据行所在的页。然后数据库通过把数据页读入内存，再在内存中进行查找，最后得到查找的数据。</p>
+<h2 id="为什么说B-树比B树更适合数据库索引？"><a href="#为什么说B-树比B树更适合数据库索引？" class="headerlink" title="为什么说B+树比B树更适合数据库索引？"></a>为什么说B+树比B树更适合数据库索引？</h2><p>B+树是上世纪70年代针对硬盘和单核处理器设计的，为了减少机械硬盘的寻道次数，它采用了多叉树结构，降低了索引结构的深度，IO读写次数减少。</p>
+<p>熟悉数据结构的同学都知道，B树也是多叉树结构，一种自平衡的树，而且B+树是从B树演化而来的，那么为什么不使用B+树的前身B树呢？一些资料也表明B树也适用于读写相对大的数据块的存储系统，例如磁盘。下面来看下用B树做索引的结构：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/b%20tree.jpg" alt="b tree"></p>
+<p>上图小红方块表示文件内容在硬盘中的存储位置。B树相比B+树的一个主要区别就在于B树的分支节点上存储着数据，而B+树的分支节点只是叶子节点的索引而已。</p>
+<p>从上面比较B+树和B树的结构，可以得出为什么使用B+树做索引的一些原因(其实网上写B+树索引谈到的大都是以下这些原因)：</p>
+<p><strong>1. B+树的磁盘读取代价低</strong></p>
+<p>B+-tree的内部节点并没有指向关键字具体信息的指针，换句话说，即分支节点没有存储数据，因此其内部节点相对B 树更小。如果把所有同一内部节点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。</p>
+<p><strong>2. B+树的查询效率更加稳定</strong></p>
+<p>在B+树中，由于分支节点并不是最终指向文件内容的节点，分支节点只是叶子节点的索引，所以对于任意关键字的查找都必须从根节点走到分支节点，所有关键字查询路径长度相同，每个数据查询效率相当。而对于B树而言，其分支节点上也保存有数据，对于每一个数据的查询所走的路径长度是不一样的，效率也不一样。</p>
+<p><strong>3. B+树便于执行扫库操作</strong></p>
+<p>由于B+树的数据都存储在叶子节点上，分支节点均为索引，方便扫库，只需扫一遍叶子即可。但是B树在分支节点上都保存着数据，要找到具体的顺序数据，需要执行一次中序遍历来查找。所以B+树更加适合范围查询的情况，在解决磁盘IO性能的同时解决了B树元素遍历效率低下的问题</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>再次总结下B+树索引，它采用了多叉树的结构，降低了索引结构的深度，避免了传统二叉树结构中绝大部分的随机访问操作，有效减少了磁盘磁头的寻道次数。B+树索引查询效率稳定，也有利于进行范围查询。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="http://mysql.taobao.org/monthly/2018/09/01/#" target="_blank" rel="noopener">MySQL · 引擎特性 · B+树并发控制机制的前世今生</a></li>
+<li><a href="https://blog.csdn.net/xlgen157387/article/details/79450295" target="_blank" rel="noopener">为什么MySQL数据库索引选择使用B+树？</a></li>
+<li><a href="https://read.douban.com/ebook/15233230/" target="_blank" rel="noopener">MySQL技术内幕 InnoDB存储引擎 姜承尧 第2版</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" data-id="cjqutq0dk001hjstd43celd4y" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/">Comentarios</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2018/11/23/探索Java内存模型/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Más viejo</strong>
+            <div class="article-nav-title">探索Java内存模型</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Categorias</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Archivos</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Etiquetas</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Nube de etiquetas</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">Links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2019/01/13/浅析MySQL-InnoDB中的B-树索引/';
+        
+        this.page.identifier = '浅析MySQL-InnoDB中的B-树索引';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
