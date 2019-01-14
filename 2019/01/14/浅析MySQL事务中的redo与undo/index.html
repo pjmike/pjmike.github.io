@@ -3,23 +3,24 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Redis学习之持久化机制 | pjmike的博客</title>
+    <title>浅析MySQL事务中的redo与undo | pjmike的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
-<meta name="keywords" content="Redis">
+    <meta name="description" content="我们都知道事务有4种特性：原子性、一致性、隔离性和持久性，在事务中的操作，要么全部执行，要么全部不做，这就是事务的目的。事务的隔离性由锁机制实现，原子性、一致性和持久性由事务的redo 日志和undo 日志来保证。所以本篇文章将讨论关于事务中的redo和undo的几个问题：  redo 日志与undo日志分别是什么？ redo 如何保证事务的持久性？ undo log 是否是redo log的逆过">
+<meta name="keywords" content="MySQL">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Redis学习之持久化机制">
-<meta property="og:url" content="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/index.html">
+<meta property="og:title" content="浅析MySQL事务中的redo与undo">
+<meta property="og:url" content="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/index.html">
 <meta property="og:site_name" content="pjmike的博客">
-<meta property="og:description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
+<meta property="og:description" content="我们都知道事务有4种特性：原子性、一致性、隔离性和持久性，在事务中的操作，要么全部执行，要么全部不做，这就是事务的目的。事务的隔离性由锁机制实现，原子性、一致性和持久性由事务的redo 日志和undo 日志来保证。所以本篇文章将讨论关于事务中的redo和undo的几个问题：  redo 日志与undo日志分别是什么？ redo 如何保证事务的持久性？ undo log 是否是redo log的逆过">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg">
-<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_aof_reload.png">
-<meta property="og:updated_time" content="2018-11-07T12:22:32.818Z">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mysql_redo.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/userbuffer_pagebuffer_disk.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mini_transaction.png">
+<meta property="og:updated_time" content="2019-01-14T10:06:06.247Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Redis学习之持久化机制">
-<meta name="twitter:description" content="前言持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。 一般有两种持久化方式：  快照 ： Redis RDB 写日志： Redis AOF  下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读">
-<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg">
+<meta name="twitter:title" content="浅析MySQL事务中的redo与undo">
+<meta name="twitter:description" content="我们都知道事务有4种特性：原子性、一致性、隔离性和持久性，在事务中的操作，要么全部执行，要么全部不做，这就是事务的目的。事务的隔离性由锁机制实现，原子性、一致性和持久性由事务的redo 日志和undo 日志来保证。所以本篇文章将讨论关于事务中的redo和undo的几个问题：  redo 日志与undo日志分别是什么？ redo 如何保证事务的持久性？ undo log 是否是redo log的逆过">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mysql_redo.png">
     
 
     
@@ -212,7 +213,7 @@
 </aside>
 
             
-            <section id="main"><article id="post-Redis学习之持久化机制" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-浅析MySQL事务中的redo与undo" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -220,7 +221,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            Redis学习之持久化机制
+            浅析MySQL事务中的redo与undo
         </h1>
     
 
@@ -229,8 +230,8 @@
                         
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/11/07/Redis学习之持久化机制/">
-            <time datetime="2018-11-07T12:21:19.000Z" itemprop="datePublished">2018-11-07</time>
+        <a href="/2019/01/14/浅析MySQL事务中的redo与undo/">
+            <time datetime="2019-01-14T10:04:58.000Z" itemprop="datePublished">2019-01-14</time>
         </a>
     </div>
 
@@ -238,13 +239,13 @@
                         
     <div class="article-category">
     	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Redis/">Redis</a>
+        <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
     </div>
 
                         
     <div class="article-tag">
         <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Redis/">Redis</a>
+        <a class="tag-link" href="/tags/MySQL/">MySQL</a>
     </div>
 
                     </div>
@@ -255,94 +256,105 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-                <div id="toc" class="toc-article">
-                <strong class="toc-title">Catalogue</strong>
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RDB"><span class="toc-number">2.</span> <span class="toc-text">RDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#手动触发"><span class="toc-number">2.1.</span> <span class="toc-text">手动触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自动触发"><span class="toc-number">2.2.</span> <span class="toc-text">自动触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RDB的相关配置"><span class="toc-number">2.3.</span> <span class="toc-text">RDB的相关配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他机制"><span class="toc-number">2.4.</span> <span class="toc-text">其他机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AOF"><span class="toc-number">3.</span> <span class="toc-text">AOF</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开启AOF"><span class="toc-number">4.</span> <span class="toc-text">开启AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令写入"><span class="toc-number">4.1.</span> <span class="toc-text">命令写入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件同步方式"><span class="toc-number">4.2.</span> <span class="toc-text">文件同步方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重写机制"><span class="toc-number">4.3.</span> <span class="toc-text">重写机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重新加载"><span class="toc-number">4.4.</span> <span class="toc-text">重新加载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">5.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
-                </div>
-            
-            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>持久化就是将Redis内存中的数据写入到磁盘中进行存储，因为Redis是内存数据库，数据都是存在内存中的，为了避免进程退出导致数据的丢失，所以需要将数据持久化到硬盘中，这样下次Redis重启后可以利用之前持久化的文件实现数据恢复。</p>
-<p>一般有两种持久化方式：</p>
+            <p>我们都知道事务有4种特性：原子性、一致性、隔离性和持久性，在事务中的操作，要么全部执行，要么全部不做，这就是事务的目的。事务的隔离性由锁机制实现，原子性、一致性和持久性由事务的redo 日志和undo 日志来保证。所以本篇文章将讨论关于事务中的redo和undo的几个问题：</p>
 <ul>
-<li>快照 ： Redis RDB</li>
-<li>写日志： Redis AOF</li>
+<li>redo 日志与undo日志分别是什么？</li>
+<li>redo 如何保证事务的持久性？</li>
+<li>undo log 是否是redo log的逆过程？</li>
 </ul>
-<p>下面对这两种方式一一进行详细阐述，关于更多Redis持久化深入介绍，可以拜读 Redis持久化的经典之作——<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">Redis persistence demystified</a></p>
 <a id="more"></a>
-<h2 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h2><p>RDB 持久化是<strong>把当前进程数据生成快照保存到硬盘的过程</strong>，文件格式是二进制文件，这种利用快照方式保存数据，其实在很多领域都比较常见，比如云服务器备份数据，MySQL备份数据等等。</p>
-<p>触发RDB持久化过程一般分为两种方式：</p>
+<h2 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h2><h3 id="Redo-的类型"><a href="#Redo-的类型" class="headerlink" title="Redo 的类型"></a>Redo 的类型</h3><p>重做日志(redo log)用来保证事务的持久性，即事务ACID中的D。实际上它可以分为以下两种类型：</p>
 <ul>
-<li>手动触发</li>
-<li>自动触发</li>
+<li>物理Redo日志</li>
+<li>逻辑Redo日志</li>
 </ul>
-<h3 id="手动触发"><a href="#手动触发" class="headerlink" title="手动触发"></a>手动触发</h3><p>手动触发又分别有两种命令：</p>
+<p>在InnoDB存储引擎中，<strong>大部分情况下 Redo是物理日志，记录的是数据页的物理变化</strong>。而逻辑Redo日志，不是记录页面的实际修改，而是记录修改页面的一类操作，比如新建数据页时，需要记录逻辑日志。关于逻辑Redo日志涉及更加底层的内容，这里我们只需要记住绝大数情况下，Redo是物理日志即可，DML对页的修改操作，均需要记录Redo.</p>
+<h3 id="Redo-的作用"><a href="#Redo-的作用" class="headerlink" title="Redo 的作用"></a>Redo 的作用</h3><p>Redo log的主要作用是用于数据库的崩溃恢复</p>
+<h3 id="Redo-的组成"><a href="#Redo-的组成" class="headerlink" title="Redo 的组成"></a>Redo 的组成</h3><p>Redo log可以简单分为以下两个部分：</p>
 <ul>
-<li>save命令：阻塞当前的Redis服务器，直到RDB过程完成为止</li>
-<li>bgsave命令（主流的触发RDB持久化方式): Redis 进程执行 fork操作创建子进程，RDB 持久化由子进程负责，完成后自动结束，阻塞只发生在 fork 阶段</li>
+<li>一是内存中重做日志缓冲 (redo log buffer),是易失的，在内存中</li>
+<li>二是重做日志文件 (redo log file)，是持久的，保存在磁盘中</li>
 </ul>
-<p><strong>save命令</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; save</span><br><span class="line">OK</span><br></pre></td></tr></table></figure></p>
-<p>执行 <code>save</code>命令阻塞当前Redis，然后完成时返回一个 <code>OK</code></p>
-<p><strong>bgsave</strong></p>
-<p>bgsave的执行流程如下图(出自《Redis开发与运维》)：</p>
-<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_bgsave.jpg" alt="redis_bgsave"></p>
+<h3 id="什么时候写Redo"><a href="#什么时候写Redo" class="headerlink" title="什么时候写Redo?"></a>什么时候写Redo?</h3><p>上面那张图简单地体现了Redo的写入流程，这里再细说下写入Redo的时机：</p>
 <ul>
-<li>执行 bgsave 命令，Redis 父进程 判断当前是否存在正在执行的子进程，如 RDB/AOF子进程，如果存在 bgsave 命令直接返回</li>
-<li>父进程执行 fork 操作创建子进程，fork操作过程中父进程会阻塞，通过 <code>info stats</code> 命令 查看 <code>latest_fork_usec</code> 选项，可以获取最近一个 fork 操作的耗时，单位是 微秒</li>
-<li>父进程 fork 完成后，bgsave 命令 返回 <code>Background saving started</code> 信息并不会阻塞父进程，可以继续响应其他命令</li>
-<li>子进程创建 RDB 文件，根据父进程内存生成临时快照文件，完成后对原有文件进行原子替换</li>
-<li>进程发送信号给父进程表示完成，父进程更新统计信息</li>
+<li>在数据页修改完成之后，在脏页刷出磁盘之前，写入redo日志。注意的是先修改数据，后写日志</li>
+<li><strong>redo日志比数据页先写回磁盘</strong></li>
+<li>聚集索引、二级索引、undo页面的修改，均需要记录Redo日志。</li>
 </ul>
-<h3 id="自动触发"><a href="#自动触发" class="headerlink" title="自动触发"></a>自动触发</h3><p>自动触发机制一般是在配置文件中使用 <code>save m n</code>，表示 m 秒内数据集存在 n 次 修改时，自动触发 <code>bgsave</code>，redis 默认的自动触发机制如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># Save the DB on disk:</span><br><span class="line">#</span><br><span class="line">#   save &lt;seconds&gt; &lt;changes&gt;</span><br><span class="line">#</span><br><span class="line">#   Will save the DB if both the given number of seconds and the given</span><br><span class="line">#   number of write operations against the DB occurred.</span><br><span class="line">#</span><br><span class="line">#   In the example below the behaviour will be to save:</span><br><span class="line">#   after 900 sec (15 min) if at least 1 key changed</span><br><span class="line">#   after 300 sec (5 min) if at least 10 keys changed</span><br><span class="line">#   after 60 sec if at least 10000 keys changed</span><br><span class="line">#</span><br><span class="line">#   Note: you can disable saving completely by commenting out all &quot;save&quot; lines.</span><br><span class="line">#</span><br><span class="line">#   It is also possible to remove all the previously configured save</span><br><span class="line">#   points by adding a save directive with a single empty string argument</span><br><span class="line">#   like in the following example:</span><br><span class="line">#</span><br><span class="line">#   save &quot;&quot;</span><br><span class="line"></span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure></p>
-<p>比如 <code>save 900 1</code>就表示当时间到 900s 时，如果Redis数据至少发生了一次修改，那么就会执行 bgsave</p>
-<h3 id="RDB的相关配置"><a href="#RDB的相关配置" class="headerlink" title="RDB的相关配置"></a>RDB的相关配置</h3><p>在 <code>redis.conf</code>有一系列关于 RDB的相关配置，如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 快照的文件名</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"></span><br><span class="line"># 存放快照的目录</span><br><span class="line">dir ./</span><br><span class="line"></span><br><span class="line"># 在进行快照备份时,是否进行压缩。</span><br><span class="line"># yes：压缩，但是需要一些cpu的消耗。</span><br><span class="line"># no：不压缩，需要更多的磁盘空间。</span><br><span class="line">rdbcompression yes</span><br><span class="line"></span><br><span class="line"># 是否开启RDB文件的校验，在写入文件和读取文件时都起作用,关闭时，写入和启动文件有大约10%的性能提升，但无法检查RDB的损坏情况</span><br><span class="line">rdbchecksum yes</span><br><span class="line"></span><br><span class="line">#自动触发</span><br><span class="line">#900秒后且至少1个key发生变化时创建快照  </span><br><span class="line">save 900 1  </span><br><span class="line">#300秒后且至少10个key发生变化时创建快照  </span><br><span class="line">save 300 10  </span><br><span class="line">#60秒后且至少10000个key发生变化时创建快照  </span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure></p>
-<p>一旦数据库出现问题，那么我们的RDB文件中保存的数据并不是全新的，从上次RDB文件生成到Redis停机这段时间的数据全部丢掉了。例如，每隔5分钟或者更长的时间来创建一次快照，Redis停止工作时（例如意外断电）就可能丢失最近几分钟的数据。所以RDB 不适合实时持久化操作</p>
-<h3 id="其他机制"><a href="#其他机制" class="headerlink" title="其他机制"></a>其他机制</h3><ul>
-<li>全量复制： 如果从节点执行全量复制，主节点自动执行 bgsave 命令 生成 RDB 文件并发送给从节点</li>
-<li>debug reload：  重新加载redis会触发 save操作</li>
-<li>shutdown命令：  如果没有开启 AOF 持久化功能则自动执行 <code>bgsave</code></li>
-</ul>
-<h2 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h2><p>AOF (append only file) 持久化： 以独立日志的方式记录每次写命令，重启时再重新执行 AOF 文件中的命令以达到恢复数据的目的，类似于 MySQL binlog。</p>
-<p>与 RDB 相比，AOF 的实时性更好。</p>
-<h2 id="开启AOF"><a href="#开启AOF" class="headerlink" title="开启AOF"></a>开启AOF</h2><p>在 <code>redis.conf</code>配置文件中开启 AOF持久化<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 是否开启AOF，默认关闭（no）</span><br><span class="line">appendonly yes</span><br><span class="line"></span><br><span class="line"># AOF 文件名 (默认: &quot;appendonly.aof&quot;)</span><br><span class="line"></span><br><span class="line">appendfilename &quot;appendonly.aof&quot;</span><br><span class="line"></span><br><span class="line"># 保存路径与 RDB 一样,可配置</span><br><span class="line"></span><br><span class="line">dir ./</span><br></pre></td></tr></table></figure></p>
-<p>使用AOF流程：</p>
+<h3 id="Redo的整体流程"><a href="#Redo的整体流程" class="headerlink" title="Redo的整体流程"></a>Redo的整体流程</h3><p>下面以一个更新事务为例，宏观上把握redo log 流转过程，如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mysql_redo.png" alt="mysql_redo"></p>
 <ul>
-<li>命令写入(append): 所有的写入命令会追加到 aof_buf 缓冲区中</li>
-<li>文件同步(sync):   AOF 缓冲区根据对应的策略向硬盘做同步操作(sync)</li>
-<li>文件重写(rewrite)： 随着AOF文件越来越大，需要定期对AOF文件进行重写，达到压缩的目的</li>
-<li>重启加载(load): 当Redis重启时，加载AOF文件进行数据恢复</li>
+<li>第一步：先将原始数据从磁盘中读入内存中来，修改数据的内存拷贝</li>
+<li>第二步：生成一条重做日志并写入redo log buffer，记录的是数据被修改后的值</li>
+<li>第三步：当事务commit时，将redo log buffer中的内容刷新到 redo log file，对 redo log file采用追加写的方式</li>
+<li>第四步：定期将内存中修改的数据刷新到磁盘中</li>
 </ul>
-<h3 id="命令写入"><a href="#命令写入" class="headerlink" title="命令写入"></a>命令写入</h3><p> Redis先把命令追加到 <code>aof_buf</code>缓冲区中，该缓冲区是在系统的用户态缓冲区中，更具体的讲是在 Redis的缓冲内存中，缓冲内存主要包括： 客户端缓冲，复制积压缓冲区，AOF缓冲区。所以这里Redis实际上是将命令追加到AOF缓冲区。</p>
-<p> 之所以先写入缓冲区，是为了避免每次写 AOF 文件命令都直接写入硬盘，导致硬盘IO成为Redis负载的瓶颈。</p>
-<p> AOF 命令写入的内容直接是文本协议格式，一种Redis制定的文本协议，详情请查阅相关资料。它是一种纯文本格式，具有很好的兼容性，开启AOF后，所有写入命令都包含追加操作，直接采用 协议格式，避免了二次处理开销。</p>
-<h3 id="文件同步方式"><a href="#文件同步方式" class="headerlink" title="文件同步方式"></a>文件同步方式</h3><p>文件同步本质上将在用户态缓冲区(具体说是AOF缓冲区)中的数据 通过System call 刷入到操作系统的内核态中，进入刷入硬盘中去。</p>
-<p>其实涉及的两个重要的系统调用(System Call)：</p>
+<h3 id="redo如何保证-事务的持久性？"><a href="#redo如何保证-事务的持久性？" class="headerlink" title="redo如何保证 事务的持久性？"></a>redo如何保证 事务的持久性？</h3><p>InnoDB是事务的存储引擎，其通过<strong>Force Log at Commit 机制</strong>实现事务的持久性，即当事务提交时，先将 redo log buffer 写入到 redo log file 进行持久化，待事务的commit操作完成时才算完成。这种做法也被称为 <strong>Write-Ahead Log(预先日志持久化)</strong>，在持久化一个数据页之前，先将内存中相应的日志页持久化。</p>
+<p>为了保证每次日志都写入redo log file，在每次将redo buffer写入redo log file之后，默认情况下，InnoDB存储引擎都需要调用一次 <strong>fsync操作</strong>,因为重做日志打开并没有 O_DIRECT选项，所以重做日志先写入到文件系统缓存。为了确保重做日志写入到磁盘，必须进行一次 fsync操作。fsync是一种系统调用操作，其fsync的效率取决于磁盘的性能，因此磁盘的性能也影响了事务提交的性能，也就是数据库的性能。<br><strong>(O_DIRECT选项是在Linux系统中的选项，使用该选项后，对文件进行直接IO操作，不经过文件系统缓存，直接写入磁盘)</strong></p>
+<p>上面提到的<strong>Force Log at Commit机制</strong>就是靠InnoDB存储引擎提供的参数 <code>innodb_flush_log_at_trx_commit</code>来控制的，该参数可以控制 redo log刷新到磁盘的策略，设置该参数值也可以允许用户设置非持久性的情况发生，具体如下：</p>
 <ul>
-<li><strong>write</strong>： 通过 write 系统调用，将数据写入到内核缓冲区中后直接返回，后面的工作交由操作系统将内核缓冲区的数据写入硬盘，这样的好处是提高了IO性能</li>
-<li><strong>fsync</strong>：通过 fsync 系统调用 将数据提交到硬盘中，强制硬盘同步，将一直阻塞到写入硬盘完成后返回</li>
+<li>当设置参数为1时，（默认为1），表示事务提交时必须调用一次 <code>fsync</code> 操作，最安全的配置，保障持久性</li>
+<li>当设置参数为2时，则在事务提交时只做 <strong>write</strong> 操作，只保证将redo log buffer写到系统的页面缓存中，不进行fsync操作，因此如果MySQL数据库宕机时 不会丢失事务，但操作系统宕机则可能丢失事务</li>
+<li>当设置参数为0时，表示事务提交时不进行写入redo log操作，这个操作仅在master thread 中完成，而在master thread中每1秒进行一次重做日志的fsync操作，因此实例 crash 最多丢失1秒钟内的事务。（master thread是负责将缓冲池中的数据异步刷新到磁盘，保证数据的一致性）</li>
 </ul>
-<p>而文件同步又有三种策略，可在 <code>redis.conf</code>配置文件中进行配置:</p>
+<p><code>fsync</code>和<code>write</code>操作实际上是系统调用函数，在很多持久化场景都有使用到，比如 Redis 的AOF持久化中也使用到两个函数。<code>fsync</code>操作 将数据提交到硬盘中，强制硬盘同步，将一直阻塞到写入硬盘完成后返回，大量进行<code>fsync</code>操作就有性能瓶颈，而<code>write</code>操作将数据写到系统的页面缓存后立即返回，后面依靠系统的调度机制将缓存数据刷到磁盘中去,其顺序是user buffer——&gt; page cache——&gt;disk。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/userbuffer_pagebuffer_disk.png" alt="usebuffer_pagecache_disk"></p>
+<p><strong>除了上面谈到的Force Log at Commit机制保证事务的持久性，实际上重做日志的实现还要依赖于mini-transaction。</strong></p>
+<h3 id="Redo在InnoDB中是如何实现的？与mini-transaction的联系？"><a href="#Redo在InnoDB中是如何实现的？与mini-transaction的联系？" class="headerlink" title="Redo在InnoDB中是如何实现的？与mini-transaction的联系？"></a>Redo在InnoDB中是如何实现的？与mini-transaction的联系？</h3><p>Redo的实现实则跟mini-transaction紧密相关，mini-transaction是一种InnoDB内部使用的机制，通过mini-transaction来<strong>保证并发事务操作下以及数据库异常时数据页中数据的一致性</strong>，但它不属于事务。</p>
+<p><strong>为了使得mini-transaction保证数据页数据的一致性，mini-transaction必须遵循以下三种协议</strong>：</p>
 <ul>
-<li><code>appendfsync always</code>： 单纯靠调用 <code>fsync</code>将数据刷入到硬盘，是最有保证的完全的持久化，但速度也是最慢的，因为<code>fsync</code>存在阻塞，一般不推荐使用。 </li>
-<li><code>appendfsync everysec</code>: 每隔一秒钟，数据会通过write写入到内核缓冲完成后返回。为了进一步保证持久化，又专门后台开一个线程通过fsync将数据刷新到磁盘，以避免内核缓冲内数据因系统故障宕机丢失。在性能和持久化方面做了很好的折中，是受推荐的方式。</li>
-<li><code>appendfsync no</code>: 通过write系统调用将数据写入到内核缓存，然后依赖OS的写入，将数据从内核缓存写入到硬盘，一般为30秒左右一次。性能最好但是持久化最没有保证，不被推荐，如果有系统宕机故障，最近30秒的数据有可能丢失</li>
+<li>The FIX Rules</li>
+<li>Write-Ahead Log</li>
+<li>Force-log-at-commit</li>
 </ul>
-<h3 id="重写机制"><a href="#重写机制" class="headerlink" title="重写机制"></a>重写机制</h3><p>随着命令不断写入AOF,文件会越来越大，为了解决这个问题，Redis引入了AOF重写机制压缩文件体积。 经过重写，比如多条命令合并成一条命令等操作，然后重写后的AOF文件可以变小，以便更快被Redis加载</p>
-<p>AOF重写过程分为手动触发和自动触发：</p>
+<p><strong>The FIX Rules</strong></p>
+<p>修改一个数据页时需要获得该页的x-latch(排他锁)，获取一个数据页时需要该页的s-latch(读锁或者称为共享锁) 或者是 x-latch，持有该页的锁直到修改或访问该页的操作完成。</p>
+<p><strong>Write-Ahead Log</strong></p>
+<p>在前面阐述中就提到了Write-Ahead Log(预先写日志)。在持久化一个数据页之前，必须先将内存中相应的日志页持久化。每个页都有一个LSN(log sequence number)，代表日志序列号，（LSN占用8字节，单调递增), 当一个数据页需要写入到持久化设备之前，要求内存中小于该页LSN的日志先写入持久化设备</p>
+<p>那为什么必须要先写日志呢？可不可以不写日志，直接将数据写入磁盘？原则上是可以的，只不过会产生一些问题，数据修改会产生随机IO，但日志是顺序IO，append方式顺序写，是一种串行的方式，这样才能充分利用磁盘的性能。</p>
+<p><strong>Force-log-at-commit</strong></p>
+<p>这一点也就是前文提到的如何保证事务的持久性的内容，这里再次总结一下，与上面的内容相呼应。在一个事务中可以修改多个页，Write-Ahead Log 可以保证单个数据页的一致性，但是无法保证事务的持久性，Force-log-at-commit 要求当一个事务提交时，其产生所有的mini-transaction 日志必须刷新到磁盘中，若日志刷新完成后，在缓冲池中的页刷新到持久化存储设备前数据库发生了宕机，那么数据库重启时，可以通过日志来保证数据的完整性。</p>
+<p><strong>重做日志的写入流程</strong></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mini_transaction.png" alt="重做日志写入流程"><br>​<br>上图表示了重做日志的写入流程，每个mini-transaction对应每一条DML操作，比如一条update语句，其由一个mini-transaction来保证，对数据修改后，产生redo1，首先将其写入mini-transaction私有的Buffer中，update语句结束后，将redo1从私有Buffer拷贝到公有的Log Buffer中。当整个外部事务提交时，将redo log buffer再刷入到redo log file中。</p>
+<h2 id="undo-log"><a href="#undo-log" class="headerlink" title="undo log"></a>undo log</h2><h3 id="undo-log的定义"><a href="#undo-log的定义" class="headerlink" title="undo log的定义"></a>undo log的定义</h3><p>undo log主要记录的是数据的逻辑变化，为了在发生错误时回滚之前的操作，需要将之前的操作都记录下来，然后在发生错误时才可以回滚。</p>
+<h3 id="undo-log的作用"><a href="#undo-log的作用" class="headerlink" title="undo log的作用"></a>undo log的作用</h3><p>undo是一种逻辑日志，有两个作用：</p>
 <ul>
-<li>手动触发：直接调用 <code>bgrewriteaof</code>命令</li>
-<li>自动触发： 两大参数<ul>
-<li><code>auto-aof-rewrite-min-size</code>：表示运行 AOF重写时文件最小体积，默认为64MB</li>
-<li><code>auto-aof-rewrite-percentage</code> ： AOF增长率，当前AOF文件空间和上一次重写后AOF文件空间的比值</li>
+<li>用于事务的回滚</li>
+<li>MVCC</li>
 </ul>
-</li>
+<p>关于MVCC(多版本并发控制)的内容这里就不多说了，本文重点关注undo log用于事务的回滚。</p>
+<p>undo日志，只将数据库逻辑地恢复到原来的样子，在回滚的时候，它实际上是做的相反的工作，比如一条INSERT ，对应一条 DELETE，对于每个UPDATE,对应一条相反的 UPDATE,将修改前的行放回去。undo日志用于事务的回滚操作进而保障了事务的原子性。</p>
+<h3 id="undo-log的写入时机"><a href="#undo-log的写入时机" class="headerlink" title="undo log的写入时机"></a>undo log的写入时机</h3><ul>
+<li>DML操作修改聚簇索引前，记录undo日志</li>
+<li>二级索引记录的修改，不记录undo日志</li>
 </ul>
-<p>在<code>redis.conf</code>配置文件中，自动触发参数设置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#当AOF增长率为100%且达到了64mb时开始自动重写AOF  </span><br><span class="line">auto-aof-rewrite-percentage 100  </span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br></pre></td></tr></table></figure></p>
-<h3 id="重新加载"><a href="#重新加载" class="headerlink" title="重新加载"></a>重新加载</h3><p>Redis 持久化文件加载流程如下，如果 RDB 与 AOF同时开启，优先使用 AOF (下图摘自《Redis开发与运维》)：</p>
-<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/redis_aof_reload.png" alt="redis_aof_reload"></p>
+<p>需要注意的是，undo页面的修改，同样需要记录redo日志。</p>
+<h3 id="undo的存储位置"><a href="#undo的存储位置" class="headerlink" title="undo的存储位置"></a>undo的存储位置</h3><p>在InnoDB存储引擎中，undo存储在回滚段(Rollback Segment)中,每个回滚段记录了1024个undo log segment，而在每个undo log segment段中进行undo 页的申请，在5.6以前，Rollback Segment是在共享表空间里的，5.6.3之后，可通过 innodb_undo_tablespace设置undo存储的位置。</p>
+<h3 id="undo的类型"><a href="#undo的类型" class="headerlink" title="undo的类型"></a>undo的类型</h3><p>在InnoDB存储引擎中，undo log分为：</p>
+<ul>
+<li>insert undo log</li>
+<li>update undo log</li>
+</ul>
+<p>insert undo log是指在insert 操作中产生的undo log，因为insert操作的记录，只对事务本身可见，对其他事务不可见。故该undo log可以在事务提交后直接删除，不需要进行purge操作。</p>
+<p>而update undo log记录的是对delete 和update操作产生的undo log，该undo log可能需要提供MVCC机制，因此不能再事务提交时就进行删除。提交时放入undo log链表，等待purge线程进行最后的删除。</p>
+<p>补充：purge线程两个主要作用是：清理undo页和清除page里面带有Delete_Bit标识的数据行。在InnoDB中，事务中的Delete操作实际上并不是真正的删除掉数据行，而是一种Delete Mark操作，在记录上标识Delete_Bit，而不删除记录。是一种”假删除”,只是做了个标记，真正的删除工作需要后台purge线程去完成。</p>
+<h2 id="undo-log-是否是redo-log的逆过程？"><a href="#undo-log-是否是redo-log的逆过程？" class="headerlink" title="undo log 是否是redo log的逆过程？"></a>undo log 是否是redo log的逆过程？</h2><p>undo log 是否是redo log的逆过程？其实从前文就可以得出答案了，undo log是逻辑日志，对事务回滚时，只是将数据库逻辑地恢复到原来的样子，而redo log是物理日志，记录的是数据页的物理变化，显然undo log不是redo log的逆过程。</p>
+<h2 id="redo-amp-undo总结"><a href="#redo-amp-undo总结" class="headerlink" title="redo &amp; undo总结"></a>redo &amp; undo总结</h2><p>下面是redo log + undo log的简化过程，便于理解两种日志的过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">假设有A、B两个数据，值分别为1,2.</span><br><span class="line">1. 事务开始</span><br><span class="line">2. 记录A=1到undo log</span><br><span class="line">3. 修改A=3</span><br><span class="line">4. 记录A=3到 redo log</span><br><span class="line">5. 记录B=2到 undo log</span><br><span class="line">6. 修改B=4</span><br><span class="line">7. 记录B=4到redo log</span><br><span class="line">8. 将redo log写入磁盘</span><br><span class="line">9. 事务提交</span><br></pre></td></tr></table></figure>
+<p>实际上，在insert/update/delete操作中，redo和undo分别记录的内容都不一样，量也不一样。在InnoDB内存中，一般的顺序如下：</p>
+<ul>
+<li>写undo的redo</li>
+<li>写undo</li>
+<li>修改数据页</li>
+<li>写Redo</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文分析了事务中的redo和undo日志，参考了一些资料书籍整理得出，可能有些地方表述的不清楚。如有不对之处，欢迎指出。</p>
 <h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
-<li><a href="https://book.douban.com/subject/26971561/" target="_blank" rel="noopener">Redis开发与运维</a></li>
-<li><a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">Redis persistence demystified</a></li>
-<li><a href="https://www.cnblogs.com/kismetv/p/9137897.html" target="_blank" rel="noopener">深入学习Redis（2）：持久化</a></li>
-<li><a href="http://blog.720ui.com/2016/redis_action_03_rdb_aof/" target="_blank" rel="noopener">Redis实战（三） 持久化机制</a></li>
+<li><a href="https://read.douban.com/ebook/15233230/" target="_blank" rel="noopener">MySQL技术内幕：InnoDB存储引擎（第2版）</a></li>
+<li><a href="https://book.douban.com/subject/25872763/" target="_blank" rel="noopener">MySQL内核：InnoDB存储引擎 卷1</a></li>
+<li><a href="http://hedengcheng.com/?p=489" target="_blank" rel="noopener">InnoDB 日志/回滚段/崩溃恢复实现详解</a></li>
+<li><a href="http://mysql.taobao.org/monthly/2015/05/01/" target="_blank" rel="noopener">MySQL · 引擎特性 · InnoDB redo log漫游</a></li>
+<li><a href="https://mp.weixin.qq.com/s/MDb0IVBUThM7XYpownclQw" target="_blank" rel="noopener">MySQL的undo,redo,二阶段提交思维导图</a></li>
 </ul>
 
         
@@ -354,7 +366,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/" data-id="cjqw5yczu003mt8td9wljvb84" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/" data-id="cjqw5yd4s004kt8tdbror25ej" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -422,7 +434,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/">Comments</a>
+        <a href="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/">Comments</a>
     
 
         </footer>
@@ -431,19 +443,10 @@
         
 <nav id="article-nav">
     
-        <a href="/2018/11/20/Java并发编程知识概览-一/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    Java并发编程知识概览(一)
-                
-            </div>
-        </a>
     
-    
-        <a href="/2018/11/05/Redis学习之管道机制/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
-            <div class="article-nav-title">Redis学习之管道机制</div>
+            <div class="article-nav-title">浅析MySQL InnoDB中的B+树索引</div>
         </a>
     
 </nav>
@@ -548,9 +551,9 @@
     <script>
     var disqus_config = function () {
         
-            this.page.url = 'https://pjmike.github.io/2018/11/07/Redis学习之持久化机制/';
+            this.page.url = 'https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/';
         
-        this.page.identifier = 'Redis学习之持久化机制';
+        this.page.identifier = '浅析MySQL事务中的redo与undo';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
