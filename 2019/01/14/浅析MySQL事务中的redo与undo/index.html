@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mysql_redo.png">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/userbuffer_pagebuffer_disk.png">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mini_transaction.png">
-<meta property="og:updated_time" content="2019-01-14T10:06:06.247Z">
+<meta property="og:updated_time" content="2019-01-25T10:23:23.204Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅析MySQL事务中的redo与undo">
 <meta name="twitter:description" content="我们都知道事务有4种特性：原子性、一致性、隔离性和持久性，在事务中的操作，要么全部执行，要么全部不做，这就是事务的目的。事务的隔离性由锁机制实现，原子性、一致性和持久性由事务的redo 日志和undo 日志来保证。所以本篇文章将讨论关于事务中的redo和undo的几个问题：  redo 日志与undo日志分别是什么？ redo 如何保证事务的持久性？ undo log 是否是redo log的逆过">
@@ -88,7 +88,7 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
@@ -107,10 +107,10 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Entradas',
+            POSTS: 'Posts',
             PAGES: 'Pages',
-            CATEGORIES: 'Categorias',
-            TAGS: 'Etiquetas',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
             UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
@@ -137,7 +137,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Buscar" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
     </div>
 
                 </td>
@@ -157,16 +157,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">SEGUIR</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 57
-                <span>Entradas</span>
+                <span>posts</span>
             </div>
             <div class="article-info-block">
                 28
-                <span>Etiquetas</span>
+                <span>tags</span>
             </div>
         </div>
         
@@ -311,7 +311,6 @@
 <p>修改一个数据页时需要获得该页的x-latch(排他锁)，获取一个数据页时需要该页的s-latch(读锁或者称为共享锁) 或者是 x-latch，持有该页的锁直到修改或访问该页的操作完成。</p>
 <p><strong>Write-Ahead Log</strong></p>
 <p>在前面阐述中就提到了Write-Ahead Log(预先写日志)。在持久化一个数据页之前，必须先将内存中相应的日志页持久化。每个页都有一个LSN(log sequence number)，代表日志序列号，（LSN占用8字节，单调递增), 当一个数据页需要写入到持久化设备之前，要求内存中小于该页LSN的日志先写入持久化设备</p>
-<p>那为什么必须要先写日志呢？可不可以不写日志，直接将数据写入磁盘？原则上是可以的，只不过会产生一些问题，数据修改会产生随机IO，但日志是顺序IO，append方式顺序写，是一种串行的方式，这样才能充分利用磁盘的性能。</p>
 <p><strong>Force-log-at-commit</strong></p>
 <p>这一点也就是前文提到的如何保证事务的持久性的内容，这里再次总结一下，与上面的内容相呼应。在一个事务中可以修改多个页，Write-Ahead Log 可以保证单个数据页的一致性，但是无法保证事务的持久性，Force-log-at-commit 要求当一个事务提交时，其产生所有的mini-transaction 日志必须刷新到磁盘中，若日志刷新完成后，在缓冲池中的页刷新到持久化存储设备前数据库发生了宕机，那么数据库重启时，可以通过日志来保证数据的完整性。</p>
 <p><strong>重做日志的写入流程</strong></p>
@@ -339,7 +338,7 @@
 <p>而update undo log记录的是对delete 和update操作产生的undo log，该undo log可能需要提供MVCC机制，因此不能再事务提交时就进行删除。提交时放入undo log链表，等待purge线程进行最后的删除。</p>
 <p>补充：purge线程两个主要作用是：清理undo页和清除page里面带有Delete_Bit标识的数据行。在InnoDB中，事务中的Delete操作实际上并不是真正的删除掉数据行，而是一种Delete Mark操作，在记录上标识Delete_Bit，而不删除记录。是一种”假删除”,只是做了个标记，真正的删除工作需要后台purge线程去完成。</p>
 <h2 id="undo-log-是否是redo-log的逆过程？"><a href="#undo-log-是否是redo-log的逆过程？" class="headerlink" title="undo log 是否是redo log的逆过程？"></a>undo log 是否是redo log的逆过程？</h2><p>undo log 是否是redo log的逆过程？其实从前文就可以得出答案了，undo log是逻辑日志，对事务回滚时，只是将数据库逻辑地恢复到原来的样子，而redo log是物理日志，记录的是数据页的物理变化，显然undo log不是redo log的逆过程。</p>
-<h2 id="redo-amp-undo总结"><a href="#redo-amp-undo总结" class="headerlink" title="redo &amp; undo总结"></a>redo &amp; undo总结</h2><p>下面是redo log + undo log的简化过程，便于理解两种日志的过程：</p>
+<h2 id="redo-amp-undo总结"><a href="#redo-amp-undo总结" class="headerlink" title="redo &amp; undo总结"></a>redo &amp; undo总结</h2><p>下面是redo log + undo log的简化过程，便于整体上把握两种日志的写入过程，但是：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">假设有A、B两个数据，值分别为1,2.</span><br><span class="line">1. 事务开始</span><br><span class="line">2. 记录A=1到undo log</span><br><span class="line">3. 修改A=3</span><br><span class="line">4. 记录A=3到 redo log</span><br><span class="line">5. 记录B=2到 undo log</span><br><span class="line">6. 修改B=4</span><br><span class="line">7. 记录B=4到redo log</span><br><span class="line">8. 将redo log写入磁盘</span><br><span class="line">9. 事务提交</span><br></pre></td></tr></table></figure>
 <p>实际上，在insert/update/delete操作中，redo和undo分别记录的内容都不一样，量也不一样。在InnoDB内存中，一般的顺序如下：</p>
 <ul>
@@ -366,7 +365,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/" data-id="cjqxhlrp4004qystdno6ghonf" class="article-share-link"><i class="fas fa-share"></i>Compartir</a>
+    <a data-url="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/" data-id="cjrbwfhu2004nxwtd0sap6dj4" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -434,7 +433,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/">Comentarios</a>
+        <a href="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/01/14/浅析MySQL事务中的redo与undo/">Comments</a>
     
 
         </footer>
@@ -444,7 +443,7 @@
 <nav id="article-nav">
     
         <a href="/2019/01/15/浅析MySQL-InnoDB的隔离级别/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más nuevo</strong>
+            <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
                     浅析MySQL InnoDB的隔离级别
@@ -454,7 +453,7 @@
     
     
         <a href="/2019/01/13/浅析MySQL-InnoDB中的B-树索引/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Más viejo</strong>
+            <strong class="article-nav-caption">Older</strong>
             <div class="article-nav-title">浅析MySQL InnoDB中的B+树索引</div>
         </a>
     
@@ -481,7 +480,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Categorias</h3>
+        <h3 class="widget-title">categories</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
@@ -490,7 +489,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Archivos</h3>
+        <h3 class="widget-title">archives</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -499,7 +498,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Etiquetas</h3>
+        <h3 class="widget-title">tags</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -508,7 +507,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Nube de etiquetas</h3>
+        <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
             <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 11.67px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/RabbitMQ/" style="font-size: 11.67px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 11.67px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 11.67px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 11.67px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
@@ -517,7 +516,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">Links</h3>
+        <h3 class="widget-title">links</h3>
         <div class="widget">
             <ul>
                 
