@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://pjmike.github.io/2018/12/14/Nginx%E5%85%A5%E9%97%A8%E5%B0%8F%E7%BB%93/</loc>
+    
+    <lastmod>2019-03-02T16:40:45.704Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://pjmike.github.io/2018/11/03/Bean%E6%98%A0%E5%B0%84%E5%B7%A5%E5%85%B7%E4%B9%8BApache-BeanUtils-VS-Spring-BeanUtils/</loc>
+    
+    <lastmod>2019-03-02T16:13:09.515Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://pjmike.github.io/2019/01/14/%E6%B5%85%E6%9E%90MySQL%E4%BA%8B%E5%8A%A1%E4%B8%AD%E7%9A%84redo%E4%B8%8Eundo/</loc>
     
     <lastmod>2019-01-25T10:23:23.204Z</lastmod>
