@@ -13,16 +13,15 @@
 <meta property="og:site_name" content="pjmike的博客">
 <meta property="og:description" content="Java的堆结构再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/%E5%A0%86%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B2.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/mark_sweep.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/copy.png">
 <meta property="og:image" content="http://osvtz719h.bkt.clouddn.com/mark_compact.png">
-<meta property="og:updated_time" content="2018-09-07T15:57:16.058Z">
+<meta property="og:updated_time" content="2019-03-17T10:30:21.485Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM 系列文章之 GC 算法浅析">
 <meta name="twitter:description" content="Java的堆结构再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”。">
-<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg">
+<meta name="twitter:image" content="http://osvtz719h.bkt.clouddn.com/%E5%A0%86%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B2.png">
     
 
     
@@ -90,14 +89,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -109,11 +108,11 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Pos',
-            PAGES: 'Halaman',
-            CATEGORIES: 'Kategori',
-            TAGS: 'Tag',
-            UNTITLED: 'Tanpa Judul',
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
@@ -139,7 +138,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
     </div>
 
                 </td>
@@ -159,16 +158,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
                 59
-                <span>pos</span>
+                <span>posts</span>
             </div>
             <div class="article-info-block">
                 30
-                <span>tag</span>
+                <span>tags</span>
             </div>
         </div>
         
@@ -265,14 +264,8 @@
             
             <h2 id="Java的堆结构"><a href="#Java的堆结构" class="headerlink" title="Java的堆结构"></a>Java的堆结构</h2><p>再介绍垃圾回收算法之前，先来看看 Java中的堆，Java里的堆指的是用于存放 Java 对象的内存区域。<strong>JVM的堆被同一个JVM实例中所有的Java线程共享，它通常由某种自动管理机制所管理，这种机制通常叫做”垃圾回收”</strong>。</p>
 <a id="more"></a>
-<p>在Java 中，堆被分为两个不同的区域: 新生代(Young),老年代(Old)。新生代又被划分为三个区域: Eden，From Survivor，To Survivor。在 JDK 1.7及以前，堆的内存模型大致为:<br><img src="http://osvtz719h.bkt.clouddn.com/jvm_heap.jpg" alt="jvm_heap"></p>
-<ul>
-<li>新生代：Young Generation，主要用来存放新生的对象</li>
-<li>老年代: Old Generation，主要存放应用程序声明周期长的内存对象</li>
-<li>永久代: 在Hotspot中，永久代又称为方法区，主要存放Class和Meta信息。</li>
-</ul>
-<p>在JDK 1.8及以后，永久代被彻底移除，堆的内存模型大致如下:<br><img src="http://osvtz719h.bkt.clouddn.com/%E5%A0%86%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B2.png" alt="heap"></p>
-<p>这种情况下，堆大小 = 新生代 + 老年代。其中堆的大小可以通过参数 <code>-Xms，-Xmx</code>来指定。</p>
+<p>堆的内存模型大致如下:<br><img src="http://osvtz719h.bkt.clouddn.com/%E5%A0%86%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B2.png" alt="heap"></p>
+<p>堆大小 = 新生代 + 老年代。其中堆的大小可以通过参数 <code>-Xms，-Xmx</code>来指定。</p>
 <p>默认的，新生代(Young) 与老年代(Old)的比例的值是 1:2 (该值可以通过参数 -XX: NewRatio来指定)，即: <strong>新生代(Young) = 1/3的堆空间大小，老年代(Old) = 2/3的堆空间大小。</strong></p>
 <p>其中，新生代(Young)被细分为 Eden 和 两个 Survivor区域，这两个 Survivor区域分别被命名为 from 和 to，以示区分。</p>
 <p>默认的，Eden:from:to = 8:1:1 (可以通过参数 -XX: SurvivorRatio来设定)，即: <strong>Eden = 8/10 的新生代空间大小，from = to = 1/10 的新生代空间大小。</strong></p>
@@ -391,7 +384,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjsrpr2tx002uzwtdxrrh8x0n" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+    <a data-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/" data-id="cjtcs5akg0024totdorrsfp37" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -459,7 +452,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Komentar</a>
+        <a href="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2018/09/03/JVM-系列文章之-GC-算法浅析/">Comments</a>
     
 
         </footer>
@@ -469,7 +462,7 @@
 <nav id="article-nav">
     
         <a href="/2018/09/03/JVM-系列文章之-Full-GC-和-Minor-GC/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Lebih baru</strong>
+            <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
                     JVM 系列文章之 Full GC 和 Minor GC
@@ -479,7 +472,7 @@
     
     
         <a href="/2018/09/01/JVM-系列文章之-对象存活分析-引用计数-and-可达性分析/" id="article-nav-older" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Lebih lama</strong>
+            <strong class="article-nav-caption">Older</strong>
             <div class="article-nav-title">JVM 系列文章之 对象存活分析 - 引用计数 and 可达性分析</div>
         </a>
     
@@ -506,7 +499,7 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Kategori</h3>
+        <h3 class="widget-title">categories</h3>
         <div class="widget">
             <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
@@ -515,7 +508,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">Arsip</h3>
+        <h3 class="widget-title">archives</h3>
         <div class="widget">
             <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
@@ -524,7 +517,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag</h3>
+        <h3 class="widget-title">tags</h3>
         <div class="widget">
             <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
@@ -533,7 +526,7 @@
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">awan tag</h3>
+        <h3 class="widget-title">tag cloud</h3>
         <div class="widget tagcloud">
             <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 11.67px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RabbitMQ/" style="font-size: 11.67px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 11.67px;">Redis</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 11.67px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 11.67px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
@@ -542,7 +535,7 @@
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">tautan</h3>
+        <h3 class="widget-title">links</h3>
         <div class="widget">
             <ul>
                 

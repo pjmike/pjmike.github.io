@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://pjmike.github.io/2018/09/03/JVM-%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B9%8B-GC-%E7%AE%97%E6%B3%95%E6%B5%85%E6%9E%90/</loc>
+    
+    <lastmod>2019-03-17T10:30:21.485Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://pjmike.github.io/2018/12/14/Nginx%E5%85%A5%E9%97%A8%E5%B0%8F%E7%BB%93/</loc>
     
     <lastmod>2019-03-02T16:40:45.704Z</lastmod>
@@ -236,13 +243,6 @@
     <loc>https://pjmike.github.io/2018/09/08/springboot%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B9%8B%E6%97%A5%E5%BF%97%E9%85%8D%E7%BD%AE/</loc>
     
     <lastmod>2018-09-08T16:44:42.980Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://pjmike.github.io/2018/09/03/JVM-%E7%B3%BB%E5%88%97%E6%96%87%E7%AB%A0%E4%B9%8B-GC-%E7%AE%97%E6%B3%95%E6%B5%85%E6%9E%90/</loc>
-    
-    <lastmod>2018-09-07T15:57:16.058Z</lastmod>
     
   </url>
   
