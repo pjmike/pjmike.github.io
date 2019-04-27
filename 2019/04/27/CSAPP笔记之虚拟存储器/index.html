@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>CSAPP笔记之虚拟存储器 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="下面是对《深入理解计算机系统》以及虚拟内存与动态内存分配博客文章的学习笔记">
+<meta name="keywords" content="CSAPP,笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP笔记之虚拟存储器">
+<meta property="og:url" content="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="下面是对《深入理解计算机系统》以及虚拟内存与动态内存分配博客文章的学习笔记">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E7%89%A9%E7%90%86%E5%AF%BB%E5%9D%80.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E8%99%9A%E6%8B%9F%E5%AF%BB%E5%9D%80.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%B8%8E%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%A1%B5%E8%A1%A8.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4%E5%B7%A5%E5%85%B7.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E9%A1%B5%E9%9D%A2%E5%91%BD%E4%B8%AD.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E7%BC%BA%E9%A1%B5.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/TLB%E5%91%BD%E4%B8%AD.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/TLB%E6%9C%AA%E5%91%BD%E4%B8%AD.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%86%85%E9%83%A8%E7%A2%8E%E7%89%87.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%86%85%E9%83%A8%E7%A2%8E%E7%89%87.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%8F%AF%E8%BE%BE%E5%9B%BE.jpg">
+<meta property="og:updated_time" content="2019-04-27T12:47:05.487Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CSAPP笔记之虚拟存储器">
+<meta name="twitter:description" content="下面是对《深入理解计算机系统》以及虚拟内存与动态内存分配博客文章的学习笔记">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E7%89%A9%E7%90%86%E5%AF%BB%E5%9D%80.png">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                65
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                34
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-CSAPP笔记之虚拟存储器" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            CSAPP笔记之虚拟存储器
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2019/04/27/CSAPP笔记之虚拟存储器/">
+            <time datetime="2019-04-27T12:42:49.000Z" itemprop="datePublished">2019-04-27</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/笔记/">笔记</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/CSAPP/">CSAPP</a>, <a class="tag-link" href="/tags/笔记/">笔记</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#物理和虚拟寻址"><span class="toc-number">1.</span> <span class="toc-text">物理和虚拟寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-物理地址"><span class="toc-number">1.1.</span> <span class="toc-text">1. 物理地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-虚拟地址"><span class="toc-number">1.2.</span> <span class="toc-text">2. 虚拟地址</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚拟内存的三个角色"><span class="toc-number">2.</span> <span class="toc-text">虚拟内存的三个角色</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#作为缓存工具"><span class="toc-number">2.1.</span> <span class="toc-text">作为缓存工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#页表"><span class="toc-number">2.1.1.</span> <span class="toc-text">页表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#作为内存管理工具"><span class="toc-number">2.2.</span> <span class="toc-text">作为内存管理工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#作为内存保护工具"><span class="toc-number">2.3.</span> <span class="toc-text">作为内存保护工具</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#地址翻译"><span class="toc-number">3.</span> <span class="toc-text">地址翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用TLB加速地址翻译"><span class="toc-number">3.1.</span> <span class="toc-text">利用TLB加速地址翻译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多级页表"><span class="toc-number">3.2.</span> <span class="toc-text">多级页表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动态内存分配"><span class="toc-number">4.</span> <span class="toc-text">动态内存分配</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#性能指标"><span class="toc-number">4.1.</span> <span class="toc-text">性能指标</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#内部碎片"><span class="toc-number">4.1.1.</span> <span class="toc-text">内部碎片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#外部碎片"><span class="toc-number">4.1.2.</span> <span class="toc-text">外部碎片</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾回收"><span class="toc-number">4.2.</span> <span class="toc-text">垃圾回收</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#垃圾收集器的基本知识"><span class="toc-number">4.2.1.</span> <span class="toc-text">垃圾收集器的基本知识</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C程序中常见的与存储器有关的错误"><span class="toc-number">4.3.</span> <span class="toc-text">C程序中常见的与存储器有关的错误</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                </div>
+            
+            <blockquote>
+<p>下面是对《深入理解计算机系统》以及<a href="https://wdxtub.com/2016/04/16/thin-csapp-7/" target="_blank" rel="noopener">虚拟内存与动态内存分配</a>博客文章的学习笔记</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="物理和虚拟寻址"><a href="#物理和虚拟寻址" class="headerlink" title="物理和虚拟寻址"></a>物理和虚拟寻址</h2><h3 id="1-物理地址"><a href="#1-物理地址" class="headerlink" title="1. 物理地址"></a>1. 物理地址</h3><p>计算机系统的主存被组织成一个由M个连续的字节大小的单元组成的数组，每字节都有唯一的物理地址，第一个字节的地址为0，接下来的字节地址为1，再下一个为2，依此类推。CPU访问存储器的最自然的方式就是使用物理地址，我们把这种方式称为物理寻址</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E7%89%A9%E7%90%86%E5%AF%BB%E5%9D%80.png" alt="物理寻址"></p>
+<p>当CPU执行这条加载指令时，它会生成一个有效的物理地址，通过存储器总线，把它传递给主存，主存取出从物理地址4处开始的4字节的字，将将它返回给CPU，CPU会将它存放到一个寄存器里。</p>
+<p>物理地址一般应用在简单的嵌入式微控制器中（汽车、电梯、电子相框等），因为应用的范围有严格的限制，不需要在内存管理中引入过多的复杂度。</p>
+<h3 id="2-虚拟地址"><a href="#2-虚拟地址" class="headerlink" title="2. 虚拟地址"></a>2. 虚拟地址</h3><p>现代处理器使用一种称为虚拟寻址的寻址方式，如下图</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E8%99%9A%E6%8B%9F%E5%AF%BB%E5%9D%80.jpg" alt="虚拟寻址"></p>
+<p>使用虚拟地址时，CPU通过生成一个虚拟地址来访问主存，这个虚拟地址在被送到存储器之前先转换成适当的物理地址，将一个虚拟地址转换为物理地址的任务叫做地址翻译，这个任务就是靠MMU内存管理单元实现的。</p>
+<h2 id="虚拟内存的三个角色"><a href="#虚拟内存的三个角色" class="headerlink" title="虚拟内存的三个角色"></a>虚拟内存的三个角色</h2><p>虚拟存储器提供了三个重要的能力：</p>
+<ul>
+<li>它将主存看成是一个存储在磁盘上的地址空间的高速缓存，在主存中只保存活动区域，并根据需要在磁盘和主存之间来回传送数据，通过这种方式，它高效地使用了主存</li>
+<li>它为每个进程提供了一致的地址空间，从而简化了存储器管理</li>
+<li>它保护了每个进程的地址空间不被其他进程破坏</li>
+</ul>
+<h3 id="作为缓存工具"><a href="#作为缓存工具" class="headerlink" title="作为缓存工具"></a>作为缓存工具</h3><p>概念上讲，虚拟内存就是存储在磁盘上的N个连续字节的数组，这个数组的部分内容，会缓存在DRAM中，在DRAM中的每个缓存块称为页（page)，类似地，物理存储器被分割成物理页（页帧），页和页帧大小一致。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%B8%8E%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98.jpg" alt="虚拟内存与物理内存"></p>
+<p>在任意时刻，虚拟页面的集合都分为三个不相交的子集：</p>
+<ul>
+<li>未分配的： VM系统还未分配（或创建的）的页。未分配的块没有任何数据和他们相关联，因此也就不占用任何磁盘空间</li>
+<li>缓存的： 当前缓存在物理存储器中的已分配页</li>
+<li>未缓存的：没有缓存在物理存储器中的已分配页</li>
+</ul>
+<h4 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h4><p>同任何缓存一样，虚拟存储器必须有某种方法来判定一个虚拟页是否存放在DRAM中的某个地方，如果是，系统还必须确定这个虚拟页存放在哪个物理页中，如果不命中，系统必须判断这个虚拟页存放在磁盘的哪个位置，在物理存储器中选择一个牺牲页，并将虚拟页从磁盘拷到DRAM中，替换这个牺牲页。</p>
+<p>这个机制就是通过页表（page table)，每个页表实际上是一个数组，数组中的每个元素都称为页表项(PTE，page table entry)，每个页表项负责把虚拟页映射到物理页上，在DRAM中，每个进程都有自己的页表，具体如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%A1%B5%E8%A1%A8.jpg" alt="页表"></p>
+<blockquote>
+<p><strong>注意：页表是存放在物理存储器中的，每次地址翻译硬件一个虚拟地址转换为物理地址时都会读取页表</strong></p>
+</blockquote>
+<p>通常我们可以假设每个PTE是由一个有效位（valid bit)和一个n位地址字段组成的，有效位表明了该虚拟页当前是否被缓存在DRAM中</p>
+<ul>
+<li><p>如果设置了有效位，那么地址字段就表示DRAM中相应的物理页的起始位置，这个物理页中缓存了该虚拟页。</p>
+</li>
+<li><p>如果没有设置有效位，那么一个空地址表示这个虚拟页还未被分配</p>
+</li>
+</ul>
+<p>在一个页表中查询，就会遇到两种情况，一种是命中（page Hit)，另一种则是未命中 （page Fault)</p>
+<ul>
+<li>命中的时候，DRAM有对应的物理页，可以直接访问</li>
+<li>不命中的时候，DRAM中并没有对应的数据，所以需要执行一系列的操作（从磁盘复制到DRAM中），具体为：<ul>
+<li>触发Page fault，也就是一个缺页异常</li>
+<li>缺页异常调用内核的缺页异常处理程序，选择DRAM中需要被置换出的page，并将数据从磁盘复制到DRAMz中</li>
+<li>重新启动导致缺页的指令，这时候就会命中</li>
+</ul>
+</li>
+</ul>
+<h3 id="作为内存管理工具"><a href="#作为内存管理工具" class="headerlink" title="作为内存管理工具"></a>作为内存管理工具</h3><p>每个进程都有自己的虚拟地址空间，这样一来，对于进程来说，它们看到的就是简单的线性空间（但实际上在物理内存中可能是间隔，支离破碎的），具体的映射过程如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.jpg" alt="内存管理"></p>
+<p>在内存分配中没有太多限制，每个虚拟页都可以被映射到任何的物理页上。这样也带来一个好处，如果两个进程间有共享的数据，那么直接指向同一个物理页即可</p>
+<p>虚拟内存带来的另一个好处就是可以简化链接和载入的结构（因为有了统一的抽象，不需要纠结细节）</p>
+<ul>
+<li>独立的地址空间允许每个进程的存储器映像使用相同的基本格式</li>
+</ul>
+<h3 id="作为内存保护工具"><a href="#作为内存保护工具" class="headerlink" title="作为内存保护工具"></a>作为内存保护工具</h3><p>页表中的每个条目的高位部分是表示权限的位，MMU 可以通过检查这些位来进行权限控制（读、写、执行），如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4%E5%B7%A5%E5%85%B7.jpg" alt="内存保护工具"></p>
+<p>每个PTE中已经添加了三个许可证：</p>
+<ul>
+<li>SUP位表示进程是否必须运行在内核模式才能访问该页；运行在内核模式中的进程可以访问任何页面，但是运行在用户模式中的进程只允许访问那些SUP为0的页面</li>
+<li>READ位和WRITE位控制对页面的读和写访问</li>
+</ul>
+<h2 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h2><p>形式上说，地址翻译是一个N元素和虚拟地址空间(VAS)中的元素和一个M元素的物理地址空间(PAS)中元素之间的映射：</p>
+<ul>
+<li>N=2^n： N表示虚拟地址空间中的地址数量</li>
+<li>M=2^m: M表示物理地址空间中的地址数量</li>
+</ul>
+<p>虚拟地址中的元素：</p>
+<ul>
+<li>TLBI: TLB 的索引值</li>
+<li>TLBT: TLB 的标签(tag)</li>
+<li>VPO: 虚拟页偏移量</li>
+<li>VPN: 虚拟页编号</li>
+</ul>
+<p>物理地址中的元素：</p>
+<ul>
+<li>PPO: 物理页偏移量</li>
+<li>PPN: 物理页编号</li>
+</ul>
+<p>下面看一个具体的例子来说明如何进行地址翻译：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91.png" alt="地址翻译"></p>
+<p>具体的访问过程为：</p>
+<ul>
+<li>通过虚拟地址找到页表(page table)中对应的条目</li>
+<li>检查有效位(valid bit)，是否需要触发页错误(page fault)</li>
+<li>然后根据页表中的物理页编号找到内存中的对应地址</li>
+<li>最后把虚拟页偏移和前面的实际地址拼起来，就是最终的物理地址</li>
+</ul>
+<p>在上述第二步中需要检查有效位，有效位如果等于0，那么页面就不在存储器中（也就是缺页），所以这里有两种情况：Page Hit 和Page Fault，先来看看Page Hit的情况：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E9%A1%B5%E9%9D%A2%E5%91%BD%E4%B8%AD.png" alt="页面命中"></p>
+<ul>
+<li>处理器生成一个虚拟地址，并把它传送给MMU</li>
+<li>MMU生成PTE地址，并从高速缓存/主存请求得到它</li>
+<li>高速缓存/主存向MMU返回PTE</li>
+<li>MMU构造物理地址，并把它传送给高速缓存/主存</li>
+<li>高速缓存/主存返回所请求的数据字给处理器</li>
+</ul>
+<p>Page Fault就要复杂一点，第一次触发页错误会把页面载入内存/缓存，然后再以Page Hit的机制得到数据</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E7%BC%BA%E9%A1%B5.png" alt="缺页"></p>
+<p>这里有 7 步，前面和 Page Hit 是一致的，先把虚拟地址发给 MMU 进行检查，然后发现没有对应的页，于是触发异常，异常处理器会负责从磁盘中找到对应页面并与缓存/内存中的页进行置换，置换完成后再访问同一地址，就可以按照 Page Hit 的方式来访问了。</p>
+<h3 id="利用TLB加速地址翻译"><a href="#利用TLB加速地址翻译" class="headerlink" title="利用TLB加速地址翻译"></a>利用TLB加速地址翻译</h3><p>每次CPU产生一个虚拟地址，MMU就必须查阅一个PTE，以便将虚拟地址翻译为物理地址，在最糟糕的情况下，这又会要求从存储器取一次数据，代价是几十到几百个周期。许多系统都试图消除这样的开销，它们在MMU中包括了一个关于PTE的小的缓存，称为翻译后备缓冲器（Translation Lookaside Buffer，TLB)</p>
+<p>TLB是一个小的、虚拟寻址的缓存，其中每一行都保存着一个由单个PTE组成的块。</p>
+<p>使用TLB的流程是：</p>
+<ul>
+<li>CPU生成一个虚拟地址</li>
+<li>如果TLB中有对应的PTE，那么MMU从TLB中取出对应的PTE</li>
+<li>MMU将虚拟地址翻译成物理地址，并且将它发送到主存</li>
+<li>主存将所请求到的数据字返回给CPU</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/TLB%E5%91%BD%E4%B8%AD.png" alt="TLB命中"></p>
+<p>下面是TLB未命中的情况：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/TLB%E6%9C%AA%E5%91%BD%E4%B8%AD.png" alt="TLB未命中"></p>
+<h3 id="多级页表"><a href="#多级页表" class="headerlink" title="多级页表"></a>多级页表</h3><p>如果我们有一个32位的地址空间，4KB的页面和一个4字节的PTE，那么即使应用所引用的只是虚拟地址空间中很小的一部分，也总是需要一个4MB的页表驻留在存储器中。对于地址空间为64位的，情况更复杂。</p>
+<p>所以我们需要一种多级页表的方法，第一层的页表中的条目指向第二层的页表，一个一个索引下去，最终寻找到具体的物理地址，整个翻译过程如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8.jpg" alt="多级页表"></p>
+<h2 id="动态内存分配"><a href="#动态内存分配" class="headerlink" title="动态内存分配"></a>动态内存分配</h2><p>程序员通过动态内存分配（例如malloc)来让程序在运行时得到虚拟内存，动态内存分配器维护着一个进程的虚拟存储器区域，称之为堆(heap)。</p>
+<p>分配器将堆视为一组不同大小的块（block)的集合来维护，每个块就是一个连续的虚拟存储器片，要么是已分配的，要么是空闲的。已分配的块显式地保留为供应用程序使用，空闲块是可用来分配的，空闲块保持空闲，直到它显式地被应用所分配。</p>
+<p>分配器有两种类型的分配器：</p>
+<ul>
+<li>显式分配器：应用分配并且回收空间（C语言中的malloc和free)</li>
+<li>隐式分配器（又叫做垃圾收集器）：应用只负责分配，但是不负责回收，由垃圾收集器去回收内存空间（比如Java语言中的垃圾收集）</li>
+</ul>
+<p>一个简单的使用 malloc 和 free 的例子：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">foo</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, *p;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* Allocate a block of n ints */</span></span><br><span class="line">    p = (<span class="keyword">int</span> *) <span class="built_in">malloc</span>(n * <span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">    <span class="keyword">if</span> (p == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        perror(<span class="string">"malloc"</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* Initialize allocated block */</span></span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;n; i++)</span><br><span class="line">        p[i] = i;</span><br><span class="line">    <span class="comment">/* Return allocated block to the heap */</span></span><br><span class="line">    <span class="built_in">free</span>(p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>分配器有如下的限制：</p>
+<ul>
+<li>不能控制已分配块的数量和大小</li>
+<li>必须立即响应malloc请求 （不能缓存或者给请求重新排序）</li>
+<li>必须在未分配的内存中分配</li>
+<li>不同的块需要对齐（32位中的8byte，64位中16位byte)</li>
+<li>只能操作和修改未分配的内存</li>
+<li>不能移动已分配的块</li>
+</ul>
+<h3 id="性能指标"><a href="#性能指标" class="headerlink" title="性能指标"></a>性能指标</h3><p>在以上分配器的限制之下，分配器的编写者试图实现吞吐率最大化和存储器使用率最大化，而这两个性能指标往往是相互冲突的。</p>
+<p>吞吐率定义为每个单位时间里完成的请求数，例如，如果一个分配器在1秒钟内完成500个分配请求和500个释放请求，那么它的吞吐率就是每秒1000次操作。</p>
+<p>另一个目标就是最大的内存利用率，影响内存利用率的主要因素就是【内存碎片】，内存碎片又分为内部碎片和外部碎片两种。</p>
+<h4 id="内部碎片"><a href="#内部碎片" class="headerlink" title="内部碎片"></a>内部碎片</h4><p>内部碎片指的是对于给定的块，如果需要存储的数据(payload)小于块大小，就会因为对齐和维护所需的数据结构的缘故而出现无法利用的空间，例如：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%86%85%E9%83%A8%E7%A2%8E%E7%89%87.jpg" alt="内部碎片"></p>
+<h4 id="外部碎片"><a href="#外部碎片" class="headerlink" title="外部碎片"></a>外部碎片</h4><p>外部碎片指的是内存中没有足够的连续空间，如下图所示，内存中有足够的空间，但是空间不连续，所以成为了碎片：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%86%85%E9%83%A8%E7%A2%8E%E7%89%87.jpg" alt="碎片"></p>
+<h3 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h3><p>垃圾回收器是一种动态存储分配器，它自动释放程序不再需要的已分配块。这些块就称为垃圾。自动回收堆存储的过程叫做垃圾回收</p>
+<h4 id="垃圾收集器的基本知识"><a href="#垃圾收集器的基本知识" class="headerlink" title="垃圾收集器的基本知识"></a>垃圾收集器的基本知识</h4><p>垃圾收集器将存储器视为一张有向可达图，其形式如下图</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/CSAPP/%E5%8F%AF%E8%BE%BE%E5%9B%BE.jpg" alt="可达图"></p>
+<p>该图的节点被分成一组根节点和一组堆节点。每个堆节点对应于堆中的一个已分配块。<strong>当对于堆中的任何一个节点，如果从任何一个根节点出发都能到达，那么我们可以说该节点是可达的，那么该节点占据的内存块还是有用的，能够被再次利用。</strong> 在任何时候，不可达节点就是垃圾，不能被应用程序再次利用，垃圾回收器会回收掉该节点，清除没有用的对象。垃圾回收器的作用就是一直维护这张可达图，直到应用程序不再运行。（类似Java虚拟机中的可达性分析算法）</p>
+<h3 id="C程序中常见的与存储器有关的错误"><a href="#C程序中常见的与存储器有关的错误" class="headerlink" title="C程序中常见的与存储器有关的错误"></a>C程序中常见的与存储器有关的错误</h3><p>C程序中常见的与存储器有关的错误：</p>
+<ul>
+<li>间接引用坏指针</li>
+<li>读未初始化的存储器</li>
+<li>允许栈缓冲区溢出</li>
+<li>错位错误</li>
+<li>引用指针，而不是它所指向的对象</li>
+<li>引用不存在的变量</li>
+<li>引用空闲堆中的数据</li>
+<li>引起存储器泄漏</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>《深入理解计算机系统》</li>
+<li><a href="https://wdxtub.com/2016/04/16/thin-csapp-7/" target="_blank" rel="noopener">https://wdxtub.com/2016/04/16/thin-csapp-7/</a></li>
+<li><a href="https://www.alonehero.com/2018/01/17/v8-javascript%E5%BC%95%E6%93%8E-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B61/" target="_blank" rel="noopener">https://www.alonehero.com/2018/01/17/v8-javascript%E5%BC%95%E6%93%8E-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B61/</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/" data-id="cjuzi3qn3002w9stdje771j5s" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/04/27/CSAPP笔记之异常控制流与进程/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">CSAPP笔记之异常控制流与进程</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">12</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 11.67px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 11.67px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RabbitMQ/" style="font-size: 11.67px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 11.67px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 11.67px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 11.67px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/笔记/" style="font-size: 11.67px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/';
+        
+        this.page.identifier = 'CSAPP笔记之虚拟存储器';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

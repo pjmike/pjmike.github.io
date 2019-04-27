@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>CSAPP笔记之异常控制流与进程 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="下面是针对《深入理解Java虚拟机》和博客文章-异常控制流的学习总结">
+<meta name="keywords" content="CSAPP,笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP笔记之异常控制流与进程">
+<meta property="og:url" content="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="下面是针对《深入理解Java虚拟机》和博客文章-异常控制流的学习总结">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E5%B8%B8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%B8%AD%E6%96%AD.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%99%B7%E9%98%B1%E5%A4%84%E7%90%86.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E5%B8%B8%E6%80%BB%E7%BB%93.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E8%BF%9B%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%BF%A1%E5%8F%B7%E7%B1%BB%E5%9E%8B.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86.png">
+<meta property="og:updated_time" content="2019-04-27T12:47:57.262Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CSAPP笔记之异常控制流与进程">
+<meta name="twitter:description" content="下面是针对《深入理解Java虚拟机》和博客文章-异常控制流的学习总结">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E5%B8%B8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                65
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                34
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-CSAPP笔记之异常控制流与进程" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            CSAPP笔记之异常控制流与进程
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2019/04/27/CSAPP笔记之异常控制流与进程/">
+            <time datetime="2019-04-27T12:42:29.000Z" itemprop="datePublished">2019-04-27</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/笔记/">笔记</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/CSAPP/">CSAPP</a>, <a class="tag-link" href="/tags/笔记/">笔记</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一、异常控制流"><span class="toc-number">1.</span> <span class="toc-text">一、异常控制流</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#异常"><span class="toc-number">1.1.</span> <span class="toc-text">异常</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-中断-硬件中断"><span class="toc-number">1.1.1.</span> <span class="toc-text">1. 中断 (硬件中断)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-陷阱"><span class="toc-number">1.1.2.</span> <span class="toc-text">2. 陷阱</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-故障"><span class="toc-number">1.1.3.</span> <span class="toc-text">3. 故障</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-终止"><span class="toc-number">1.1.4.</span> <span class="toc-text">4.终止</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-异常小结"><span class="toc-number">1.1.5.</span> <span class="toc-text">5. 异常小结</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二、进程"><span class="toc-number">2.</span> <span class="toc-text">二、进程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-进程概念"><span class="toc-number">2.1.</span> <span class="toc-text">1. 进程概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-私有地址空间"><span class="toc-number">2.1.1.</span> <span class="toc-text">1.1 私有地址空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-用户态和内核态"><span class="toc-number">2.1.2.</span> <span class="toc-text">1.2 用户态和内核态</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-进程切换"><span class="toc-number">2.2.</span> <span class="toc-text">2. 进程切换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-进程控制"><span class="toc-number">2.3.</span> <span class="toc-text">3. 进程控制</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#三、信号"><span class="toc-number">3.</span> <span class="toc-text">三、信号</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#接收信号"><span class="toc-number">3.1.</span> <span class="toc-text">接收信号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阻塞信号"><span class="toc-number">3.2.</span> <span class="toc-text">阻塞信号</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#四、非本地跳转"><span class="toc-number">4.</span> <span class="toc-text">四、非本地跳转</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考链接"><span class="toc-number">5.</span> <span class="toc-text">参考链接</span></a></li></ol>
+                </div>
+            
+            <blockquote>
+<p>下面是针对《深入理解Java虚拟机》和博客文章-<a href="https://wdxtub.com/2016/04/16/thin-csapp-5/" target="_blank" rel="noopener">异常控制流</a>的学习总结</p>
+</blockquote>
+<a id="more"></a>
+<h1 id="一、异常控制流"><a href="#一、异常控制流" class="headerlink" title="一、异常控制流"></a>一、异常控制流</h1><p>从开机到关机，处理器做的工作其实很简单，就是不断读取并执行指令，每次执行一条，整个指令执行的序列，称之为处理器的控制流。</p>
+<p>一般改变控制流的方式，比如：</p>
+<ul>
+<li>跳转和分支</li>
+<li>调用和返回</li>
+</ul>
+<p>这两个操作对应于<strong>程序状态的改变</strong>，但是这实际上仅仅局限与程序本身的控制，没有办法去应对更加复杂的情况，<strong>系统状态发生变化</strong>的时候，上述操作是不行的，比如：</p>
+<ul>
+<li>数据从磁盘或者网络适配器到达</li>
+<li>指令除以0</li>
+<li>用户按下ctrl+c</li>
+<li>系统的计时器到时间</li>
+</ul>
+<p>但是系统必须能够对系统状态的变化做出反应，这些系统状态不是被内部程序变量捕获的，，而且也不一定要和程序的执行相关。所以就引入了一种更加复杂的机制来处理，现代操作系统通过使控制流发生突变来对以上情况做出反应，这些突变就称为异常控制流（exceptional control flow，ECF)。</p>
+<p>异常控制流发生在计算机系统的各个层次，比如，硬件检测到的事件会触发控制突然转移到异常处理程序，在操作系统层面，内核通过上下文转换将控制从一个用户进程转移到另一个用户进程</p>
+<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><p>异常是异常控制流的一种形式，它一部分是由硬件实现的，一部分是由操作系统实现的。</p>
+<p>异常就是控制流中的突变，用来响应处理器状态中的某些变化，或者说，异常指的是将控制交给系统内核来响应某些事件（例如处理器状态的变化），其中内核是操作系统常住内存的一部分，而这类事件包括除以0、数学运算溢出，页错误，I/O请求完成或用户按下了ctrl+c等系统级别的事件</p>
+<p>具体过程如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E5%B8%B8%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B.jpg" alt="异常执行流程"></p>
+<p>在任何情况下，当处理器检测到有事件发生时，它就会通过一张叫做异常表的跳转表来确定跳转位置，每种事件都有对应的唯一的异常编号，发生对应异常时就会调用对应的异常处理代码</p>
+<p>异常一般可以分为四类：</p>
+<ul>
+<li>中断（interrupt)</li>
+<li>陷阱（trap）</li>
+<li>故障（fault）</li>
+<li>终止（abort）</li>
+</ul>
+<h3 id="1-中断-硬件中断"><a href="#1-中断-硬件中断" class="headerlink" title="1. 中断 (硬件中断)"></a>1. 中断 (硬件中断)</h3><p>中断是异步发生的，是来自处理器外部的I/O设备的信号的结果，不知道它什么时候会发生，CPU对其的响应也是完全被动的。</p>
+<p>比较常见的中断有两种：计数器中断和I/O中断，计时器中断是由计时器芯片每隔几毫秒触发的，内核用计时器终端来从用户程序手上拿回控制权。</p>
+<p>I/O中断比较多，比如说键盘输入了ctrl+c，网络适配器中一个包接收完毕，都会触发这样的中断。</p>
+<p>中断处理的过程如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%B8%AD%E6%96%AD.png" alt="中断"></p>
+<p>I/O设备，比如网络适配器、磁盘控制器等，通过向处理器芯片上的一个引脚发信号，并将异常号放到系统总线上，以触发中断，这个异常号就标识了引起中断的设备</p>
+<p>在当前指令完成执行之后，处理器注意到中断引脚的电压变高了，就从系统总线读取异常号，然后调用适当的中断处理程序，当处理程序返回时，它就将控制返回给下一条指令，结果是程序继续执行。</p>
+<h3 id="2-陷阱"><a href="#2-陷阱" class="headerlink" title="2. 陷阱"></a>2. 陷阱</h3><p>陷阱、故障和终止都是属于同步异常，是因为执行某条指令所导致的事件。陷阱是有意的异常，是执行一条指令的结果，就像中断处理程序一样，陷阱处理程序将控制返回到下一条指令。</p>
+<p>陷阱最重要的用途是在用户程序和内核之间提供一个像过程一样的接口，叫做<strong>系统调用</strong>。</p>
+<p>用户程序经常需要向内核请求服务，比如读一个文件(read)、创建一个新的进程(fork)、加载一个新的程序(execve)，或者终止当前进程(exit)，为了允许对这些内核服务的受控的访问，处理器提供了一条特殊的”syscall n”指令，当用户程序想要请求服务n时，可以执行这条指令，执行syscall指令会导致一个到异常处理程序的陷阱，这个处理程序对参数解码，并调用适当的内核程序。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E9%99%B7%E9%98%B1%E5%A4%84%E7%90%86.png" alt="陷阱处理"></p>
+<h3 id="3-故障"><a href="#3-故障" class="headerlink" title="3. 故障"></a>3. 故障</h3><p>故障由错误情况引起，它可能能够被故障处理程序修正。当故障发生时，处理器将控制转移给故障处理程序，如果处理程序能够修正这个错误情况，它就将控制返回到引起故障的指令，从而重新执行它，否则，处理程序返回到内核中的abort例程，abort例程会终止引起故障的应用程序。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86.png" alt="故障处理"></p>
+<p>一个经典的故障示例是缺页异常，当指令引用一个虚拟地址时，而与该地址相对应的物理页面不在存储器中，因此必须从磁盘中取出时，就会发生故障。而缺页处理程序从磁盘加载适当的页面，然后将控制返回给引起故障的指令，当指令再次执行时，相应的物理页面已经驻留在存储器中了，指令就可以没有故障地运行完成。</p>
+<h3 id="4-终止"><a href="#4-终止" class="headerlink" title="4.终止"></a>4.终止</h3><p>终止是不可恢复的致命错误造成的结果，通常是一些硬件错误，终止处理程序不会将控制返回给应用程序，处理程序将控制返回给一个abort例程，该例程会终止这个应用程序。</p>
+<h3 id="5-异常小结"><a href="#5-异常小结" class="headerlink" title="5. 异常小结"></a>5. 异常小结</h3><p>对异常做个小结，异步异常只有中断一种，而同步异常有陷阱、故障和终止，下面是对4种类别进行的总结</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%BC%82%E5%B8%B8%E6%80%BB%E7%BB%93.png" alt="异常总结"></p>
+<h1 id="二、进程"><a href="#二、进程" class="headerlink" title="二、进程"></a>二、进程</h1><h2 id="1-进程概念"><a href="#1-进程概念" class="headerlink" title="1. 进程概念"></a>1. 进程概念</h2><p><strong>进程的定义就是一个执行中的程序的实例</strong>。</p>
+<p>系统中的每个程序都是运行在某个进程的上下文中，上下文是由程序正确运行所需的状态组成的，这个状态包括存放在存储器中的程序代码和数据，它的栈、通用目的寄存器的内容、程序计数器、环境变量以及打开文件描述符的集合</p>
+<h3 id="1-1-私有地址空间"><a href="#1-1-私有地址空间" class="headerlink" title="1.1 私有地址空间"></a>1.1 私有地址空间</h3><p>进程为每个程序提供了一种假象，好像它独占地使用系统地址空间，在一台有n位地址的机器上，地址空间有2^n个可能地址的集合，比如对于32位系统，它的虚拟地址空间为4GB，一个进程为每个程序提供它自己的私有地址空间。</p>
+<h3 id="1-2-用户态和内核态"><a href="#1-2-用户态和内核态" class="headerlink" title="1.2 用户态和内核态"></a>1.2 用户态和内核态</h3><p>在x86结构中，有4种特权级别，特权级别最高的是ring 0,被视作为内核态，级别最低的是ring 3，就被看做为用户态。当程序运行在内核态时，可以执行指令集中的任何命令，并且可以访问系统中任何存储器位置；而处于用户态的程序，也就是一般普通程序运行的模式怕，不能直接访问操作系统内核的数据结构和程序。</p>
+<p>而处理器通常是用某个控制寄存器中的一个模式位(mode bit)来提供这种功能的，该寄存器描述了进程当前享有的特权。当设置了模式位，进程就运行在内核态中，没有设置模式位时，进程就运行在用户模式中，用户模式中的进程不允许执行特权指令，比如停止处理器、改变模式位。或者发起一个I/O操作，也不允许用户模式中的进程直接引用地址空间中的内核区内的代码和数据。</p>
+<p><strong>进程从用户模式变为内核模式的唯一方法是通过诸如中断、故障或者陷入系统调用这样的异常，当异常发生时，控制传递到异常处理程序，处理器将模式从用户模式转换为内核模式，处理程序运行在内核模式中，当它返回到应用程序代码时，处理器就把模式从内核模式改回到用户模式</strong></p>
+<h2 id="2-进程切换"><a href="#2-进程切换" class="headerlink" title="2. 进程切换"></a>2. 进程切换</h2><p>操作系统内核使用一种称为上下文切换的较高层形式的异常控制流来实现多任务，内核为每个进程维持一个上下文，上下文就是内核重新启动一个被抢占的进程所需的状态，它由一些对象的值组成，这些对象包括：</p>
+<ul>
+<li>通用目的寄存器</li>
+<li>浮点寄存器</li>
+<li>程序计数器</li>
+<li>用户栈</li>
+<li>状态寄存器</li>
+<li>内核栈</li>
+<li>各种内核数据结构，比如描绘地址空间的页表、包含有关当前进程信息的进程表，以及包含进程已打开文件的信息的文件表</li>
+</ul>
+<p>上下文切换过程如下：</p>
+<ul>
+<li>保存当前进程的上下文</li>
+<li>恢复某个先前被抢占的进程被保存的上下文</li>
+<li>将控制传递给这个新恢复的进程</li>
+</ul>
+<p>下面展示一对进程A和进程B之间上下文切换的例子，切换进程时，内核负责执行具体的调度，如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E8%BF%9B%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2.png" alt="进程上下文切换"></p>
+<ul>
+<li>进程A运行在用户模式，直到通过执行系统调用read陷入到内核</li>
+<li>磁盘读取数据需要一段相对较长的时间（数量级为几十毫秒），所以内核执行从进程A到进程B的上下文切换</li>
+<li>切换的第一部分内核代表进程A在内核模式下执行指令，然后在某一时刻，它开始代表进程B（仍然是内核模式）执行指令</li>
+<li>切换之后，内核代表进程B在用户模式下执行命令</li>
+<li>磁盘发出中断信号，数据已经从磁盘传送到存储器上，然后就执行进程B到进程A的上下文切换</li>
+<li>将控制返回给进程A中紧随在系统调用read之后的那条指令，进程A继续运行，直到下一次异常发生，依次类推</li>
+</ul>
+<h2 id="3-进程控制"><a href="#3-进程控制" class="headerlink" title="3. 进程控制"></a>3. 进程控制</h2><p><strong>获取进程ID</strong></p>
+<ul>
+<li><code>pid_t getpid(void)</code>: 返回当前进程的PID</li>
+<li><code>pid_t getppid(void)</code>: 返回当前进程的父进程PID</li>
+</ul>
+<p><strong>创建和终止进程</strong></p>
+<p>我们可以认为进程有三种主要状态：</p>
+<ul>
+<li>运行<ul>
+<li>正在被执行、正在等待执行或者最终将会被执行</li>
+</ul>
+</li>
+<li>停止<ul>
+<li>执行被挂起，在进一步通知前不会计划执行</li>
+</ul>
+</li>
+<li>终止<ul>
+<li>进程被永久停止</li>
+</ul>
+</li>
+</ul>
+<p>进程被终止的原因：</p>
+<ul>
+<li>收到一个信号，该信号的默认行为是终止进程</li>
+<li>从主程序返回</li>
+<li>调用exit函数</li>
+</ul>
+<p>exit函数被调用一次，但从不返回，具体的函数原型是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//以status 状态终止进程，0表示正常结束，非0则是出现了错误</span><br><span class="line">void exit(int status)</span><br></pre></td></tr></table></figure></p>
+<p><strong>创建进程</strong></p>
+<p>父进程通过调用fork函数创建一个新的运行子进程，fork函数很有趣，因为它只被调用一次，却返回两次：</p>
+<ul>
+<li>一次在父进程中，fork返回子进程的PID</li>
+<li>一次在新创建的子进程中，fork返回0 （因为子进程的PID总是非零的，返回值就提供一个明确的方法来分辨程序是在父进程还是在子进程中进行）</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对于子进程，返回 0</span></span><br><span class="line"><span class="comment">// 对于父进程，返回子进程的 PID</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fork</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>子进程几乎和父进程一模一样，会有相同且独立的虚拟地址空间，也会得到父进程已经打开的文件描述符(file descriptor)。比较明显的不同之处就是进程 PID 了。</p>
+<p>看一个例子：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line">    <span class="keyword">int</span> x = <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    pid = Fork();</span><br><span class="line">    <span class="keyword">if</span> (pid == <span class="number">0</span>) </span><br><span class="line">    &#123;   <span class="comment">// Child</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I'm the child!  x = %d\n"</span>, ++x);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Parent</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"I'm the parent! x = %d\n"</span>, --x);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">linux&gt; ./forkdemo</span><br><span class="line">I&apos;m the parent! x = 0</span><br><span class="line">I&apos;m the child!  x = 2</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>fork调用一次，但是会有两个返回值</li>
+<li>并行执行，不能预计父进程和子进程的执行顺序</li>
+<li>每个进程拥有自己独立的地址空间（也就是变量都是独立的），除此之外其他都相同</li>
+<li>在父进程和子进程中 stdout 是一样的（都会发送到标准输出）</li>
+</ul>
+<p><strong>回收子进程</strong></p>
+<p>当一个进程由于某种原因终止时，内核并不是立即把它从系统中清除，相反，进程被保持在一种已终止的状态中，直到被它的父进程回收，当父进程回收已终止的子进程时，内核将子进程的退出状态传递给父进程，然后抛弃已终止的进程，从此开始，进程就不存在了。父进程一般利用wait或者waitpid回收已终止的子进程</p>
+<p>而一个终止了但未被回收的进程称为僵尸进程。如果父进程不回收子进程的话，通常来说会被init进程（pid==1）回收。</p>
+<h1 id="三、信号"><a href="#三、信号" class="headerlink" title="三、信号"></a>三、信号</h1><p>在前面已经谈到的异常控制流中，我们看到了操作系统是如何使用异常来支持一种称为进程上下文切换的异常控制流方式，这一节将讨论更高层的<strong>软件形式的异常</strong>，称为Unix信号。</p>
+<p>它是一种异步的通知机制，用来提醒进程一个事件已经发生，当一个信号发送给一个进程，操作系统中断了进程正常的控制流程，此时，任何非原子操作都被中断，如果进程定义了信号的处理函数，那么它将被执行，否则就执行默认的处理函数</p>
+<p>低层的硬件异常是由内核异常处理程序处理的，正常情况下，对用户进程而言是不可见的，而信号提供了一种机制，通知用户进程发生了这些异常。信号的类型由1~30的整数定义，常用的信号类型如下：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%BF%A1%E5%8F%B7%E7%B1%BB%E5%9E%8B.png" alt="信号类型"></p>
+<p>内核通过给目标进程发送信号，来更新目标进程的状态，具体的场景为：</p>
+<ul>
+<li>内核检测到了如除以0(SIGFPE)或子进程终止(SIGCHLD)的系统事件</li>
+<li>另一个进程调用了kill指令来请求内核发送信号给指定的进程</li>
+</ul>
+<p>目标进程接收到信号后，内核会强制要求进程对于信号做出响应，可以有几种不同的操作：</p>
+<ul>
+<li>忽略这个信号</li>
+<li>终止进程</li>
+<li>捕获信号，执行信号处理器（signal handler)，类似于异步中断中的异常处理器</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86.png" alt="信号处理"></p>
+<h2 id="接收信号"><a href="#接收信号" class="headerlink" title="接收信号"></a>接收信号</h2><p>当内核从异常处理程序返回，准备将控制传递给进程p时，它会检查进程p的未被阻塞的待处理信号的集合（pending &amp; ~blocked)，如果这个集合为空（通常情况下），那么内核将控制传递到p的逻辑控制流中的下一条指令（Inext)。</p>
+<p>然而，如果集合是非空的，那么内核选择集合中的某个信号k(通常是最小的k)，并且强制p接收信号k，收到这个信号会触发进程的某种行为，一旦进程完成了这个行为，那么控制就传递回p的逻辑控制流中的下一条指令(Inext)，每个信号类型都有一个预定义的默认行为，下面的一种：</p>
+<ul>
+<li>进程终止</li>
+<li>进程终止并转储存储器</li>
+<li>进程停止直到被SIGCONT信号重启</li>
+<li>进程忽略该信号</li>
+</ul>
+<h2 id="阻塞信号"><a href="#阻塞信号" class="headerlink" title="阻塞信号"></a>阻塞信号</h2><p>我们知道，内核会阻塞与当前在处理的信号同类型的其他正待等待的信号，也就是说，一个 SIGINT 信号处理器是不能被另一个 SIGINT 信号中断的。</p>
+<h1 id="四、非本地跳转"><a href="#四、非本地跳转" class="headerlink" title="四、非本地跳转"></a>四、非本地跳转</h1><p>C语言提供了一种用户级异常控制流形式，称为非本地跳转，它将控制直接从一个函数转移到另一个当前正在执行的函数，而不需要经过正常的调用 - 返回序列。非本地跳转是通过setjmp和longjmp函数来提供的。</p>
+<ul>
+<li><p>setjmp函数在env缓冲区中保存当前调用环境，以供后面的longjmp使用，并返回0，调用环境包括程序计数器、栈指针和通用目的寄存器。</p>
+</li>
+<li><p>longjmp函数从env缓冲区中恢复调用环境，然后触发一个从最近一次初始化env的setjmp调用返回，然后setjmp返回，并带有非0的返回值retval.</p>
+</li>
+</ul>
+<p>非本地跳转的一个重要应用就是允许从一个深层嵌套的函数调用中立即返回，通常是由检测到某个错误情况引起的。如果一个深层嵌套函数调用中发现了一个错误，我们可以使用非本地跳转直接返回到一个普通的本地化的错误处理程序，而不是费力地解开调用栈。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ul>
+<li>《深入理解计算机系统》</li>
+<li><a href="https://wdxtub.com/2016/04/16/thin-csapp-5/" target="_blank" rel="noopener">https://wdxtub.com/2016/04/16/thin-csapp-5/</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/" data-id="cjuzi3rkn006e9std864xwj2n" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2019/04/27/CSAPP笔记之虚拟存储器/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Newer</strong>
+            <div class="article-nav-title">
+                
+                    CSAPP笔记之虚拟存储器
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2019/04/27/CSAPP笔记之存储器层次结构/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">CSAPP笔记之存储器层次结构</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">12</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 11.67px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 11.67px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RabbitMQ/" style="font-size: 11.67px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 11.67px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 11.67px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 11.67px;">leetcode</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/笔记/" style="font-size: 11.67px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/';
+        
+        this.page.identifier = 'CSAPP笔记之异常控制流与进程';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
