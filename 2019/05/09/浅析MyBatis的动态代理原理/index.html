@@ -5,21 +5,21 @@
     
     <title>浅析MyBatis的动态代理原理 | pjmike的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="前言一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。">
+    <meta name="description" content="前言一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。 MyBatis的核心组件及应用在详细探究M">
 <meta name="keywords" content="MyBatis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅析MyBatis的动态代理原理">
 <meta property="og:url" content="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/index.html">
 <meta property="og:site_name" content="pjmike的博客">
-<meta property="og:description" content="前言一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。">
+<meta property="og:description" content="前言一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。 MyBatis的核心组件及应用在详细探究M">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mybatis/mapper%20xml%E8%A7%A3%E6%9E%90.png">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mybatis/configurationElement.png">
 <meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mybatis/mybatis%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86.png">
-<meta property="og:updated_time" content="2019-05-09T14:14:15.956Z">
+<meta property="og:updated_time" content="2019-05-09T14:22:25.819Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅析MyBatis的动态代理原理">
-<meta name="twitter:description" content="前言一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。">
+<meta name="twitter:description" content="前言一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。 MyBatis的核心组件及应用在详细探究M">
 <meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mybatis/mapper%20xml%E8%A7%A3%E6%9E%90.png">
     
 
@@ -262,7 +262,6 @@
                 </div>
             
             <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>一直以来都在使用MyBatis做持久化框架，也知道当我们定义XXXMapper接口类并利用它来做CRUD操作时，Mybatis是利用了动态代理的技术帮我们生成代理类。那么动态代理内部的实现细节到底是怎么的呀？XXXMapper.java类和XXXMapper.xml到底是如何关联起来的呀？本篇文章就来详细剖析下MyBatis的动态代理的具体实现机制。</p>
-<a id="more"></a>
 <h2 id="MyBatis的核心组件及应用"><a href="#MyBatis的核心组件及应用" class="headerlink" title="MyBatis的核心组件及应用"></a>MyBatis的核心组件及应用</h2><p>在详细探究MyBatis中动态代理机制之前，先来补充一下基础知识，认识一下MyBatis的核心组件。</p>
 <ul>
 <li><strong>SqlSessionFactoryBuilder(构造器)</strong>： 它可以从XML、注解或者手动配置Java代码来创建SqlSessionFactory。</li>
@@ -308,9 +307,9 @@
 <ul>
 <li><strong>configurationElement(XNode context)方法</strong></li>
 </ul>
-<p>该方法主要用于将mapper文件中的元素信息，比如<insert>、<select>这等信息解析到MappedStatement对象，并保存到Configuration类中的mappedStatements属性中，以便于后续动态代理类执行CRUD操作时能够获取真正的Sql语句信息</select></insert></p>
+<p>该方法主要用于将mapper文件中的元素信息，比如<code>insert</code>、<code>select</code>这等信息解析到MappedStatement对象，并保存到Configuration类中的mappedStatements属性中，以便于后续动态代理类执行CRUD操作时能够获取真正的Sql语句信息</p>
 <p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/mybatis/configurationElement.png" alt="configurationElement"></p>
-<p>buildStatementFromContext方法就用于解析<insert>、<select>这类元素信息，并将其封装成MappedStatement对象，具体的实现细节这里就不细说了。</select></insert></p>
+<p>buildStatementFromContext方法就用于解析<code>insert、select</code>这类元素信息，并将其封装成MappedStatement对象，具体的实现细节这里就不细说了。</p>
 <ul>
 <li><strong>bindMapperForNamespace()方法</strong></li>
 </ul>
@@ -354,7 +353,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/" data-id="cjvgqgg8c006zkgtdacxud22h" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/" data-id="cjvgqqwqh006zxotd4yxkr9yf" class="article-share-link"><i class="fas fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
