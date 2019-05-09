@@ -3,17 +3,18 @@
 <head>
     <meta charset="utf-8">
     
-    <title>Category: RabbitMQ | pjmike的博客</title>
+    <title>浅析MyBatis的动态代理原理 | pjmike的博客</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="努力，不一定成功，成功却需努力">
-<meta property="og:type" content="website">
-<meta property="og:title" content="pjmike的博客">
-<meta property="og:url" content="https://pjmike.github.io/categories/RabbitMQ/index.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析MyBatis的动态代理原理">
+<meta property="og:url" content="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/index.html">
 <meta property="og:site_name" content="pjmike的博客">
 <meta property="og:description" content="努力，不一定成功，成功却需努力">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-05-09T14:08:40.907Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="pjmike的博客">
+<meta name="twitter:title" content="浅析MyBatis的动态代理原理">
 <meta name="twitter:description" content="努力，不一定成功，成功却需努力">
     
 
@@ -207,86 +208,148 @@
 </aside>
 
             
-            <section id="main">
-<div class="timeline timeline-wrap">
-    <div class="timeline-row timeline-row-major">
-        <span class="node"><i class="fas fa-folder"></i></span>
-        <h1 class="title">RabbitMQ</h1>
-    </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+            <section id="main"><article id="post-浅析MyBatis的动态代理原理" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
                 
     
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/10/08/RabbitMQ与AMQP模型概览/">RabbitMQ与AMQP模型概览</a>
+        <h1 class="article-title" itemprop="name">
+            浅析MyBatis的动态代理原理
         </h1>
     
 
-                <div class="article-meta">
-                    
+                
+                    <div class="article-meta">
+                        
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/10/08/RabbitMQ与AMQP模型概览/">
-            <time datetime="2018-10-08T14:35:38.000Z" itemprop="datePublished">2018-10-08</time>
+        <a href="/2019/05/09/浅析MyBatis的动态代理原理/">
+            <time datetime="2019-05-09T14:08:40.000Z" itemprop="datePublished">2019-05-09</time>
         </a>
     </div>
 
 
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/RabbitMQ/">RabbitMQ</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/RabbitMQ/">RabbitMQ</a>
-    </div>
-
-                </div>
-            </div>
-        </div>
-    
-        <div class="timeline-row">
-            <span class="node"></span>
-            <div class="content">
+                        
+                        
+                    </div>
                 
-    
-        <h1 itemprop="name">
-            <a class="timeline-article-title" href="/2018/08/08/RabbitMQ的安装详解/">RabbitMQ的安装详解</a>
-        </h1>
-    
-
-                <div class="article-meta">
-                    
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2018/08/08/RabbitMQ的安装详解/">
-            <time datetime="2018-08-08T15:29:37.000Z" itemprop="datePublished">2018-08-08</time>
-        </a>
-    </div>
-
-
-                    
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/RabbitMQ/">RabbitMQ</a>
-    </div>
-
-                    
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/RabbitMQ/">RabbitMQ</a>
-    </div>
-
-                </div>
-            </div>
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            
+        
         </div>
-    
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
 </div>
+
+    <a data-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/" data-id="cjvgq9cyu0019m0tdruopncic" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/04/27/CSAPP笔记之虚拟存储器/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">CSAPP笔记之虚拟存储器</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
 </section>
             
                 
@@ -373,11 +436,13 @@
     <script>
     var disqus_config = function () {
         
-        this.page.identifier = '';
+            this.page.url = 'https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/';
+        
+        this.page.identifier = '浅析MyBatis的动态代理原理';
     };
     (function() { 
         var d = document, s = d.createElement('script');  
-        s.src = '//' + 'pjmike' + '.disqus.com/count.js';
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
