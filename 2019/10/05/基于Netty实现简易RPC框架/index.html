@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>基于Netty实现简易RPC框架 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言现在网上有很多关于使用Netty来构建RPC框架的例子，为什么我这里还要写一篇文章进行论述呢，我很清楚我可能没有写得他们那么好。之所以还要写，有两点原因:  一是因为学过Netty之后，还需要去不断实践才能更好的把握Netty的用法，显然，基于Netty实现RPC框架是一个很好的做法； 二是因为目前市面上有很多RPC框架，比如Dubbo，这些框架通讯底层都是Netty，所以说通过这个例子，也可">
+<meta name="keywords" content="Netty,RPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Netty实现简易RPC框架">
+<meta property="og:url" content="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="前言现在网上有很多关于使用Netty来构建RPC框架的例子，为什么我这里还要写一篇文章进行论述呢，我很清楚我可能没有写得他们那么好。之所以还要写，有两点原因:  一是因为学过Netty之后，还需要去不断实践才能更好的把握Netty的用法，显然，基于Netty实现RPC框架是一个很好的做法； 二是因为目前市面上有很多RPC框架，比如Dubbo，这些框架通讯底层都是Netty，所以说通过这个例子，也可">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_3.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_4.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_5.png">
+<meta property="og:updated_time" content="2019-10-05T14:51:45.529Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Netty实现简易RPC框架">
+<meta name="twitter:description" content="前言现在网上有很多关于使用Netty来构建RPC框架的例子，为什么我这里还要写一篇文章进行论述呢，我很清楚我可能没有写得他们那么好。之所以还要写，有两点原因:  一是因为学过Netty之后，还需要去不断实践才能更好的把握Netty的用法，显然，基于Netty实现RPC框架是一个很好的做法； 二是因为目前市面上有很多RPC框架，比如Dubbo，这些框架通讯底层都是Netty，所以说通过这个例子，也可">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58.png">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                68
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                37
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-基于Netty实现简易RPC框架" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            基于Netty实现简易RPC框架
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2019/10/05/基于Netty实现简易RPC框架/">
+            <time datetime="2019-10-05T14:50:26.000Z" itemprop="datePublished">2019-10-05</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Netty/">Netty</a><i class="fas fa-angle-right"></i><a class="article-category-link" href="/categories/Netty/RPC/">RPC</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Netty/">Netty</a>, <a class="tag-link" href="/tags/RPC/">RPC</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在网上有很多关于使用Netty来构建RPC框架的例子，为什么我这里还要写一篇文章进行论述呢，我很清楚我可能没有写得他们那么好。之所以还要写，有两点原因:</p>
+<ul>
+<li>一是因为学过Netty之后，还需要去不断实践才能更好的把握Netty的用法，显然，基于Netty实现RPC框架是一个很好的做法；</li>
+<li>二是因为目前市面上有很多RPC框架，比如Dubbo，这些框架通讯底层都是Netty，所以说通过这个例子，也可以更好的去体验RPC的设计。</li>
+</ul>
+<p>下面我将从以下几点阐述如何基于Netty实现简易的RPC框架：</p>
+<ul>
+<li>RPC是什么？</li>
+<li>实现RPC框架需要关注哪些方面 ？</li>
+<li>使用Netty如何实现？</li>
+</ul>
+<a id="more"></a>
+<h2 id="RPC是什么？"><a href="#RPC是什么？" class="headerlink" title="RPC是什么？"></a>RPC是什么？</h2><p>RPC，远程过程调用，可以做到像本地调用一样调用远程服务，是一种进程间的通信方式，概念想必大家都很清楚，在看到58沈剑写的<a href="https://www.w3cschool.cn/architectroad/architectroad-rpc-framework.html" target="_blank" rel="noopener">RPC文章</a> 之后，意识到其实我们可以换一种思考方式去理解RPC，也就是从本地调用出发，进而去推导RPC调用</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58.png" alt="rpc_58"></p>
+<h3 id="1-本地函数调用"><a href="#1-本地函数调用" class="headerlink" title="1. 本地函数调用"></a>1. 本地函数调用</h3><p>本地函数是我们经常碰到的，比如下面示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public String sayHello(String name) &#123;</span><br><span class="line">    return &quot;hello, &quot; + name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们只需要传入一个参数，调用sayHello方法就可以得到一个输出，也就是输入参数——&gt;方法体——&gt;输出，入参、出参以及方法体都在同一个进程空间中，这就是<strong>本地函数调用</strong></p>
+<h3 id="2-Socket通信"><a href="#2-Socket通信" class="headerlink" title="2. Socket通信"></a>2. Socket通信</h3><p>那有没有办法实现不同进程之间通信呢？调用方在进程A，需要调用方法A，但是方法A在进程B中</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_2.png" alt="rpc_2"></p>
+<p>最容易想到的方式就是使用Socket通信，使用Socket可以完成跨进程调用，我们需要约定一个进程通信协议，来进行传参，调用函数，出参。写过Socket应该都知道，Socket是比较原始的方式，我们需要更多的去关注一些细节问题，比如参数和函数需要转换成字节流进行网络传输，也就是序列化操作，然后出参时需要反序列化；使用socket进行底层通讯，代码编程也比较容易出错。</p>
+<p>如果一个调用方需要关注这么多问题，那无疑是个灾难，所以有没有什么简单方法，让我们的调用方不需要关注细节问题，让调用方像调用本地函数一样，只要传入参数，调用方法，然后坐等返回结果就可以了呢？</p>
+<h3 id="3-RPC框架"><a href="#3-RPC框架" class="headerlink" title="3. RPC框架"></a>3. RPC框架</h3><p>RPC框架就是用来解决上面的问题的，它能够让调用方像调用本地函数一样调用远程服务，底层通讯细节对调用方是透明的，将各种复杂性都给屏蔽掉，给予调用方极致体验。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_3.png" alt="rpc_3"></p>
+<h2 id="RPC调用需要关注哪些方面"><a href="#RPC调用需要关注哪些方面" class="headerlink" title="RPC调用需要关注哪些方面"></a>RPC调用需要关注哪些方面</h2><p>前面就已经说到RPC框架，让调用方像调用本地函数一样调用远程服务，那么如何做到这一点呢？</p>
+<p>在使用的时候，调用方是直接调用本地函数，传入相应参数，其他细节它不用管，至于通讯细节交给RPC框架来实现。实际上RPC框架采用代理类的方式，具体来说是动态代理的方式，在运行时动态创建新的类，也就是代理类，在该类中实现通讯的细节问题，比如参数<strong>序列化</strong>。</p>
+<p>当然不光是序列化，我们还需要<strong>约定一个双方通信的协议格式</strong>，规定好协议格式，比如请求参数的数据类型，请求的参数，请求的方法名等，这样根据格式进行序列化后进行网络传输，然后服务端收到请求对象后按照指定格式进行解码，这样服务端才知道具体该调用哪个方法，传入什么样的参数。</p>
+<p>刚才又提到<strong>网络传输</strong>，RPC框架重要的一环也就是网络传输，服务是部署在不同主机上的，如何高效的进行网络传输，尽量不丢包，保证数据完整无误的快速传递出去？实际上，就是利用我们今天的主角——<strong>Netty</strong>，Netty是一个高性能的网络通讯框架，它足以胜任我们的任务。</p>
+<p>前面说了这么多，再次总结下一个RPC框架需要重点关注哪几个点：</p>
+<ul>
+<li>代理 （动态代理）</li>
+<li>通讯协议</li>
+<li>序列化</li>
+<li>网络传输</li>
+</ul>
+<p>当然一个优秀的RPC框架需要关注的不止上面几点，只不过本篇文章旨在做一个简易的RPC框架，理解了上面关键的几点就够了</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_4.png" alt="rpc_4"></p>
+<h2 id="基于Netty实现RPC框架"><a href="#基于Netty实现RPC框架" class="headerlink" title="基于Netty实现RPC框架"></a>基于Netty实现RPC框架</h2><p>终于到了本文的重头戏了，我们将根据实现RPC需要关注的几个要点（代理、序列化、协议、编解码），使用Netty进行逐一实现</p>
+<h3 id="1-Protocol（协议）"><a href="#1-Protocol（协议）" class="headerlink" title="1. Protocol（协议）"></a>1. Protocol（协议）</h3><p>首先我们需要确定通信双方的协议格式，请求对象和响应对象</p>
+<p>请求对象：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@ToString</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcRequest</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 请求对象的ID</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String requestId;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 类名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String className;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 方法名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String methodName;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 参数类型</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Class&lt;?&gt;[] parameterTypes;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 入参</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Object[] parameters;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>请求对象的ID是客户端用来验证服务器请求和响应是否匹配</li>
+</ul>
+<p>响应对象：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcResponse</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 响应ID</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String requestId;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 错误信息</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String error;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 返回的结果</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Object result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-序列化"><a href="#2-序列化" class="headerlink" title="2. 序列化"></a>2. 序列化</h3><p>市面上序列化协议很多，比如jdk自带的，Google的protobuf，kyro、Hessian等，只要不选择jdk自带的序列化方法，（因为其性能太差，序列化后产生的码流太大），其他方式其实都可以，这里为了方便起见，<strong>选用JSON作为序列化协议，使用fastjson作为JSON框架</strong></p>
+<p>为了后续扩展方便，先定义序列化接口：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Serializer</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * java对象转换为二进制</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> object</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">byte</span>[] serialize(Object object) <span class="keyword">throws</span> IOException;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 二进制转换成java对象</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> clazz</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bytes</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    &lt;T&gt; <span class="function">T <span class="title">deserialize</span><span class="params">(Class&lt;T&gt; clazz, <span class="keyword">byte</span>[] bytes)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>因为我们采用JSON的方式，所以定义JSONSerializer的实现类:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JSONSerializer</span> <span class="keyword">implements</span> <span class="title">Serializer</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">byte</span>[] serialize(Object object) &#123;</span><br><span class="line">        <span class="keyword">return</span> JSON.toJSONBytes(object);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">deserialize</span><span class="params">(Class&lt;T&gt; clazz, <span class="keyword">byte</span>[] bytes)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> JSON.parseObject(bytes, clazz);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果后续要使用其他序列化方式，可以自行实现序列化接口</p>
+<h3 id="3-编解码器"><a href="#3-编解码器" class="headerlink" title="3. 编解码器"></a>3. 编解码器</h3><p>约定好协议格式和序列化方式之后，我们还需要编解码器，编码器将请求对象转换为适合于传输的格式（一般来说是字节流），而对应的解码器是将网络字节流转换回应用程序的消息格式。</p>
+<p>编码器实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcEncoder</span> <span class="keyword">extends</span> <span class="title">MessageToByteEncoder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Class&lt;?&gt; clazz;</span><br><span class="line">    <span class="keyword">private</span> Serializer serializer;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RpcEncoder</span><span class="params">(Class&lt;?&gt; clazz, Serializer serializer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.clazz = clazz;</span><br><span class="line">        <span class="keyword">this</span>.serializer = serializer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">encode</span><span class="params">(ChannelHandlerContext channelHandlerContext, Object msg, ByteBuf byteBuf)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (clazz != <span class="keyword">null</span> &amp;&amp; clazz.isInstance(msg)) &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] bytes = serializer.serialize(msg);</span><br><span class="line">            byteBuf.writeInt(bytes.length);</span><br><span class="line">            byteBuf.writeBytes(bytes);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>解码器实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcDecoder</span> <span class="keyword">extends</span> <span class="title">ByteToMessageDecoder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Class&lt;?&gt; clazz;</span><br><span class="line">    <span class="keyword">private</span> Serializer serializer;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RpcDecoder</span><span class="params">(Class&lt;?&gt; clazz, Serializer serializer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.clazz = clazz;</span><br><span class="line">        <span class="keyword">this</span>.serializer = serializer;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">decode</span><span class="params">(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List&lt;Object&gt; list)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//因为之前编码的时候写入一个Int型，4个字节来表示长度</span></span><br><span class="line">        <span class="keyword">if</span> (byteBuf.readableBytes() &lt; <span class="number">4</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//标记当前读的位置</span></span><br><span class="line">        byteBuf.markReaderIndex();</span><br><span class="line">        <span class="keyword">int</span> dataLength = byteBuf.readInt();</span><br><span class="line">        <span class="keyword">if</span> (byteBuf.readableBytes() &lt; dataLength) &#123;</span><br><span class="line">            byteBuf.resetReaderIndex();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">byte</span>[] data = <span class="keyword">new</span> <span class="keyword">byte</span>[dataLength];</span><br><span class="line">        <span class="comment">//将byteBuf中的数据读入data字节数组</span></span><br><span class="line">        byteBuf.readBytes(data);</span><br><span class="line">        Object obj = serializer.deserialize(clazz, data);</span><br><span class="line">        list.add(obj);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-Netty-客户端"><a href="#4-Netty-客户端" class="headerlink" title="4. Netty 客户端"></a>4. Netty 客户端</h3><p>下面来看看Netty客户端是如何实现的，也就是如何使用Netty开启客户端。</p>
+<p>实际上，熟悉Netty的朋友应该都知道，我们需要注意以下几点：</p>
+<ul>
+<li>编写启动方法，指定传输使用Channel</li>
+<li>指定ChannelHandler，对网络传输中的数据进行读写处理</li>
+<li>添加编解码器</li>
+<li>添加失败重试机制</li>
+<li>添加发送请求消息的方法</li>
+</ul>
+<p>下面来看具体的实现代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NettyClient</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> EventLoopGroup eventLoopGroup;</span><br><span class="line">    <span class="keyword">private</span> Channel channel;</span><br><span class="line">    <span class="keyword">private</span> ClientHandler clientHandler;</span><br><span class="line">    <span class="keyword">private</span> String host;</span><br><span class="line">    <span class="keyword">private</span> Integer port;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_RETRY = <span class="number">5</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NettyClient</span><span class="params">(String host, Integer port)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.host = host;</span><br><span class="line">        <span class="keyword">this</span>.port = port;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">connect</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        clientHandler = <span class="keyword">new</span> ClientHandler();</span><br><span class="line">        eventLoopGroup = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        <span class="comment">//启动类</span></span><br><span class="line">        Bootstrap bootstrap = <span class="keyword">new</span> Bootstrap();</span><br><span class="line">        bootstrap.group(eventLoopGroup)</span><br><span class="line">                <span class="comment">//指定传输使用的Channel</span></span><br><span class="line">                .channel(NioSocketChannel.class)</span><br><span class="line">                .option(ChannelOption.SO_KEEPALIVE, <span class="keyword">true</span>)</span><br><span class="line">                .option(ChannelOption.TCP_NODELAY, <span class="keyword">true</span>)</span><br><span class="line">                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,<span class="number">5000</span>)</span><br><span class="line">                .handler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                        ChannelPipeline pipeline = ch.pipeline();</span><br><span class="line">                        <span class="comment">//添加编码器</span></span><br><span class="line">                        pipeline.addLast(<span class="keyword">new</span> RpcEncoder(RpcRequest.class, <span class="keyword">new</span> JSONSerializer()));</span><br><span class="line">                        <span class="comment">//添加解码器</span></span><br><span class="line">                        pipeline.addLast(<span class="keyword">new</span> RpcDecoder(RpcResponse.class, <span class="keyword">new</span> JSONSerializer()));</span><br><span class="line">                        <span class="comment">//请求处理类</span></span><br><span class="line">                        pipeline.addLast(clientHandler);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">        connect(bootstrap, host, port, MAX_RETRY);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 失败重连机制，参考Netty入门实战掘金小册</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bootstrap</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> host</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> port</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> retry</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">connect</span><span class="params">(Bootstrap bootstrap, String host, <span class="keyword">int</span> port, <span class="keyword">int</span> retry)</span> </span>&#123;</span><br><span class="line">        ChannelFuture channelFuture = bootstrap.connect(host, port).addListener(future -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (future.isSuccess()) &#123;</span><br><span class="line">                log.info(<span class="string">"连接服务端成功"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (retry == <span class="number">0</span>) &#123;</span><br><span class="line">                log.error(<span class="string">"重试次数已用完，放弃连接"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">//第几次重连：</span></span><br><span class="line">                <span class="keyword">int</span> order = (MAX_RETRY - retry) + <span class="number">1</span>;</span><br><span class="line">                <span class="comment">//本次重连的间隔</span></span><br><span class="line">                <span class="keyword">int</span> delay = <span class="number">1</span> &lt;&lt; order;</span><br><span class="line">                log.error(<span class="string">"&#123;&#125; : 连接失败，第 &#123;&#125; 重连...."</span>, <span class="keyword">new</span> Date(), order);</span><br><span class="line">                bootstrap.config().group().schedule(() -&gt; connect(bootstrap, host, port, retry - <span class="number">1</span>), delay, TimeUnit.SECONDS);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        channel = channelFuture.channel();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 发送消息</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> request</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RpcResponse <span class="title">send</span><span class="params">(<span class="keyword">final</span> RpcRequest request)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            channel.writeAndFlush(request).await();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> clientHandler.getRpcResponse(request.getRequestId());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@PreDestroy</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        eventLoopGroup.shutdownGracefully();</span><br><span class="line">        channel.closeFuture().syncUninterruptibly();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们对于数据的处理重点在于ClientHandler类上，它继承了ChannelDuplexHandler类，可以对出站和入站的数据进行处理<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClientHandler</span> <span class="keyword">extends</span> <span class="title">ChannelDuplexHandler</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 使用Map维护请求对象ID与响应结果Future的映射关系</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, DefaultFuture&gt; futureMap = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelRead</span><span class="params">(ChannelHandlerContext ctx, Object msg)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (msg <span class="keyword">instanceof</span> RpcResponse) &#123;</span><br><span class="line">            <span class="comment">//获取响应对象</span></span><br><span class="line">            RpcResponse response = (RpcResponse) msg;</span><br><span class="line">            DefaultFuture defaultFuture =</span><br><span class="line">            futureMap.get(response.getRequestId());</span><br><span class="line">            <span class="comment">//将结果写入DefaultFuture</span></span><br><span class="line">            defaultFuture.setResponse(response);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">super</span>.channelRead(ctx,msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (msg <span class="keyword">instanceof</span> RpcRequest) &#123;</span><br><span class="line">            RpcRequest request = (RpcRequest) msg;</span><br><span class="line">            <span class="comment">//发送请求对象之前，先把请求ID保存下来，并构建一个与响应Future的映射关系</span></span><br><span class="line">            futureMap.putIfAbsent(request.getRequestId(), <span class="keyword">new</span> DefaultFuture());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">super</span>.write(ctx, msg, promise);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取响应结果</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> requsetId</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RpcResponse <span class="title">getRpcResponse</span><span class="params">(String requsetId)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            DefaultFuture future = futureMap.get(requsetId);</span><br><span class="line">            <span class="keyword">return</span> future.getRpcResponse(<span class="number">5000</span>);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">//获取成功以后，从map中移除</span></span><br><span class="line">            futureMap.remove(requsetId);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>参考文章： <a href="https://xilidou.com/2018/09/26/dourpc-remoting/" target="_blank" rel="noopener">https://xilidou.com/2018/09/26/dourpc-remoting/</a></p>
+</blockquote>
+<p>从上面实现可以看出，我们定义了一个Map,维护请求ID与响应结果的映射关系，目的是为了客户端用来验证服务端响应是否与请求相匹配，因为Netty的channel可能被多个线程使用，当结果返回时，你不知道是从哪个线程返回的，所以需要一个映射关系。</p>
+<p>而我们的结果是封装在DefaultFuture中的，因为Netty是异步框架，所有的返回都是基于Future和Callback机制的，我们这里自定义Future来实现客户端”异步调用”<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DefaultFuture</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> RpcResponse rpcResponse;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> isSucceed = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Object object = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RpcResponse <span class="title">getRpcResponse</span><span class="params">(<span class="keyword">int</span> timeout)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (object) &#123;</span><br><span class="line">            <span class="keyword">while</span> (!isSucceed) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    object.wait(timeout);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> rpcResponse;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setResponse</span><span class="params">(RpcResponse response)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (isSucceed) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">synchronized</span> (object) &#123;</span><br><span class="line">            <span class="keyword">this</span>.rpcResponse = response;</span><br><span class="line">            <span class="keyword">this</span>.isSucceed = <span class="keyword">true</span>;</span><br><span class="line">            object.notify();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>实际上用了wait和notify机制，同时使用一个boolean变量做辅助</li>
+</ul>
+<h3 id="5-Netty服务端"><a href="#5-Netty服务端" class="headerlink" title="5. Netty服务端"></a>5. Netty服务端</h3><p>Netty服务端的实现跟客户端的实现差不多，只不过要注意的是，当对请求进行解码过后，需要通过代理的方式调用本地函数。下面是Server端代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NettyServer</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> EventLoopGroup boss = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">private</span> EventLoopGroup worker = <span class="keyword">null</span>;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> ServerHandler serverHandler;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//此处使用了zookeeper做注册中心，本文不涉及，可忽略</span></span><br><span class="line">        ServiceRegistry registry = <span class="keyword">new</span> ZkServiceRegistry(<span class="string">"127.0.0.1:2181"</span>);</span><br><span class="line">        start(registry);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(ServiceRegistry registry)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//负责处理客户端连接的线程池</span></span><br><span class="line">        boss = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        <span class="comment">//负责处理读写操作的线程池</span></span><br><span class="line">        worker = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line">        ServerBootstrap serverBootstrap = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">        serverBootstrap.group(boss, worker)</span><br><span class="line">                .channel(NioServerSocketChannel.class)</span><br><span class="line">                .option(ChannelOption.SO_BACKLOG, <span class="number">1024</span>)</span><br><span class="line">                .childHandler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                        ChannelPipeline pipeline = ch.pipeline();</span><br><span class="line">                        <span class="comment">//添加解码器</span></span><br><span class="line">                        pipeline.addLast(<span class="keyword">new</span> RpcEncoder(RpcResponse.class, <span class="keyword">new</span> JSONSerializer()));</span><br><span class="line">                        <span class="comment">//添加编码器</span></span><br><span class="line">                        pipeline.addLast(<span class="keyword">new</span> RpcDecoder(RpcRequest.class, <span class="keyword">new</span> JSONSerializer()));</span><br><span class="line">                        <span class="comment">//添加请求处理器</span></span><br><span class="line">                        pipeline.addLast(serverHandler);</span><br><span class="line"></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">        bind(serverBootstrap, <span class="number">8888</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果端口绑定失败，端口数+1,重新绑定</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> serverBootstrap</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> port</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bind</span><span class="params">(<span class="keyword">final</span> ServerBootstrap serverBootstrap,<span class="keyword">int</span> port)</span> </span>&#123;</span><br><span class="line">        serverBootstrap.bind(port).addListener(future -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (future.isSuccess()) &#123;</span><br><span class="line">                log.info(<span class="string">"端口[ &#123;&#125; ] 绑定成功"</span>,port);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                log.error(<span class="string">"端口[ &#123;&#125; ] 绑定失败"</span>, port);</span><br><span class="line">                bind(serverBootstrap, port + <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PreDestroy</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destory</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        boss.shutdownGracefully().sync();</span><br><span class="line">        worker.shutdownGracefully().sync();</span><br><span class="line">        log.info(<span class="string">"关闭Netty"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>下面是处理读写操作的Handler类：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="meta">@ChannelHandler</span>.Sharable</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ServerHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelInboundHandler</span>&lt;<span class="title">RpcRequest</span>&gt; <span class="keyword">implements</span> <span class="title">ApplicationContextAware</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> ApplicationContext applicationContext;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">channelRead0</span><span class="params">(ChannelHandlerContext ctx, RpcRequest msg)</span> </span>&#123;</span><br><span class="line">        RpcResponse rpcResponse = <span class="keyword">new</span> RpcResponse();</span><br><span class="line">        rpcResponse.setRequestId(msg.getRequestId());</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Object handler = handler(msg);</span><br><span class="line">            log.info(<span class="string">"获取返回结果: &#123;&#125; "</span>, handler);</span><br><span class="line">            rpcResponse.setResult(handler);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable throwable) &#123;</span><br><span class="line">            rpcResponse.setError(throwable.toString());</span><br><span class="line">            throwable.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        ctx.writeAndFlush(rpcResponse);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 服务端使用代理处理请求</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> request</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Object <span class="title">handler</span><span class="params">(RpcRequest request)</span> <span class="keyword">throws</span> ClassNotFoundException, InvocationTargetException </span>&#123;</span><br><span class="line">        <span class="comment">//使用Class.forName进行加载Class文件</span></span><br><span class="line">        Class&lt;?&gt; clazz = Class.forName(request.getClassName());</span><br><span class="line">        Object serviceBean = applicationContext.getBean(clazz);</span><br><span class="line">        log.info(<span class="string">"serviceBean: &#123;&#125;"</span>,serviceBean);</span><br><span class="line">        Class&lt;?&gt; serviceClass = serviceBean.getClass();</span><br><span class="line">        log.info(<span class="string">"serverClass:&#123;&#125;"</span>,serviceClass);</span><br><span class="line">        String methodName = request.getMethodName();</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt;[] parameterTypes = request.getParameterTypes();</span><br><span class="line">        Object[] parameters = request.getParameters();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//使用CGLIB Reflect</span></span><br><span class="line">        FastClass fastClass = FastClass.create(serviceClass);</span><br><span class="line">        FastMethod fastMethod = fastClass.getMethod(methodName, parameterTypes);</span><br><span class="line">        log.info(<span class="string">"开始调用CGLIB动态代理执行服务端方法..."</span>);</span><br><span class="line">        <span class="keyword">return</span> fastMethod.invoke(serviceBean, parameters);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setApplicationContext</span><span class="params">(ApplicationContext applicationContext)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.applicationContext = applicationContext;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="6-客户端代理"><a href="#6-客户端代理" class="headerlink" title="6. 客户端代理"></a>6. 客户端代理</h3><p>客户端使用Java动态代理，在代理类中实现通信细节，众所众知，Java动态代理需要实现InvocationHandler接口<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RpcClientDynamicProxy</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Class&lt;T&gt; clazz;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RpcClientDynamicProxy</span><span class="params">(Class&lt;T&gt; clazz)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.clazz = clazz;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        RpcRequest request = <span class="keyword">new</span> RpcRequest();</span><br><span class="line">        String requestId = UUID.randomUUID().toString();</span><br><span class="line"></span><br><span class="line">        String className = method.getDeclaringClass().getName();</span><br><span class="line">        String methodName = method.getName();</span><br><span class="line"></span><br><span class="line">        Class&lt;?&gt;[] parameterTypes = method.getParameterTypes();</span><br><span class="line"></span><br><span class="line">        request.setRequestId(requestId);</span><br><span class="line">        request.setClassName(className);</span><br><span class="line">        request.setMethodName(methodName);</span><br><span class="line">        request.setParameterTypes(parameterTypes);</span><br><span class="line">        request.setParameters(args);</span><br><span class="line">        log.info(<span class="string">"请求内容: &#123;&#125;"</span>,request);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//开启Netty 客户端，直连</span></span><br><span class="line">        NettyClient nettyClient = <span class="keyword">new</span> NettyClient(<span class="string">"127.0.0.1"</span>, <span class="number">8888</span>);</span><br><span class="line">        log.info(<span class="string">"开始连接服务端：&#123;&#125;"</span>,<span class="keyword">new</span> Date());</span><br><span class="line">        nettyClient.connect();</span><br><span class="line">        RpcResponse send = nettyClient.send(request);</span><br><span class="line">        log.info(<span class="string">"请求调用返回结果：&#123;&#125;"</span>, send.getResult());</span><br><span class="line">        <span class="keyword">return</span> send.getResult();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>在invoke方法中封装请求对象，构建NettyClient对象，并开启客户端，发送请求消息</li>
+</ul>
+<p>代理工厂类如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProxyFactory</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">create</span><span class="params">(Class&lt;T&gt; interfaceClass)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(),<span class="keyword">new</span> Class&lt;?&gt;[] &#123;interfaceClass&#125;, <span class="keyword">new</span> RpcClientDynamicProxy&lt;T&gt;(interfaceClass));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>通过Proxy.newProxyInstance创建接口的代理类</li>
+</ul>
+<h3 id="7-RPC远程调用测试"><a href="#7-RPC远程调用测试" class="headerlink" title="7. RPC远程调用测试"></a>7. RPC远程调用测试</h3><p>API：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">HelloService</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">hello</span><span class="params">(String name)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>准备一个测试API接口</li>
+</ul>
+<p>客户端：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClientApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        SpringApplication.run(ClientApplication.class, args);</span><br><span class="line">        HelloService helloService = ProxyFactory.create(HelloService.class);</span><br><span class="line">        log.info(<span class="string">"响应结果“: &#123;&#125;"</span>,helloService.hello(<span class="string">"pjmike"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>客户端调用接口的方法</li>
+</ul>
+<p>服务端：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//服务端实现</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceImpl</span> <span class="keyword">implements</span> <span class="title">HelloService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">hello</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"hello, "</span> + name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/%E5%88%86%E5%B8%83%E5%BC%8F/RPC/rpc_58_5.png" alt="rpc_5"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>以上我们基于Netty实现了一个非非非常简陋的RPC框架，比起成熟的RPC框架来说相差甚远，甚至说基本的注册中心都没有实现，但是通过本次实践，可以说我对于RPC的理解更深了，了解了一个RPC框架到底需要关注哪些方面，未来当我们使用成熟的RPC框架时，比如Dubbo，能够做到心中有数，能明白其底层不过也是使用Netty作为基础通讯框架。往后，如果更深入翻看开源RPC框架源码时，也相对比较容易</p>
+<p>项目地址： <a href="https://github.com/pjmike/springboot-rpc-demo" target="_blank" rel="noopener">https://github.com/pjmike/springboot-rpc-demo</a></p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="https://xilidou.com/2018/09/26/dourpc-remoting/" target="_blank" rel="noopener">https://xilidou.com/2018/09/26/dourpc-remoting/</a></li>
+<li><a href="https://www.cnblogs.com/luxiaoxun/p/5272384.html" target="_blank" rel="noopener">https://www.cnblogs.com/luxiaoxun/p/5272384.html</a></li>
+<li><a href="https://my.oschina.net/huangyong/blog/361751" target="_blank" rel="noopener">https://my.oschina.net/huangyong/blog/361751</a></li>
+<li><a href="https://www.w3cschool.cn/architectroad/architectroad-rpc-framework.html" target="_blank" rel="noopener">https://www.w3cschool.cn/architectroad/architectroad-rpc-framework.html</a></li>
+<li><a href="https://www.cnkirito.moe/dubbo27-features/" target="_blank" rel="noopener">https://www.cnkirito.moe/dubbo27-features/</a></li>
+<li><a href="https://juejin.im/post/5ad2a99ff265da238d51264d#heading-6" target="_blank" rel="noopener">https://juejin.im/post/5ad2a99ff265da238d51264d#heading-6</a></li>
+<li><a href="https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b4db0e6e51d45191d79e475#heading-3" target="_blank" rel="noopener">https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b4db0e6e51d45191d79e475#heading-3</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/" data-id="ck1dofk1v0071iotdb7o7ii12" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/06/02/maven入门总结/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">maven入门总结</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">12</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">5</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 11.67px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 16.67px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 11.67px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 11.67px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 11.67px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 11.67px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 11.67px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/笔记/" style="font-size: 11.67px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/';
+        
+        this.page.identifier = '基于Netty实现简易RPC框架';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
