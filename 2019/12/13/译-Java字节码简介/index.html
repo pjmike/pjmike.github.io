@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>(译)Java字节码简介 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="原文链接：Introduction to Java Bytecode原作者： Mahmoud Anouti翻译：pjmike备注：已省略作者的前言叙事部分  JVM数据类型Java语言是一种静态类型的编程语言，而这会影响到字节码指令的设计，因为设计出来的指令会期望自己可以对特定类型的值进行操作。">
+<meta name="keywords" content="Java,日常翻译">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(译)Java字节码简介">
+<meta property="og:url" content="https://pjmike.github.io/2019/12/13/译-Java字节码简介/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="原文链接：Introduction to Java Bytecode原作者： Mahmoud Anouti翻译：pjmike备注：已省略作者的前言叙事部分  JVM数据类型Java语言是一种静态类型的编程语言，而这会影响到字节码指令的设计，因为设计出来的指令会期望自己可以对特定类型的值进行操作。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/jvm_stacks.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/jvm_heap.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/method_area.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/operand_stack.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iconst_12.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/istore_11.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iconst_2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/istore_2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iload_1.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iadd.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/istore_3.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/math_pow2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/math_pow21.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init%20(1">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init_store.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init_store2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/area2.png">
+<meta property="og:updated_time" content="2019-12-13T07:53:19.768Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="(译)Java字节码简介">
+<meta name="twitter:description" content="原文链接：Introduction to Java Bytecode原作者： Mahmoud Anouti翻译：pjmike备注：已省略作者的前言叙事部分  JVM数据类型Java语言是一种静态类型的编程语言，而这会影响到字节码指令的设计，因为设计出来的指令会期望自己可以对特定类型的值进行操作。">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/jvm_stacks.png">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                70
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                38
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-译-Java字节码简介" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            (译)Java字节码简介
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2019/12/13/译-Java字节码简介/">
+            <time datetime="2019-12-13T07:51:05.000Z" itemprop="datePublished">2019-12-13</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/日常翻译/">日常翻译</a><i class="fas fa-angle-right"></i><a class="article-category-link" href="/categories/日常翻译/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/日常翻译/">日常翻译</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <blockquote>
+<p>原文链接：<a href="https://dzone.com/articles/introduction-to-java-bytecode" target="_blank" rel="noopener">Introduction to Java Bytecode</a><br>原作者： Mahmoud Anouti<br>翻译：pjmike<br>备注：已省略作者的前言叙事部分</p>
+</blockquote>
+<h2 id="JVM数据类型"><a href="#JVM数据类型" class="headerlink" title="JVM数据类型"></a>JVM数据类型</h2><p>Java语言是一种静态类型的编程语言，而这会影响到字节码指令的设计，因为设计出来的指令会期望自己可以对特定类型的值进行操作。</p>
+<a id="more"></a>
+<blockquote>
+<p>译者注：编译时就知道变量类型的是静态类型</p>
+</blockquote>
+<p>举个例子来说，这有几个加法指令可以对两个数进行相加：<code>iadd</code>, <code>ladd</code>, <code>fadd</code>, <code>dadd</code>。而这几个指令分别期望数据类型为int、long、float和double的操作数。大多数字节码都具有这种特性，即根据操作数类型，具有相同功能的不同形式。</p>
+<p>JVM定义的数据类型有：</p>
+<ul>
+<li>基本类型：<ul>
+<li>数值类型: <code>byte (8-bit)</code>,<code>short(16-bit)</code>,<code>int(32-bit)</code>,<code>long(64-bit)</code>,<code>char(16-bit)</code>,<code>float(32-bit)</code>,<code>double(64-bit)</code></li>
+<li><code>boolean</code>类型</li>
+<li><code>returnAddress</code>: 指令指针 </li>
+</ul>
+</li>
+<li>引用类型<ul>
+<li>类类型</li>
+<li>数组类型</li>
+<li>接口类型</li>
+</ul>
+</li>
+</ul>
+<p>在字节码中对boolean类型的支持是受限的, 例如, 没有直接对boolean值进行操作的指令, boolean值将由编译器使用相应的int指令转换为int类型。</p>
+<p>除了returnAddress，Java开发人员应该熟悉上述所有类型，因为returnAddress没有等价的编程语言类型。 </p>
+<blockquote>
+<p>译者注：returnAddress类型目前已经很少见了，它是为字节码指令jsr、jsr_w和ret服务的，指向了一条字节码指令的地址</p>
+</blockquote>
+<h2 id="基于堆栈的架构"><a href="#基于堆栈的架构" class="headerlink" title="基于堆栈的架构"></a>基于堆栈的架构</h2><p>字节码指令集的简单性很大程度上是由于Sun设计了基于堆栈的VM体系结构，而不是基于寄存器的VM体系结构。 JVM进程使用各种内存组件，但是基本上只有Java堆栈需要详细检查字节码指令</p>
+<ul>
+<li><p><strong>PC寄存器</strong>：对于在Java程序中运行的每个线程，都有一个PC寄存器保存着当前执行的指令地址</p>
+</li>
+<li><p><strong>JVM 栈</strong>：对于每个线程，都会分配一个栈，其中存储了局部变量、方法参数和返回值。下面是一个显示3个线程的堆栈示例</p>
+</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/jvm_stacks.png" alt="jvm_stack"></p>
+<ul>
+<li><strong>堆</strong>： 所有线程共享的一块内存区域，用于存储对象实例和数组。对象的回收由垃圾收集器管理</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/jvm_heap.png" alt="jvm_object"></p>
+<ul>
+<li><strong>方法区</strong>： 对于每个已加载的类，它用于存储方法代码和符号表（例如对字段或方法的引用）以及常量池。</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/method_area.png" alt="method_area"></p>
+<p>JVM堆栈由栈帧组成的，当方法被调用时，每个栈帧入栈；当方法完成时栈帧从堆栈中弹出（通过正常返回或抛出异常）。每一帧还包括：</p>
+<ul>
+<li>局部变量表，索引从0到它的长度-1。长度是由编译器决定的，一个局部变量可以保存任何类型的值，其中long和double类型的数据会占用两个局部变量空间</li>
+<li>操作数栈，它存储指令的操作数，或者方法调用的参数</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/operand_stack.png" alt="operand_stack"></p>
+<blockquote>
+<p>译者注：栈帧不仅存储了方法的局部变量表、操作数栈，还存储着动态链接和方法返回地址等信息，更详细的信息可以参阅：《深入理解Java虚拟机》</p>
+</blockquote>
+<h2 id="字节码探索"><a href="#字节码探索" class="headerlink" title="字节码探索"></a>字节码探索</h2><p>了解了JVM的内部机制之后，我们来看一些由示例代码生成的字节码， Java类文件中的每个方法都有一个代码段，该代码段由一系列字节码指令组成，每个指令具有以下格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">opcode (1 byte)      operand1 (optional)      operand2 (optional)  ...</span><br><span class="line"></span><br><span class="line">操作码 (1 byte)      操作数1(可选)            操作数2(可选)     ...</span><br></pre></td></tr></table></figure></p>
+<p>该指令由一个字节的操作码(opcode)和零个或多个操作数(operand)组成的，operand包含了要被操作的数据</p>
+<p>在当前执行方法的栈帧里，一条指令可以将值压入操作数栈或者弹出，并且有可能将值加载或存储在局部变量表中。 让我们看一个简单的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">int</span> b = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">int</span> c = a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们使用javap工具查看其编译后生成的字节码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javap -v Test.class</span><br></pre></td></tr></table></figure></p>
+<p>然后得到了如下结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span></span>;</span><br><span class="line">descriptor: ([Ljava/lang/String;)V</span><br><span class="line">flags: (<span class="number">0x0009</span>) ACC_PUBLIC, ACC_STATIC</span><br><span class="line">Code:</span><br><span class="line">stack=<span class="number">2</span>, locals=<span class="number">4</span>, args_size=<span class="number">1</span></span><br><span class="line"><span class="number">0</span>: iconst_1</span><br><span class="line"><span class="number">1</span>: istore_1</span><br><span class="line"><span class="number">2</span>: iconst_2</span><br><span class="line"><span class="number">3</span>: istore_2</span><br><span class="line"><span class="number">4</span>: iload_1</span><br><span class="line"><span class="number">5</span>: iload_2</span><br><span class="line"><span class="number">6</span>: iadd</span><br><span class="line"><span class="number">7</span>: istore_3</span><br><span class="line"><span class="number">8</span>: <span class="keyword">return</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>我们可以看到main方法的方法声明，descriptor说明这个方法的参数是一个字符串数组(<code>[Ljava/lang/String;</code> )，而返回类型是<code>void(V)</code>。flags说明该方法是public(<code>ACC_PUBLIC</code>)和static(<code>ACC_STATIC</code>)。</p>
+<blockquote>
+<p>译者注：方法中的访问标志flag用于识别一些方法的访问信息，包括这个方法是否为public；方法是否为static；方法是否为final等等</p>
+</blockquote>
+<p><strong>Code属性</strong>是最重要的部分，它包含了这个方法的一系列指令和信息，这些信息包含了操作栈的最大深度（本例中是stack=2）和在这方法栈帧中被分配的局部变量的数量（本例中是locals=4）。所有的局部变量在上面的指令中都提到了，除了第一个变量（索引为0），这个变量保存的是args参数,而其他三个局部变量就是代码中的a，b和c。</p>
+<blockquote>
+<p>译者注：Java程序方法体中的代码经过Javac编译器处理后，最终变为字节码指令存储在Code属性内，Code属性主要作用是用于描述代码</p>
+</blockquote>
+<p>从地址0到8的指令将执行以下操作：</p>
+<ul>
+<li><code>iconst_1</code>: 将整数常量1压入操作数栈</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iconst_12.png" alt="iconst_1"></p>
+<blockquote>
+<p>译者注： <code>iconst_&lt;i&gt;</code>, 将常量i加载到操作数栈中</p>
+</blockquote>
+<ul>
+<li><code>istore_1</code>: 弹出操作数栈中的顶部操作数（一个int值），并将其存储在索引为1的局部变量中，该局部变量对应于变量a。</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/istore_11.png" alt="istore_1"></p>
+<blockquote>
+<p>译者注：<code>istore_&lt;n&gt;</code>，将操作数栈中的顶部数值存储到局部变量表中索引为n的位置</p>
+</blockquote>
+<ul>
+<li><code>iconst_2</code>: 将整数常量2压入操作数栈</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iconst_2.png" alt="iconst_2"></p>
+<ul>
+<li><code>istore_2</code>: 弹出顶部操作数int值，并将其存储在索引为2的局部变量中，该变量对应于变量b。</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/istore_2.png" alt="istore_2"></p>
+<ul>
+<li><code>iload_1</code>: 加载局部变量表中索引为1的值，并将其压入操作数栈中</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iload_1.png" alt="iload_1"></p>
+<blockquote>
+<p>译者注：<code>iload_&lt;n&gt;</code>: 将局部变量表中索引为n这个位置上的值加载到操作数栈</p>
+</blockquote>
+<ul>
+<li><code>iadd</code>: 将操作数栈中的前两个int值出栈并相加，然后将相加的结果放入操作数栈</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/iadd.png" alt="iadd"></p>
+<ul>
+<li><code>istore_3</code>: 弹出顶部操作数int值，并将其存储在索引为3的局部变量中，该变量对应于变量c。</li>
+</ul>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/istore_3.png" alt="istore_3"></p>
+<ul>
+<li><code>return</code>: 从void方法中返回</li>
+</ul>
+<p>上面的每条指令仅由一个操作码组成，每个操作码精确地指示了由JVM执行的操作</p>
+<h3 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h3><p>上面的示例只有一个方法，即 main 方法。假如我们需要对变量 c 进行更复杂的计算，这些复杂的计算写在新方法 calc 中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">int</span> b = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">int</span> c = calc(a, b);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">calc</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">int</span>) Math.sqrt(Math.pow(a, <span class="number">2</span>) + Math.pow(b, <span class="number">2</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>来看看生成的字节码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span></span>;</span><br><span class="line">  descriptor: ([Ljava/lang/String;)V</span><br><span class="line">  flags: (<span class="number">0x0009</span>) ACC_PUBLIC, ACC_STATIC</span><br><span class="line">  Code:</span><br><span class="line">    stack=<span class="number">2</span>, locals=<span class="number">4</span>, args_size=<span class="number">1</span></span><br><span class="line">       <span class="number">0</span>: iconst_1</span><br><span class="line">       <span class="number">1</span>: istore_1</span><br><span class="line">       <span class="number">2</span>: iconst_2</span><br><span class="line">       <span class="number">3</span>: istore_2</span><br><span class="line">       <span class="number">4</span>: iload_1</span><br><span class="line">       <span class="number">5</span>: iload_2</span><br><span class="line">       6: invokestatic  #2         // Method calc:(II)I</span><br><span class="line">       <span class="number">9</span>: istore_3</span><br><span class="line">      <span class="number">10</span>: <span class="keyword">return</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">calc</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">int</span>)</span></span>;</span><br><span class="line">  descriptor: (II)I</span><br><span class="line">  flags: (<span class="number">0x0008</span>) ACC_STATIC</span><br><span class="line">  Code:</span><br><span class="line">    stack=<span class="number">6</span>, locals=<span class="number">2</span>, args_size=<span class="number">2</span></span><br><span class="line">       <span class="number">0</span>: iload_0</span><br><span class="line">       <span class="number">1</span>: i2d</span><br><span class="line">       2: ldc2_w        #3         // double 2.0d</span><br><span class="line">       5: invokestatic  #5         // Method java/lang/Math.pow:(DD)D</span><br><span class="line">       <span class="number">8</span>: iload_1</span><br><span class="line">       <span class="number">9</span>: i2d</span><br><span class="line">      10: ldc2_w        #3         // double 2.0d</span><br><span class="line">      13: invokestatic  #5         // Method java/lang/Math.pow:(DD)D</span><br><span class="line">      <span class="number">16</span>: dadd</span><br><span class="line">      17: invokestatic  #6         // Method java/lang/Math.sqrt:(D)D</span><br><span class="line">      <span class="number">20</span>: d2i</span><br><span class="line">      <span class="number">21</span>: ireturn</span><br></pre></td></tr></table></figure></p>
+<p>与之前相比，main方法代码唯一的不同在于，用<code>invokestatic</code>指令代替了<code>iadd</code>指令，<code>invokestatic</code>指令用于调用静态方法calc。需要注意的是，操作数栈中包含两个传递给calc方法的参数。也就是说，调用方法要按正确的顺序将它们压入操作数栈以准备要调用方法的所有参数。随后，<code>invokestatic</code>（或类似的invoke指令，将在后面看到）将弹出这些参数，并为被调用的方法创建一个新的栈帧，其中将参数放置在新栈帧的局部变量表中。</p>
+<p>我们还注意到，通过查看地址，invokestatic指令占用3个字节，该地址从6跳转到9。不同于之前的指令，invokestatic包括两个额外的字节来构造对要调用的方法的引用。该引用通过javap工具显示为<code>＃2</code>，它是从之前描述的常量池解析而来的。</p>
+<blockquote>
+<p>译者注：Class文件中的常量池主要存放两大类常量：<strong>字面量(Literal)</strong>和<strong>符号引用（Symbolic Reference）</strong>。字面量比如文本字符串、声明为final的常量值等，而符合引用包括类和接口的全限定名、字段的名称和描述符以及方法的名称和描述。下面是上述代码的常量池（由于内容较多，展示部分），#2 所表示的就是calc方法的符号引用，invokestatic指令使用之前，需要先对它所使用的符号引用进行解析<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; Constant pool:  </span><br><span class="line">&gt;   #1 = Methodref          #8.#19         // java/lang/Object.&quot;&lt;init&gt;&quot;:()V  </span><br><span class="line">&gt;   #2 = Methodref          #7.#20         //   &gt;com/pjmike/jvm/bytecode/JVMTest.calc:(II)I  </span><br><span class="line">&gt;   #3 = Double             2.0d</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>而其他字节码信息是calc方法对应的字节码。它首先使用<code>iload_0</code>指令将第一个整数参数加载到操作数栈上,下一条指令<code>i2d</code>,将其转换为双精度型double,转换后的double类型取代了操作数栈的顶部。</p>
+<p>再下一条指令 <code>ldc2_w</code>将双精度常量2.0d（从常量池中提取）压入操作数栈。 然后使用到目前为止准备好的两个操作数值（calc的第一个参数和常数2.0d）调用静态Math.pow方法。 当Math.pow方法返回时，其结果将存储在其调用程序的操作数栈中</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/math_pow2.png" alt="math_pow2"></p>
+<p>计算Math.pow(b,2)也是同样的：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/math_pow21.png" alt="math_pow21"></p>
+<p>下一条指令<code>dadd</code>会弹出顶部的两个中间结果，将它们相加，然后将总和推回顶部。 最后，<code>invokestatic</code>会对所得的总和调用<code>Math.sqrt</code>，然后使用 <code>d2i</code>指令将结果从<code>double</code>转换为<code>int</code>。生成的int值将返回到<code>main</code>方法，基于<code>istore_3</code>指令，该方法将其存储回c。</p>
+<blockquote>
+<p>译者注： 所有方法调用中的目标方法在Class文件里面都是一个常量池中的符号引用，在类加载的解析阶段，会将其中的一部分符号引用转化为直接引用。在Java虚拟机中提供了5种方法调用字节码指令，分别如下：  </p>
+<ol>
+<li>invokestatic: 调用静态方法  </li>
+<li>invokespecial: 调用实例构造器<init>方法、私有方法和父类方法  </init></li>
+<li>invokevirtual: 调用对象的实例方法</li>
+<li>invokeinterface: 调用接口方法，会在运行时再确定一个实现此接口的对象</li>
+<li>invokedynamic: 运行时动态解析出调用点限定符所引用的方法，并执行该方法</li>
+</ol>
+</blockquote>
+<h3 id="创建实例"><a href="#创建实例" class="headerlink" title="创建实例"></a>创建实例</h3><p>现在修改这个示例，加入 Point 类来封装 XY 坐标。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Point a = <span class="keyword">new</span> Point(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        Point b = <span class="keyword">new</span> Point(<span class="number">5</span>, <span class="number">3</span>);</span><br><span class="line">        <span class="keyword">int</span> c = a.area(b);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> x, y;</span><br><span class="line">    Point(<span class="keyword">int</span> x, <span class="keyword">int</span> y) &#123;</span><br><span class="line">        <span class="keyword">this</span>.x = x;</span><br><span class="line">        <span class="keyword">this</span>.y = y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">area</span><span class="params">(Point b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> length = Math.abs(b.y - <span class="keyword">this</span>.y);</span><br><span class="line">        <span class="keyword">int</span> width = Math.abs(b.x - <span class="keyword">this</span>.x);</span><br><span class="line">        <span class="keyword">return</span> length * width;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>main方法对应的字节码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span></span>;</span><br><span class="line">  descriptor: ([Ljava/lang/String;)V</span><br><span class="line">  flags: (<span class="number">0x0009</span>) ACC_PUBLIC, ACC_STATIC</span><br><span class="line">  Code:</span><br><span class="line">    stack=<span class="number">4</span>, locals=<span class="number">4</span>, args_size=<span class="number">1</span></span><br><span class="line">       0: new           #2       // class test/Point</span><br><span class="line">       <span class="number">3</span>: dup</span><br><span class="line">       <span class="number">4</span>: iconst_1</span><br><span class="line">       <span class="number">5</span>: iconst_1</span><br><span class="line">       6: invokespecial #3       // Method test/Point."&lt;init&gt;":(II)V</span><br><span class="line">       <span class="number">9</span>: astore_1</span><br><span class="line">      10: new           #2       // class test/Point</span><br><span class="line">      <span class="number">13</span>: dup</span><br><span class="line">      <span class="number">14</span>: iconst_5</span><br><span class="line">      <span class="number">15</span>: iconst_3</span><br><span class="line">      16: invokespecial #3       // Method test/Point."&lt;init&gt;":(II)V</span><br><span class="line">      <span class="number">19</span>: astore_2</span><br><span class="line">      <span class="number">20</span>: aload_1</span><br><span class="line">      <span class="number">21</span>: aload_2</span><br><span class="line">      22: invokevirtual #4       // Method test/Point.area:(Ltest/Point;)I</span><br><span class="line">      <span class="number">25</span>: istore_3</span><br><span class="line">      <span class="number">26</span>: <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<p>这里引入了 <code>new</code>、<code>dup</code> 和 <code>invokespecial</code> 几个新指令。new 指令与编程语言中的 new 运算符类似，它根据传入操作数所指定的类型来创建对象（这是对 Point 类的符号引用）。对象的内存是在堆上分配，对象引用则是被推入到操作数栈上。</p>
+<p>dup指令会复制顶部操作数的栈值，这意味着我们在栈顶部有两个指向Point对象的引用。接下来的三条指令将构造函数的参数（用于初始化对象的）压入操作数栈中，然后通过<code>invokerspecial</code>指令调用实例构造器<code>&lt;init&gt;()</code>方法。该方法完成之后，前三个操作数的栈值将被销毁，剩下的就是已创建对象的原始引用，到目前为止，就完成了初始化工作</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init%20(1" alt="init_1">.png)</p>
+<p>接下来，<code>astore_1</code>将该Point引用弹出栈，并将其赋值到索引1所保存的局部变量(<strong>astore_1中的a表明这是一个引用值</strong>).</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init_store.png" alt="astore_1"></p>
+<p>然后以同样的过程创建并初始化第二个Point实例，并将此实例赋值给变量b</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init2.png" alt="init2"></p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/init_store2.png" alt="init_store2"></p>
+<p>最后一步，分别使用<code>aload_1</code>和<code>aload_2</code>指令加载索引1和2处的局部变量，这两个局部变量就是对Point对象的两个引用，然后使用<code>invokevirtual</code>调用<code>area</code>方法，该方法会根据实际类型调用适当的方法来完成分发。例如，如果变量a指向继承Point的SpecialPoint实例，并且子类型覆盖了area方法，那么将调用重写方法。而目前这种情况下，并不存在子类，因此仅有area方法是可用的。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/JVM/Introduction%20to%20Java%20Bytecode/area2.png" alt="area2"></p>
+<p>请注意，即使area方法接受单参数，堆栈顶部也有两个Point的引用。第一个引用（pointA）实际上指向调用该方法的实例，对area方法来说，它将被传递到新栈帧的第一个局部变量中。另一个操作数（pointB）是area方法的参数。</p>
+<h2 id="由字节码反推源码的功能"><a href="#由字节码反推源码的功能" class="headerlink" title="由字节码反推源码的功能"></a>由字节码反推源码的功能</h2><p>你其实无需掌握每条字节码指令的含义和具体的执行流程，依然可以根据手头的字节码了解程序的功能。 例如，以我为例，我想检查代码是否使用<strong>Java流</strong>读取文件，以及该流是否已正确关闭。 现在给出以下字节码，很容易的判断出确实使用了<strong>流</strong>，并且很可能作为<code>try-with-resources</code>语句的一部分将其关闭。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span> <span class="keyword">throws</span> java.lang.Exception</span>;</span><br><span class="line"> descriptor: ([Ljava/lang/String;)V</span><br><span class="line"> flags: (<span class="number">0x0009</span>) ACC_PUBLIC, ACC_STATIC</span><br><span class="line"> Code:</span><br><span class="line">   stack=<span class="number">2</span>, locals=<span class="number">8</span>, args_size=<span class="number">1</span></span><br><span class="line">      0: ldc           #2                  // class test/Test</span><br><span class="line">      2: ldc           #3                  // String input.txt</span><br><span class="line">      4: invokevirtual #4                  // Method java/lang/Class.getResource:(Ljava/lang/String;)Ljava/net/URL;</span><br><span class="line">      7: invokevirtual #5                  // Method java/net/URL.toURI:()Ljava/net/URI;</span><br><span class="line">     10: invokestatic  #6                  // Method java/nio/file/Paths.get:(Ljava/net/URI;)Ljava/nio/file/Path;</span><br><span class="line">     <span class="number">13</span>: astore_1</span><br><span class="line">     14: new           #7                  // class java/lang/StringBuilder</span><br><span class="line">     <span class="number">17</span>: dup</span><br><span class="line">     18: invokespecial #8                  // Method java/lang/StringBuilder."&lt;init&gt;":()V</span><br><span class="line">     <span class="number">21</span>: astore_2</span><br><span class="line">     <span class="number">22</span>: aload_1</span><br><span class="line">     23: invokestatic  #9                  // Method java/nio/file/Files.lines:(Ljava/nio/file/Path;)Ljava/util/stream/Stream;</span><br><span class="line">     <span class="number">26</span>: astore_3</span><br><span class="line">     <span class="number">27</span>: aconst_null</span><br><span class="line">     <span class="number">28</span>: astore        <span class="number">4</span></span><br><span class="line">     <span class="number">30</span>: aload_3</span><br><span class="line">     <span class="number">31</span>: aload_2</span><br><span class="line">     32: invokedynamic #10,  0             // InvokeDynamic #0:accept:(Ljava/lang/StringBuilder;)Ljava/util/function/Consumer;</span><br><span class="line">     37: invokeinterface #11,  2           // InterfaceMethod java/util/stream/Stream.forEach:(Ljava/util/function/Consumer;)V</span><br><span class="line">     <span class="number">42</span>: aload_3</span><br><span class="line">     <span class="number">43</span>: ifnull        <span class="number">131</span></span><br><span class="line">     <span class="number">46</span>: aload         <span class="number">4</span></span><br><span class="line">     <span class="number">48</span>: ifnull        <span class="number">72</span></span><br><span class="line">     <span class="number">51</span>: aload_3</span><br><span class="line">     52: invokeinterface #12,  1           // InterfaceMethod java/util/stream/Stream.close:()V</span><br><span class="line">     <span class="number">57</span>: goto          <span class="number">131</span></span><br><span class="line">     <span class="number">60</span>: astore        <span class="number">5</span></span><br><span class="line">     <span class="number">62</span>: aload         <span class="number">4</span></span><br><span class="line">     <span class="number">64</span>: aload         <span class="number">5</span></span><br><span class="line">     66: invokevirtual #14                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V</span><br><span class="line">     <span class="number">69</span>: goto          <span class="number">131</span></span><br><span class="line">     <span class="number">72</span>: aload_3</span><br><span class="line">     73: invokeinterface #12,  1           // InterfaceMethod java/util/stream/Stream.close:()V</span><br><span class="line">     <span class="number">78</span>: goto          <span class="number">131</span></span><br><span class="line">     <span class="number">81</span>: astore        <span class="number">5</span></span><br><span class="line">     <span class="number">83</span>: aload         <span class="number">5</span></span><br><span class="line">     <span class="number">85</span>: astore        <span class="number">4</span></span><br><span class="line">     <span class="number">87</span>: aload         <span class="number">5</span></span><br><span class="line">     <span class="number">89</span>: athrow</span><br><span class="line">     <span class="number">90</span>: astore        <span class="number">6</span></span><br><span class="line">     <span class="number">92</span>: aload_3</span><br><span class="line">     <span class="number">93</span>: ifnull        <span class="number">128</span></span><br><span class="line">     <span class="number">96</span>: aload         <span class="number">4</span></span><br><span class="line">     <span class="number">98</span>: ifnull        <span class="number">122</span></span><br><span class="line">    <span class="number">101</span>: aload_3</span><br><span class="line">    102: invokeinterface #12,  1           // InterfaceMethod java/util/stream/Stream.close:()V</span><br><span class="line">    <span class="number">107</span>: goto          <span class="number">128</span></span><br><span class="line">    <span class="number">110</span>: astore        <span class="number">7</span></span><br><span class="line">    <span class="number">112</span>: aload         <span class="number">4</span></span><br><span class="line">    <span class="number">114</span>: aload         <span class="number">7</span></span><br><span class="line">    116: invokevirtual #14                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V</span><br><span class="line">    <span class="number">119</span>: goto          <span class="number">128</span></span><br><span class="line">    <span class="number">122</span>: aload_3</span><br><span class="line">    123: invokeinterface #12,  1           // InterfaceMethod java/util/stream/Stream.close:()V</span><br><span class="line">    <span class="number">128</span>: aload         <span class="number">6</span></span><br><span class="line">    <span class="number">130</span>: athrow</span><br><span class="line">    131: getstatic     #15                 // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">    <span class="number">134</span>: aload_2</span><br><span class="line">    135: invokevirtual #16                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">    138: invokevirtual #17                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">    <span class="number">141</span>: <span class="keyword">return</span></span><br><span class="line">   ...</span><br></pre></td></tr></table></figure></p>
+<p>我们看到出现了<code>java/util/stream/Stream</code>，其中调用了<code>forEach</code>，然后是对<code>InvokeDynamic</code>的调用，并带有对Consumer的引用。 然后，我们还看到了一个字节代码块，它调用Stream.close以及调用Throwable.addSuppressed的分支。这就是编译器为try-with-resources语句生成的基本代码</p>
+<p>下面是完整的源代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    Path path = Paths.get(Test.class.getResource(<span class="string">"input.txt"</span>).toURI());</span><br><span class="line">    StringBuilder data = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="keyword">try</span>(Stream lines = Files.lines(path)) &#123;</span><br><span class="line">        lines.forEach(line -&gt; data.append(line).append(<span class="string">"\n"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(data.toString());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>还好字节码指令集简洁，生成指令时几乎少有编译器优化，因此如果有必要，反编译类文件可以在没有源码的情况下检查代码。</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2019/12/13/译-Java字节码简介/" data-id="ck43uurt7007b7gtdizh3ihx7" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/12/13/译-Java字节码简介/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/12/13/译-Java字节码简介/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/10/20/Netty系列文章之Netty线程模型/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">Netty系列文章之Netty线程模型</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">12</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/">日常翻译</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/Java/">Java</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日常翻译/">日常翻译</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 12px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 16px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/日常翻译/" style="font-size: 10px;">日常翻译</a> <a href="/tags/笔记/" style="font-size: 12px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2019/12/13/译-Java字节码简介/';
+        
+        this.page.identifier = '译-Java字节码简介';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
