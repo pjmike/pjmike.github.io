@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>聊聊文件系统那些事 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言本文探究的主题是文件系统，学过操作系统的同学应该都有了解。个人觉得文件系统是操作系统比较重要的一部分内容，作为后端开发人员，肯定会有与文件打交道的时候，通过相关文件I/O函数读写文件，而学习文件系统可以让我们编写代码时做到心中有数，明白背后的逻辑">
+<meta name="keywords" content="文件系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊聊文件系统那些事">
+<meta property="og:url" content="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="前言本文探究的主题是文件系统，学过操作系统的同学应该都有了解。个人觉得文件系统是操作系统比较重要的一部分内容，作为后端开发人员，肯定会有与文件打交道的时候，通过相关文件I/O函数读写文件，而学习文件系统可以让我们编写代码时做到心中有数，明白背后的逻辑">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84.jpg">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/sector_to_disk.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/inode.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/inode_ext3.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/inode_and_directory_entry.gif">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/vfs.JPG">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/file_system.png">
+<meta property="og:updated_time" content="2019-12-23T12:20:52.268Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="聊聊文件系统那些事">
+<meta name="twitter:description" content="前言本文探究的主题是文件系统，学过操作系统的同学应该都有了解。个人觉得文件系统是操作系统比较重要的一部分内容，作为后端开发人员，肯定会有与文件打交道的时候，通过相关文件I/O函数读写文件，而学习文件系统可以让我们编写代码时做到心中有数，明白背后的逻辑">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84.jpg">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                71
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                39
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-聊聊文件系统那些事" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            聊聊文件系统那些事
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2019/12/23/聊聊文件系统那些事/">
+            <time datetime="2019-12-23T12:01:50.000Z" itemprop="datePublished">2019-12-23</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/文件系统/">文件系统</a><i class="fas fa-angle-right"></i><a class="article-category-link" href="/categories/文件系统/文件I-O/">文件I/O</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/文件系统/">文件系统</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#磁盘"><span class="toc-number">2.</span> <span class="toc-text">磁盘</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#磁盘分区"><span class="toc-number">2.1.</span> <span class="toc-text">磁盘分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件系统"><span class="toc-number">3.</span> <span class="toc-text">文件系统</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#文件系统与块"><span class="toc-number">3.1.</span> <span class="toc-text">文件系统与块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#文件系统与文件"><span class="toc-number">3.2.</span> <span class="toc-text">文件系统与文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#inode"><span class="toc-number">3.2.1.</span> <span class="toc-text">inode</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#目录项"><span class="toc-number">3.2.2.</span> <span class="toc-text">目录项</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚拟文件系统-VFS"><span class="toc-number">4.</span> <span class="toc-text">虚拟文件系统(VFS)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件系统组件的体系结构"><span class="toc-number">5.</span> <span class="toc-text">文件系统组件的体系结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料-amp-鸣谢"><span class="toc-number">6.</span> <span class="toc-text">参考资料 &amp; 鸣谢</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文探究的主题是文件系统，学过操作系统的同学应该都有了解。个人觉得文件系统是操作系统比较重要的一部分内容，作为后端开发人员，肯定会有与文件打交道的时候，通过相关文件I/O函数读写文件，而学习文件系统可以让我们编写代码时做到心中有数，明白背后的逻辑</p>
+<a id="more"></a>
+<h2 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h2><p><strong>磁盘是一种块设备</strong>，用于存储，这种块设备是在系统中能够随机(不需要按顺序)访问固定大小数据片的硬件设备</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84.jpg" alt="disk"></p>
+<blockquote>
+<p>图片来源：<a href="https://time.geekbang.org/column/article/98440" target="_blank" rel="noopener">https://time.geekbang.org/column/article/98440</a></p>
+</blockquote>
+<p>磁盘就是上图左边的样子，中间圆的部分是磁盘的盘片，右边的图是抽象出来的图。每一层里分多个磁道，每个磁道分多个扇区，每个扇区是 512 个字节。</p>
+<h3 id="磁盘分区"><a href="#磁盘分区" class="headerlink" title="磁盘分区"></a>磁盘分区</h3><p>对于大型硬盘，可以将可用空间划分或分区为多个不同的分区，比如在windows系统上，将一块磁盘分区成C、D、E盘，这就叫做分区。</p>
+<p>分区信息存储在磁盘上的分区表上，该表列出了每个分区的起点和终点信息、它的类型信息等，这些信息都存储在分区表中，而磁盘分区表主要有两种：MBR和GPT。前者是传统格式，兼容性好；后者更现代，功能更强大。</p>
+<h2 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h2><p>文件系统实际上就是文件的存储方式，它存放在磁盘上的，磁盘被分成多个分区之后，每个分区都可以有一个独立的文件系统。而为硬盘安装文件系统的操作就被称为”格式化”，格式化就是将一块盘使用命令组织成一定格式的文件系统的过程，在Windows下，我们常格式化的格式是<strong>NTFS</strong>，而在Linux下面，常用的是<strong>ext2、ext3</strong>或<strong>ext4</strong>。</p>
+<p>对硬盘完成分区和格式化以后，还需要将分区挂载 (mount) 到操作系统的某个目录下面，这样才能作为普通文件系统进行访问。被挂载的目录可以是根目录，也可以是其他二级、三级目录，任何目录都可以是挂载点，但是<strong>根目录是所有Linux的文件和目录所在的地方，需要挂载上一个磁盘分区</strong>。</p>
+<h3 id="文件系统与块"><a href="#文件系统与块" class="headerlink" title="文件系统与块"></a>文件系统与块</h3><p>操作系统在读取磁盘时，不会一个个扇区地读取，因为这样的效率太低了，而是一次性连续读取多个扇区，也就是一次性读取一个”块”。块的大小是扇区大小的2的整数倍，通常是4KB.</p>
+<p>文件系统创建在磁盘之上，它将磁盘空间以<strong>块</strong>为单位进行划分，也就是说，<strong>块是文件系统的最小寻址的单元</strong>，有时会被称作”文件块”或者”I/O”块。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/sector_to_disk.png" alt="sector_to_disk"></p>
+<h3 id="文件系统与文件"><a href="#文件系统与文件" class="headerlink" title="文件系统与文件"></a>文件系统与文件</h3><p>在文件系统中，一个文件大体上可以由<strong>目录项</strong>、<strong>inode</strong>和<strong>数据块</strong>组成：</p>
+<ul>
+<li>inode: 索引节点，存放数据块的指针</li>
+<li>目录项：包含文件名和inode节点号</li>
+<li>数据块：包含具体的文件内容</li>
+</ul>
+<p>还有一个关注点是<strong>超级块</strong>，它会记录整个文件系统的整体信息，包括 inode 与 block 的总量、使用量、剩余量，以及文件系统的格式与相关信息等。</p>
+<h4 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h4><p>inode，全称是index node，中文含义就是<strong>索引节点</strong>，它用来记录文件的元数据，比如 inode 编号、文件大小、访问权限、修改日期以及文件数据块的地址索引等，通过数据块的索引就可以找到具体的数据块。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/inode.png" alt="inode"></p>
+<p>在ext3文件系统中inode有15个索引，其中前12个索引直接记录数据块的地址，第13个索引记录索引地址。也就是说，索引块指向的硬盘数据块并不直接记录文件数据，而是记录文件数据块的索引表，依次的，第 14 个索引记录二级索引地址，第 15 个索引记录三级索引地址，下面是示意图：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/inode_ext3.png" alt="inode_ext3"></p>
+<blockquote>
+<p>图片来源：<a href="https://time.geekbang.org/column/article/169533" target="_blank" rel="noopener">https://time.geekbang.org/column/article/169533</a></p>
+</blockquote>
+<p>还有一点需要注意，索引节点和文件一一对应，它跟文件内容一样，需要持久化到磁盘，是占磁盘空间的。</p>
+<h4 id="目录项"><a href="#目录项" class="headerlink" title="目录项"></a>目录项</h4><p>在Linux系统中，目录(directory)也是一种文件，打开目录，也就是打开目录文件，目录文件的结构非常简单，就是一系列目录项（dirent）的列表。每个目录项，由两部分组成：<strong>所包含文件的文件名，以及该文件名对应的inode号码</strong>。下面是示意图</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/inode_and_directory_entry.gif" alt="inode_and_directory_entry"></p>
+<blockquote>
+<p>图片来源：<a href="http://www.pc-freak.net/blog/find-filesystem-directory-eating-filesystem-inodes-linux/" target="_blank" rel="noopener">http://www.pc-freak.net/blog/find-filesystem-directory-eating-filesystem-inodes-linux/</a></p>
+</blockquote>
+<p>不同于索引节点，目录项是由内核维护的一个内存数据结构，所以通常也被叫做目录项缓存</p>
+<h2 id="虚拟文件系统-VFS"><a href="#虚拟文件系统-VFS" class="headerlink" title="虚拟文件系统(VFS)"></a>虚拟文件系统(VFS)</h2><p>一个磁盘可以被划分为多个分区，每个分区可以有不同的文件系统，也就是说，在操作系统中，可能会面临对不同文件系统的读写问题，那么如何去管理这些文件系统呢？</p>
+<p>在Linux系统中，提供了一种<strong>虚拟文件系统（VFS），它是一种内核子系统，为用户空间程序提供了文件和具体文件系统相关的接口</strong>。换句话说，向上，对应用层提供一个标准的文件操作接口；对下，对具体的文件系统提供一个标准的接口。</p>
+<p>为了支持多种文件系统，抽象一层，以衔接各种各样的文件系统。而这抽象层（也就是VFS），<strong>直接屏蔽掉具体的文件系统，从而使用户可以直接使用open()、read()和write()这样的函数而无须考虑具体文件系统和实际物理介质</strong>，如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/vfs.JPG" alt="vfs"></p>
+<p>当计算机系统启动时，磁盘各分区上的文件系统需要向VFS注册，注册的时候，文件系统将提供一个包含VFS所需函数地址的列表，通过函数地址，VFS知道如何从文件系统中读取数据块。同时，VFS有一个<strong>超级块对象</strong>,<strong>各种文件系统都必须实现超级块对象，该对象用于存储特定文件系统的信息，通常对应于存放在磁盘特定扇区中的文件系统超级块</strong>。</p>
+<h2 id="文件系统组件的体系结构"><a href="#文件系统组件的体系结构" class="headerlink" title="文件系统组件的体系结构"></a>文件系统组件的体系结构</h2><p>接下来，我们来梳理一下体系结构，从应用层到VFS，再到磁盘的一个结构图，从这个架构图中我们可以对文件系统有一个更加清晰的认识，如下图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/file_system.png" alt="file system"></p>
+<p>从图中可以看到上文未提及的Page Cache与直接IO，实际上根据是否利用操作系统的页缓存，可以将文件I/O分为直接IO和非直接IO。</p>
+<ul>
+<li>直接IO: 不经过页缓存，直接访问磁盘数据</li>
+<li>非直接IO: 文件读写时，先要经过系统的页缓存，如果缓存中有数据中，直接读取；如果没有，再从磁盘中读取</li>
+</ul>
+<p>Page Cache主要用来减少对磁盘的I/O操作，通过将磁盘中的数据缓存到物理内存中，把对磁盘的访问变为对物理内存的访问。</p>
+<p>其实，还有一个Buffer Cache，它主要用来缓存磁盘块，用于块I/O，也就是对磁盘块数据的缓存，而Page Cache是文件数据的缓存，在Linux 2.4内核以前，两者是独立的，2.4之后就统一了，只有Page Cache，而Buffer是页映射块的，它实际上就是在Page Cache中。</p>
+<h2 id="参考资料-amp-鸣谢"><a href="#参考资料-amp-鸣谢" class="headerlink" title="参考资料 &amp; 鸣谢"></a>参考资料 &amp; 鸣谢</h2><ul>
+<li><a href="http://www.pc-freak.net/blog/find-filesystem-directory-eating-filesystem-inodes-linux" target="_blank" rel="noopener">http://www.pc-freak.net/blog/find-filesystem-directory-eating-filesystem-inodes-linux</a></li>
+<li><a href="https://www.ibm.com/developerworks/cn/linux/l-linux-filesystem/index.html" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/linux/l-linux-filesystem/index.html</a></li>
+<li><a href="https://book.douban.com/subject/6097773/" target="_blank" rel="noopener">https://book.douban.com/subject/6097773/</a></li>
+<li><a href="https://www.ruanyifeng.com/blog/2018/10/exfat.html" target="_blank" rel="noopener">https://www.ruanyifeng.com/blog/2018/10/exfat.html</a></li>
+<li><a href="https://time.geekbang.org/column/article/97876" target="_blank" rel="noopener">https://time.geekbang.org/column/article/97876</a></li>
+<li><a href="https://time.geekbang.org/column/article/76876" target="_blank" rel="noopener">https://time.geekbang.org/column/article/76876</a></li>
+<li><a href="https://time.geekbang.org/column/article/169533" target="_blank" rel="noopener">https://time.geekbang.org/column/article/169533</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/" data-id="ck4iestm700007ktde0npaz3h" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/12/13/译-Java字节码简介/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">(译)Java字节码简介</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">12</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/文件系统/">文件系统</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/文件系统/文件I-O/">文件I/O</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/">日常翻译</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/Java/">Java</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">15</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件系统/">文件系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日常翻译/">日常翻译</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 12px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 16px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 16px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/文件系统/" style="font-size: 10px;">文件系统</a> <a href="/tags/日常翻译/" style="font-size: 10px;">日常翻译</a> <a href="/tags/笔记/" style="font-size: 12px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/';
+        
+        this.page.identifier = '聊聊文件系统那些事';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
