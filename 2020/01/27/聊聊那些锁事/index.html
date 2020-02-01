@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>聊聊那些锁事 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言最近看了一本书，名字叫做《Operating Systems: Three Easy Pieces》，它的中文版是《操作系统导论》，原书在豆瓣评分9.7分，质量还不错。该书围绕虚拟化、并发和持久性这三个主要概念展开，行文诙谐幽默却又鞭辟入里，不同于寻常的操作系统书籍。这些天看了并发的几个章节，我主要关注了”锁”的部分，细读下来，有了更深刻的认识。 所以这篇文章就是对《操作系统导论》中讲解锁的章">
+<meta name="keywords" content="Java,操作系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊聊那些锁事">
+<meta property="og:url" content="https://pjmike.github.io/2020/01/27/聊聊那些锁事/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="前言最近看了一本书，名字叫做《Operating Systems: Three Easy Pieces》，它的中文版是《操作系统导论》，原书在豆瓣评分9.7分，质量还不错。该书围绕虚拟化、并发和持久性这三个主要概念展开，行文诙谐幽默却又鞭辟入里，不同于寻常的操作系统书籍。这些天看了并发的几个章节，我主要关注了”锁”的部分，细读下来，有了更深刻的认识。 所以这篇文章就是对《操作系统导论》中讲解锁的章">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-02-01T02:51:50.591Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="聊聊那些锁事">
+<meta name="twitter:description" content="前言最近看了一本书，名字叫做《Operating Systems: Three Easy Pieces》，它的中文版是《操作系统导论》，原书在豆瓣评分9.7分，质量还不错。该书围绕虚拟化、并发和持久性这三个主要概念展开，行文诙谐幽默却又鞭辟入里，不同于寻常的操作系统书籍。这些天看了并发的几个章节，我主要关注了”锁”的部分，细读下来，有了更深刻的认识。 所以这篇文章就是对《操作系统导论》中讲解锁的章">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                72
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                41
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-聊聊那些锁事" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            聊聊那些锁事
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2020/01/27/聊聊那些锁事/">
+            <time datetime="2020-01-27T12:28:35.000Z" itemprop="datePublished">2020-01-27</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/操作系统/">操作系统</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁的基本思想"><span class="toc-number">2.</span> <span class="toc-text">锁的基本思想</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何实现一个锁"><span class="toc-number">3.</span> <span class="toc-text">如何实现一个锁</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#测试并设置指令-test-and-set-instruction"><span class="toc-number">3.1.</span> <span class="toc-text">测试并设置指令(test-and-set instruction)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#比较并交换-compare-and-swap"><span class="toc-number">3.2.</span> <span class="toc-text">比较并交换 (compare-and-swap)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#获取并增加-fetch-and-add"><span class="toc-number">3.3.</span> <span class="toc-text">获取并增加 (fetch-and-add)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#如何避免过多的自旋"><span class="toc-number">3.4.</span> <span class="toc-text">如何避免过多的自旋</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#使用队列：休眠替代自旋"><span class="toc-number">3.4.1.</span> <span class="toc-text">使用队列：休眠替代自旋</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Java中的自旋锁"><span class="toc-number">3.4.2.</span> <span class="toc-text">Java中的自旋锁</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近看了一本书，名字叫做<a href="https://book.douban.com/subject/19973015//" target="_blank" rel="noopener">《Operating Systems: Three Easy Pieces》</a>，它的中文版是《操作系统导论》，原书在豆瓣评分9.7分，质量还不错。该书围绕<strong>虚拟化、并发和持久性</strong>这三个主要概念展开，行文诙谐幽默却又鞭辟入里，不同于寻常的操作系统书籍。这些天看了并发的几个章节，我主要关注了”锁”的部分，细读下来，有了更深刻的认识。</p>
+<p>所以这篇文章就是对《操作系统导论》中讲解锁的章节的一个<strong>读书笔记</strong>，实在是忍不住想分享出来。</p>
+<a id="more"></a>
+<h2 id="锁的基本思想"><a href="#锁的基本思想" class="headerlink" title="锁的基本思想"></a>锁的基本思想</h2><p>锁其实是一个变量，我们需要声明某种类型的锁变量才能使用，比如下例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lock_t mutex; //声明</span><br><span class="line">...</span><br><span class="line">lock(&amp;mutex); //加锁</span><br><span class="line">balance = balance + 1;</span><br><span class="line">unlock(&amp;mutex); //解锁</span><br></pre></td></tr></table></figure></p>
+<p>锁变量保存了锁在某一时刻的状态，它要么是可用的（avaliable,或unlocked，或free），表示没有线程持有锁，要么是被占用的（acquired，或locked,或held），表示有一个线程持有锁，正处于临界区。</p>
+<p>锁为程序员提供了最小程度的调度控制，线程可以视为程序员创建的实体，但是被操作系统调度，具体方式由操作系统选择，而锁让程序员获得一些控制权，通过给临界区加锁，可以保证临界区内只有一个线程活跃。</p>
+<p>此外，<a href="https://zh.wikipedia.org/wiki/C_POSIX_library" target="_blank" rel="noopener">POSIX库</a>将锁称为<strong>互斥量（mutex）</strong>，因为它被用来提供线程之间的互斥，即当一个线程在临界区，它能够阻止其他线程进入直到本线程离开临界区。</p>
+<h2 id="如何实现一个锁"><a href="#如何实现一个锁" class="headerlink" title="如何实现一个锁"></a>如何实现一个锁</h2><p>我们已经从程序员的角度，对锁如何工作有一定的理解。那如何实现一个锁呢？我们需要什么硬件支持？需要什么操作系统的支持？下面会进行解答。</p>
+<p>而在实现锁之前，我们还需要明确目标，需要设立一些标准才能让“锁”工作的好，主要有3个标准：</p>
+<ul>
+<li><strong>提供互斥</strong>：最基本的，锁应该能够阻止多个线程进入临界区</li>
+<li><strong>公平性</strong>：当锁可用时，是否每一个竞争线程有公平的机会抢到锁？</li>
+<li><strong>性能</strong>： 需要考虑使用锁之后增加的时间开销。比如以下几种场景：<ul>
+<li>没有竞争的情况下，即只有一个线程抢锁、释放锁的开支如何？</li>
+<li>一个CPU上多个线程竞争，性能如何？</li>
+<li>多个CPU、多个线程竞争时的性能？</li>
+</ul>
+</li>
+</ul>
+<p>这三个标准映射到Java层面来说：  </p>
+<blockquote>
+<ul>
+<li><strong>互斥锁</strong>： JDK中的synchronized和JUC中的Lock就是互斥锁，保证一次最多只能由一个线程持有该锁    </li>
+<li><strong>公平锁与非公平锁</strong>： Java中的公平锁是指多个线程在等待同一个锁时，必须按照申请锁的先后顺序来获取锁，而非公平锁是可以抢占的，公平锁可以使用new ReentrantLock(true)实现  </li>
+<li><strong>锁的性能</strong>： JDK中的synchronized的锁升级——偏向锁、轻量级锁和重量级锁，这几个锁的实现与转换，就是为了提升synchronized锁的性能</li>
+</ul>
+</blockquote>
+<h3 id="测试并设置指令-test-and-set-instruction"><a href="#测试并设置指令-test-and-set-instruction" class="headerlink" title="测试并设置指令(test-and-set instruction)"></a>测试并设置指令(test-and-set instruction)</h3><p>测试并设置指令 (test-and-set instruction) ，在x86系统上，具体是指xchg (atomic exchange，原子交换) 指令，我们用如下的C代码片段来定义测试并设置指令做了什么：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">TestAndSet</span><span class="params">(<span class="keyword">int</span> *old_ptr,<span class="keyword">int</span> <span class="keyword">new</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> old = *old_ptr; <span class="comment">//fetch old value at old_ptr</span></span><br><span class="line">    *old_ptr = <span class="keyword">new</span>; <span class="comment">//store 'new' into old_ptr</span></span><br><span class="line">    <span class="keyword">return</span> old;  <span class="comment">//return the old value</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>它返回 old_ptr 指向的旧值，同时更新为 new 的新值。同时需要注意的是，上述的伪代码是为了说明使用，直接传统编译肯定不能保证原子性，需要操作系统的硬件指令 (<strong>x86的xchg指令</strong>) 支持以保证原子性。</p>
+<p>因为既可以测试旧值，又可以设置新值，所以把这条指令叫作 “测试并设置”。依靠这一条指令完全可以实现一个简单的<strong>自旋锁 (spin lock)</strong>，代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">lock_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> flag;</span><br><span class="line">&#125; <span class="keyword">lock_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 0 表示锁可用，1表示锁已经被抢占</span></span><br><span class="line">    lock-&gt;flag = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (TestAndSet(&amp;lock-&gt;flag,<span class="number">1</span>) == <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        ; <span class="comment">// 自旋等待 (do something)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    lock-&gt;flag = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先假设一个线程在运行，调用lock()，没有其他线程持有锁，所以flag = 0,当调用  TestAndSet(flag,1) 方法，返回0，线程会跳出 while 循环，获取锁。同时也还会原子的设置flag为1，标志锁已经被持有。当线程离开临界区，调用 unlock() 将 flag 清理为0。</p>
+<p>依靠操作系统的硬件原语，将测试 (test 旧的锁值) 和设置 (set 新的值) 合并为一个原子操作之后，我们保证了只有一个线程能获取锁，这就实现了一个有效的互斥原语!</p>
+<p>上面的代码也就是自旋锁 (spin lock) 的实现，这是最简单的一种锁，一直自旋，利用CPU周期，直到锁可用。现在按照之前的标准来评价基本的自旋锁：</p>
+<ul>
+<li>能够互斥：自旋锁一次只允许一个线程进入临界区，能够保证锁的正确性</li>
+<li>公平性: 自旋锁不提供任务公平性保证，实际上，自旋的线程在竞争条件下可能会永远自旋。自旋锁没有公平性，可能会导致饿死。</li>
+<li>性能问题： 对于自旋锁，在单CPU的情况下，性能开销非常大，多个线程在竞争锁，放弃CPU之前，都会自旋一个时间片，浪费CPU周期。而在多CPU上，自旋锁性能不错（如果线程数大致等于CPU数），假设线程A在CPU1，线程B在CPU2竞争同一个锁。线程A（CPU1）占有锁时，线程B竞争锁就会自旋 （在CPU2上）。然而，临界区一般都很短，因此很快锁就可用，然后线程B获得锁</li>
+</ul>
+<h3 id="比较并交换-compare-and-swap"><a href="#比较并交换-compare-and-swap" class="headerlink" title="比较并交换 (compare-and-swap)"></a>比较并交换 (compare-and-swap)</h3><p>某些系统提供了另一个硬件原语，即比较并交换指令 (<a href="https://zh.wikipedia.org/wiki/SPARC" target="_blank" rel="noopener">SPARC系统</a>是compare-and-swap，x86系统是compare-and-exchange)，下面是这条指令的C语言伪代码。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">CompareAndSwap</span><span class="params">(<span class="keyword">int</span> *ptr,<span class="keyword">int</span> expected,<span class="keyword">int</span> <span class="keyword">new</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> actual = *ptr;</span><br><span class="line">    <span class="keyword">if</span> (actual == expected)</span><br><span class="line">    &#123;</span><br><span class="line">        *ptr = <span class="keyword">new</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> actual;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>比较并交换的基本思路是检测 ptr 指向的值是否和 expected 相等；如果是，更新 ptr 所指的值为新值。否则，什么也不做。不论哪种情况，都返回该内存地址的值</p>
+<p>有了比较并交换指令，就可以实现一个锁，类似于用测试并设置那样。例如，我们只需要用下面的代码替换lock()函数：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (CompareAndSwap(&amp;lock-&gt;flag,<span class="number">0</span>,<span class="number">1</span>) == <span class="number">1</span>)</span><br><span class="line">        ; <span class="comment">//spin    </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>比较并交换指令实际上就是<strong>CAS</strong>指令，在Java开发工作中，我们也会常常遇到，比如使用原子类AtomicXXX，内部实现就是使用了CAS操作。</p>
+<h3 id="获取并增加-fetch-and-add"><a href="#获取并增加-fetch-and-add" class="headerlink" title="获取并增加 (fetch-and-add)"></a>获取并增加 (fetch-and-add)</h3><p>还有一个硬件原语是： 获取并增加 (fetch-and-add) 指令，它能原子地返回特定地址的旧值，并且让该值自增1，在x86系统中，是xadd指令。获取并增加的C语言伪代码如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">FetchAndAdd</span><span class="params">(<span class="keyword">int</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> old = *ptr;</span><br><span class="line">    *ptr = old + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> old;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">lock_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> ticket;</span><br><span class="line">    <span class="keyword">int</span> turn;</span><br><span class="line">&#125; <span class="keyword">lock_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock_init</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    lock-&gt;ticket = <span class="number">0</span>;</span><br><span class="line">    lock-&gt;turn = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> myturn = FetchAndAdd(&amp;lock-&gt;ticket);</span><br><span class="line">    <span class="keyword">while</span> (lock-&gt;turn != myturn) </span><br><span class="line">        ;<span class="comment">//spin</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">(<span class="keyword">lock_t</span> *lock)</span> </span>&#123;</span><br><span class="line">    FetchAndAdd(&amp;lock-&gt;turn);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在这个例子中，我们用获取并增加指令，实现了一个ticket锁，其实就是一个公平锁。</p>
+<p>该实现不是利用一个值，而是使用了ticket 和 turn 两个变量来构建。基本思想是：如果线程希望获得锁，首先对一个ticket值执行一个原子的获取并增加指令。这个值作为该线程的”turn”(即myturn,为该线程设定获取锁的顺序)。根据全局共享的lock-&gt;turn 变量，当某一个线程的 myturn == turn 时，则轮到这个线程进入临界区。unlock 则是增加 turn,从而下一个等待线程可以进入临界区。</p>
+<p>本方法能够保证所有线程都能获到锁，而且是按线程来的先后顺序，也就是一种先进先出 (FIFO) 的公平性机制，该锁还有一种说法，叫做 <a href="https://zh.wikipedia.org/wiki/%E6%8E%92%E5%8F%B7%E8%87%AA%E6%97%8B%E9%94%81" target="_blank" rel="noopener"><strong>排号自旋锁 (Ticket Lock)</strong></a></p>
+<h3 id="如何避免过多的自旋"><a href="#如何避免过多的自旋" class="headerlink" title="如何避免过多的自旋"></a>如何避免过多的自旋</h3><p>前面几种指令都可以实现自旋锁，其实现也是非常简单，但是自旋过多，怎么办呢？比如以两个线程运行在单处理器为例，当一个线程（线程0）持有锁时，被中断。第二个线程（线程1）去获取锁，发现锁已经被持有。因此，它就开始自旋，接着自旋。如果线程0长时间持有锁，那么线程2会一直自旋，浪费CPU时间，所以如何让锁减少不必要地自旋？</p>
+<p>只有硬件支持是不够的，我们还需要操作系统支持！</p>
+<h4 id="使用队列：休眠替代自旋"><a href="#使用队列：休眠替代自旋" class="headerlink" title="使用队列：休眠替代自旋"></a>使用队列：休眠替代自旋</h4><p>我们可以利用 <a href="https://zh.wikipedia.org/wiki/Solaris" target="_blank" rel="noopener">Solaris</a> 提供的支持，它提供了两个调用：</p>
+<ul>
+<li>park() 能够让调用线程休眠</li>
+<li>unpark(threadID) 则会唤醒threadID 标识的线程</li>
+</ul>
+<p>可以用这两个调用来实现锁，让调用者在获取不到锁时睡眠，在锁可用时被唤醒。下面是C语言实现的伪代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">lock_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> flag;</span><br><span class="line">    <span class="keyword">int</span> guard;</span><br><span class="line">    <span class="keyword">queue_t</span> *q;</span><br><span class="line">&#125; <span class="keyword">lock_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock_init</span><span class="params">(<span class="keyword">lock_t</span> *m)</span> </span>&#123;</span><br><span class="line">    m-&gt;flag = <span class="number">0</span>;</span><br><span class="line">    m-&gt;guard = <span class="number">0</span>;</span><br><span class="line">    queueu_init(m-&gt;q);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">(<span class="keyword">lock_t</span> *m)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (TestAndSet(&amp;m-&gt;guard,<span class="number">1</span>) == <span class="number">1</span>)</span><br><span class="line">       ; <span class="comment">//acquire guard lock by spinning</span></span><br><span class="line">    <span class="keyword">if</span> (m-&gt;flag == <span class="number">0</span>) &#123;</span><br><span class="line">        m-&gt;flag = <span class="number">1</span>; <span class="comment">//lock is acquired</span></span><br><span class="line">        m-&gt;guard = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        queue_add(m-&gt;q,gettid());</span><br><span class="line">        m-&gt;guard = <span class="number">0</span>;</span><br><span class="line">        park();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">(<span class="keyword">lock_t</span> *m)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (TestAndSet(&amp;m-&gt;guard,<span class="number">1</span>) == <span class="number">1</span>)</span><br><span class="line">        ; <span class="comment">// acquire guard lock by spinning</span></span><br><span class="line">    <span class="keyword">if</span> (queue_empty(m-&gt;q)) &#123;</span><br><span class="line">        m-&gt;flag = <span class="number">0</span>; <span class="comment">// let go of lock;on one wants it;</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        unpark(queue_remove(m-&gt;q)) ;<span class="comment">//hold lock(for next thread!)</span></span><br><span class="line">    &#125;</span><br><span class="line">    m-&gt;guard = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们将之前的测试并设置和等待队列结合，实现了一个更高性能的锁，guard基本上起到了自旋锁的作用。其次，我们通过队列来控制谁会获得锁，避免饿死。</p>
+<h4 id="Java中的自旋锁"><a href="#Java中的自旋锁" class="headerlink" title="Java中的自旋锁"></a>Java中的自旋锁</h4><p>长时间的自旋等待会消耗处理器时间。对此，Java中的自旋锁也有一定的处理措施：自旋等待的时间必须要有一定的限度，如果自旋超过了限定次数没有成功获得锁，就应当挂起线程，限定次数默认为10次，可以使用 -XX:PreBlockSpin来更改。</p>
+<p>自旋锁在JDK1.4.2中引入，使用-XX:+UseSpinning来开启，其实现原理就是之前提到的CAS。JDK 6中变为默认开启，并且引入了自适应的自旋锁（适应性自旋锁）。</p>
+<p>自适应意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://book.douban.com/subject/19973015//" target="_blank" rel="noopener">https://book.douban.com/subject/19973015//</a></li>
+<li><a href="https://tech.meituan.com/2018/11/15/java-lock.html" target="_blank" rel="noopener">https://tech.meituan.com/2018/11/15/java-lock.html</a></li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2020/01/27/聊聊那些锁事/" data-id="ck63035xk0000yotdf5zd884a" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2020/01/27/聊聊那些锁事/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2020/01/27/聊聊那些锁事/">Comments</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2019/12/23/聊聊文件系统那些事/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">聊聊文件系统那些事</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">categories</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">13</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/文件系统/">文件系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/">日常翻译</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/Java/">Java</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件I-O/">文件I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件系统/">文件系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日常翻译/">日常翻译</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 12.5px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 17.5px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 17.5px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 12.5px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12.5px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/操作系统/" style="font-size: 10px;">操作系统</a> <a href="/tags/文件I-O/" style="font-size: 10px;">文件I/O</a> <a href="/tags/文件系统/" style="font-size: 10px;">文件系统</a> <a href="/tags/日常翻译/" style="font-size: 10px;">日常翻译</a> <a href="/tags/笔记/" style="font-size: 12.5px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="https://zoutq.com/">Roger</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2020 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2020/01/27/聊聊那些锁事/';
+        
+        this.page.identifier = '聊聊那些锁事';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
