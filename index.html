@@ -82,14 +82,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -101,11 +101,11 @@
 (function (window) {
     var INSIGHT_CONFIG = {
         TRANSLATION: {
-            POSTS: 'Posts',
-            PAGES: 'Pages',
-            CATEGORIES: 'Categories',
-            TAGS: 'Tags',
-            UNTITLED: '(Untitled)',
+            POSTS: 'Pos',
+            PAGES: 'Halaman',
+            CATEGORIES: 'Kategori',
+            TAGS: 'Tag',
+            UNTITLED: 'Tanpa Judul',
         },
         ROOT_URL: '/',
         CONTENT_URL: '/content.json',
@@ -131,7 +131,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
     </div>
 
                 </td>
@@ -151,16 +151,16 @@
             <h2 id="name">pjmike</h2>
             <h3 id="title">努力做一个笔耕者</h3>
             <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
-            <a id="follow" target="_blank" href="https://github.com/pjmike/">FOLLOW</a>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                72
-                <span>posts</span>
+                73
+                <span>pos</span>
             </div>
             <div class="article-info-block">
-                41
-                <span>tags</span>
+                42
+                <span>tag</span>
             </div>
         </div>
         
@@ -208,7 +208,7 @@
 
             
             <section id="main">
-    <article id="post-聊聊那些锁事" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-聊聊虚拟内存的思想" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
         
@@ -216,7 +216,7 @@
                 
     
         <h1 itemprop="name">
-            <a class="article-title" href="/2020/01/27/聊聊那些锁事/">聊聊那些锁事</a>
+            <a class="article-title" href="/2020/02/13/聊聊虚拟内存的思想/">聊聊虚拟内存的思想</a>
         </h1>
     
 
@@ -225,8 +225,8 @@
                         
     <div class="article-date">
         <i class="fas fa-calendar-alt"></i>
-        <a href="/2020/01/27/聊聊那些锁事/">
-            <time datetime="2020-01-27T12:28:35.000Z" itemprop="datePublished">2020-01-27</time>
+        <a href="/2020/02/13/聊聊虚拟内存的思想/">
+            <time datetime="2020-02-13T08:48:07.000Z" itemprop="datePublished">2020-02-13</time>
         </a>
     </div>
 
@@ -234,13 +234,13 @@
                         
     <div class="article-category">
     	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/Java/">Java</a>
+        <a class="article-category-link" href="/categories/操作系统/">操作系统</a>
     </div>
 
                         
     <div class="article-tag">
         <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/操作系统/">操作系统</a>
+        <a class="tag-link" href="/tags/操作系统/">操作系统</a>, <a class="tag-link" href="/tags/虚拟内存/">虚拟内存</a>
     </div>
 
                     </div>
@@ -250,10 +250,9 @@
         
         <div class="article-entry" itemprop="articleBody">
         
-            <p><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近看了一本书，名字叫做<a href="https://book.douban.com/subject/19973015//" target="_blank" rel="noopener">《Operating Systems: Three Easy Pieces》</a>，它的中文版是《操作系统导论》，原书在豆瓣评分9.7分，质量还不错。该书围绕<strong>虚拟化、并发和持久性</strong>这三个主要概念展开，行文诙谐幽默却又鞭辟入里，不同于寻常的操作系统书籍。这些天看了并发的几个章节，我主要关注了”锁”的部分，细读下来，有了更深刻的认识。</p>
-<p>所以这篇文章就是对《操作系统导论》中讲解锁的章节的一个<strong>读书笔记</strong>，实在是忍不住想分享出来。</p></p>
+            <p><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文依旧是对<a href="https://book.douban.com/subject/19973015//" target="_blank" rel="noopener">《Operating Systems: Three Easy Pieces》</a>一书的一个读书笔记，主要分享<strong>虚拟内存</strong>的一些内容，篇幅不多。</p></p>
             <p class="article-more-link">
-                <a href="/2020/01/27/聊聊那些锁事/#more">Read More</a>
+                <a href="/2020/02/13/聊聊虚拟内存的思想/#more">Read More</a>
             </p>
         
         </div>
@@ -264,7 +263,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2020/01/27/聊聊那些锁事/" data-id="ck63035xk0000yotdf5zd884a" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/" data-id="ck6ki90yc002dwgtd2f542zm2" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -332,7 +331,141 @@
 
             
     
-        <a href="https://pjmike.github.io/2020/01/27/聊聊那些锁事/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2020/01/27/聊聊那些锁事/">Comments</a>
+        <a href="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/">Komentar</a>
+    
+
+        </footer>
+    </div>
+    
+</article>
+
+
+
+    <article id="post-聊聊那些锁事" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 itemprop="name">
+            <a class="article-title" href="/2020/01/27/聊聊那些锁事/">聊聊那些锁事</a>
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2020/01/27/聊聊那些锁事/">
+            <time datetime="2020-01-27T12:28:35.000Z" itemprop="datePublished">2020-01-27</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/Java/">Java</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/Java/">Java</a>, <a class="tag-link" href="/tags/操作系统/">操作系统</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            <p><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近看了一本书，名字叫做<a href="https://book.douban.com/subject/19973015//" target="_blank" rel="noopener">《Operating Systems: Three Easy Pieces》</a>，它的中文版是《操作系统导论》，原书在豆瓣评分9.7分，质量还不错。该书围绕<strong>虚拟化、并发和持久性</strong>这三个主要概念展开，行文诙谐幽默却又鞭辟入里，不同于寻常的操作系统书籍。这些天看了并发的几个章节，我主要关注了”锁”的部分，细读下来，有了更深刻的认识。</p>
+<p>所以这篇文章就是对《操作系统导论》中讲解锁的章节的一个<strong>读书笔记</strong>，实在是忍不住想分享出来。</p></p>
+            <p class="article-more-link">
+                <a href="/2020/01/27/聊聊那些锁事/#more">Read More</a>
+            </p>
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2020/01/27/聊聊那些锁事/" data-id="ck6ki91ej006owgtdbsstmwnf" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2020/01/27/聊聊那些锁事/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2020/01/27/聊聊那些锁事/">Komentar</a>
     
 
         </footer>
@@ -397,7 +530,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/" data-id="ck6301n69005vbgtdczc9gqn2" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/" data-id="ck6ki91em006rwgtd4ie0i8al" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -465,7 +598,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/">Comments</a>
+        <a href="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/12/23/聊聊文件系统那些事/">Komentar</a>
     
 
         </footer>
@@ -533,7 +666,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/12/13/译-Java字节码简介/" data-id="ck6301ohb0086bgtdy847wo21" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/12/13/译-Java字节码简介/" data-id="ck6ki92l4008fwgtd1rv1kpem" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -601,7 +734,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/12/13/译-Java字节码简介/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/12/13/译-Java字节码简介/">Comments</a>
+        <a href="https://pjmike.github.io/2019/12/13/译-Java字节码简介/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/12/13/译-Java字节码简介/">Komentar</a>
     
 
         </footer>
@@ -666,7 +799,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/10/20/Netty系列文章之Netty线程模型/" data-id="ck6301mqm000fbgtdnayd88fr" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/10/20/Netty系列文章之Netty线程模型/" data-id="ck6ki90u5000awgtdq1kgs3vp" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -734,7 +867,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/10/20/Netty系列文章之Netty线程模型/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/10/20/Netty系列文章之Netty线程模型/">Comments</a>
+        <a href="https://pjmike.github.io/2019/10/20/Netty系列文章之Netty线程模型/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/10/20/Netty系列文章之Netty线程模型/">Komentar</a>
     
 
         </footer>
@@ -809,7 +942,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/" data-id="ck6301of1007gbgtdiclgm49d" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/" data-id="ck6ki92ik007swgtd3g01xbym" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -877,7 +1010,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/">Comments</a>
+        <a href="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/10/05/基于Netty实现简易RPC框架/">Komentar</a>
     
 
         </footer>
@@ -942,7 +1075,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/06/02/maven入门总结/" data-id="ck6301n4o0042bgtdtwe7d9ro" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/06/02/maven入门总结/" data-id="ck6ki9144004awgtdjnrxo97d" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1010,7 +1143,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/06/02/maven入门总结/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/06/02/maven入门总结/">Comments</a>
+        <a href="https://pjmike.github.io/2019/06/02/maven入门总结/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/06/02/maven入门总结/">Komentar</a>
     
 
         </footer>
@@ -1075,7 +1208,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/" data-id="ck6301ofc007nbgtdqcgi46tq" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/" data-id="ck6ki92ih007owgtdsp5ur3xq" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1143,7 +1276,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/">Comments</a>
+        <a href="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/05/09/浅析MyBatis的动态代理原理/">Komentar</a>
     
 
         </footer>
@@ -1210,7 +1343,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/" data-id="ck6301n3x003cbgtd4uc9l3cv" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/" data-id="ck6ki912x003fwgtd37tv519s" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1278,7 +1411,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/">Comments</a>
+        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之虚拟存储器/">Komentar</a>
     
 
         </footer>
@@ -1345,7 +1478,7 @@
 
 </div>
 
-    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/" data-id="ck6301oea006vbgtdvd6jaqiq" class="article-share-link"><i class="fas fa-share"></i>Share</a>
+    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/" data-id="ck6ki92hu0074wgtdb96qj0lx" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -1413,142 +1546,7 @@
 
             
     
-        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/">Comments</a>
-    
-
-        </footer>
-    </div>
-    
-</article>
-
-
-
-    <article id="post-CSAPP笔记之存储器层次结构" class="article article-type-post" itemscope itemprop="blogPost">
-    <div class="article-inner">
-        
-        
-            <header class="article-header">
-                
-    
-        <h1 itemprop="name">
-            <a class="article-title" href="/2019/04/27/CSAPP笔记之存储器层次结构/">CSAPP笔记之存储器层次结构</a>
-        </h1>
-    
-
-                
-                    <div class="article-meta">
-                        
-    <div class="article-date">
-        <i class="fas fa-calendar-alt"></i>
-        <a href="/2019/04/27/CSAPP笔记之存储器层次结构/">
-            <time datetime="2019-04-27T12:42:16.000Z" itemprop="datePublished">2019-04-27</time>
-        </a>
-    </div>
-
-
-                        
-    <div class="article-category">
-    	<i class="fas fa-folder"></i>
-        <a class="article-category-link" href="/categories/笔记/">笔记</a>
-    </div>
-
-                        
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a>
-    </div>
-
-                    </div>
-                
-            </header>
-        
-        
-        <div class="article-entry" itemprop="articleBody">
-        
-            <p><blockquote>
-<p>下面内容是对《深入理解计算机系统》和<a href="https://wdxtub.com/2016/04/16/thin-csapp-3/" target="_blank" rel="noopener">内存与缓存</a>文章的一个学习笔记</p>
-</blockquote></p>
-            <p class="article-more-link">
-                <a href="/2019/04/27/CSAPP笔记之存储器层次结构/#more">Read More</a>
-            </p>
-        
-        </div>
-        <footer class="article-footer">
-            <div class="share-container">
-
-
-
-</div>
-
-    <a data-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之存储器层次结构/" data-id="ck6301n38002ybgtdpr29npcs" class="article-share-link"><i class="fas fa-share"></i>Share</a>
-<script>
-    (function ($) {
-        // Prevent duplicate binding
-        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
-            __SHARE_BUTTON_BINDED__ = true;
-        } else {
-            return;
-        }
-        $('body').on('click', function() {
-            $('.article-share-box.on').removeClass('on');
-        }).on('click', '.article-share-link', function(e) {
-            e.stopPropagation();
-
-            var $this = $(this),
-                url = $this.attr('data-url'),
-                encodedUrl = encodeURIComponent(url),
-                id = 'article-share-box-' + $this.attr('data-id'),
-                offset = $this.offset(),
-                box;
-
-            if ($('#' + id).length) {
-                box = $('#' + id);
-
-                if (box.hasClass('on')){
-                    box.removeClass('on');
-                    return;
-                }
-            } else {
-                var html = [
-                    '<div id="' + id + '" class="article-share-box">',
-                        '<input class="article-share-input" value="' + url + '">',
-                        '<div class="article-share-links">',
-                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
-                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
-                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
-                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
-                        '</div>',
-                    '</div>'
-                ].join('');
-
-              box = $(html);
-
-              $('body').append(box);
-            }
-
-            $('.article-share-box.on').hide();
-
-            box.css({
-                top: offset.top + 25,
-                left: offset.left
-            }).addClass('on');
-
-        }).on('click', '.article-share-box', function (e) {
-            e.stopPropagation();
-        }).on('click', '.article-share-box-input', function () {
-            $(this).select();
-        }).on('click', '.article-share-box-link', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
-        });
-    })(jQuery);
-</script>
-
-            
-    
-        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之存储器层次结构/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之存储器层次结构/">Comments</a>
+        <a href="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2019/04/27/CSAPP笔记之异常控制流与进程/">Komentar</a>
     
 
         </footer>
@@ -1559,7 +1557,7 @@
 
 
     <nav id="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/">Berikutnya &raquo;</a>
     </nav>
 </section>
             
@@ -1568,43 +1566,43 @@
    
         
     <div class="widget-wrap">
-        <h3 class="widget-title">categories</h3>
+        <h3 class="widget-title">Kategori</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">13</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/文件系统/">文件系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/">日常翻译</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/Java/">Java</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">13</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/操作系统/">操作系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/文件系统/">文件系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/">日常翻译</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/Java/">Java</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">archives</h3>
+        <h3 class="widget-title">Arsip</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tags</h3>
+        <h3 class="widget-title">tag</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件I-O/">文件I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件系统/">文件系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日常翻译/">日常翻译</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件I-O/">文件I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件系统/">文件系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日常翻译/">日常翻译</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/虚拟内存/">虚拟内存</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
         </div>
     </div>
 
     
         
     <div class="widget-wrap">
-        <h3 class="widget-title">tag cloud</h3>
+        <h3 class="widget-title">awan tag</h3>
         <div class="widget tagcloud">
-            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 12.5px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 17.5px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 17.5px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 12.5px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12.5px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/操作系统/" style="font-size: 10px;">操作系统</a> <a href="/tags/文件I-O/" style="font-size: 10px;">文件I/O</a> <a href="/tags/文件系统/" style="font-size: 10px;">文件系统</a> <a href="/tags/日常翻译/" style="font-size: 10px;">日常翻译</a> <a href="/tags/笔记/" style="font-size: 12.5px;">笔记</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 12.5px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 17.5px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 17.5px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 12.5px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12.5px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/操作系统/" style="font-size: 12.5px;">操作系统</a> <a href="/tags/文件I-O/" style="font-size: 10px;">文件I/O</a> <a href="/tags/文件系统/" style="font-size: 10px;">文件系统</a> <a href="/tags/日常翻译/" style="font-size: 10px;">日常翻译</a> <a href="/tags/笔记/" style="font-size: 12.5px;">笔记</a> <a href="/tags/虚拟内存/" style="font-size: 10px;">虚拟内存</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
         </div>
     </div>
 
     
         
     <div class="widget-wrap widget-list">
-        <h3 class="widget-title">links</h3>
+        <h3 class="widget-title">tautan</h3>
         <div class="widget">
             <ul>
                 

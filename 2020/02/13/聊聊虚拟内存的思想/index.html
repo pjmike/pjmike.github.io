@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>聊聊虚拟内存的思想 | pjmike的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="前言本文依旧是对《Operating Systems: Three Easy Pieces》一书的一个读书笔记，主要分享虚拟内存的一些内容，篇幅不多。">
+<meta name="keywords" content="操作系统,虚拟内存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊聊虚拟内存的思想">
+<meta property="og:url" content="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/index.html">
+<meta property="og:site_name" content="pjmike的博客">
+<meta property="og:description" content="前言本文依旧是对《Operating Systems: Three Easy Pieces》一书的一个读书笔记，主要分享虚拟内存的一些内容，篇幅不多。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_early_day.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_2.png">
+<meta property="og:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_3.png">
+<meta property="og:updated_time" content="2020-02-13T08:52:15.530Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="聊聊虚拟内存的思想">
+<meta name="twitter:description" content="前言本文依旧是对《Operating Systems: Three Easy Pieces》一书的一个读书笔记，主要分享虚拟内存的一些内容，篇幅不多。">
+<meta name="twitter:image" content="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_early_day.png">
+    
+
+    
+        <link rel="alternate" href="#" title="pjmike的博客" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    <script src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+    <script>AV.initialize("4vB7T0TRY1mzQXMqBlJ2Hfe7-gzGzoHsz", "kOo7IkBdpIwhCSDShE4OgS1e");</script>
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">pjmike的博客</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/pjmike.jpg" />
+                            <i class="fas fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Tulis Sesuatu.." />
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Pos',
+            PAGES: 'Halaman',
+            CATEGORIES: 'Kategori',
+            TAGS: 'Tag',
+            UNTITLED: 'Tanpa Judul',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Cari" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/pjmike.jpg" />
+            <h2 id="name">pjmike</h2>
+            <h3 id="title">努力做一个笔耕者</h3>
+            <span id="location"><i class="fas fa-map-marker-alt" style="padding-right: 5px"></i>西安, 中国</span>
+            <a id="follow" target="_blank" href="https://github.com/pjmike/">IKUTI</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                73
+                <span>pos</span>
+            </div>
+            <div class="article-info-block">
+                42
+                <span>tag</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/pjmike/" target="_blank" title="github" class=tooltip>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="twitter" class=tooltip>
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="facebook" class=tooltip>
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="mailto:pjmike_pj@163.com" target="_blank" title="email" class=tooltip>
+                            <i class="fab fa-email"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="#" target="_blank" title="rss" class=tooltip>
+                            <i class="fab fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-聊聊虚拟内存的思想" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            聊聊虚拟内存的思想
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2020/02/13/聊聊虚拟内存的思想/">
+            <time datetime="2020-02-13T08:48:07.000Z" itemprop="datePublished">2020-02-13</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/操作系统/">操作系统</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/操作系统/">操作系统</a>, <a class="tag-link" href="/tags/虚拟内存/">虚拟内存</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+                <div id="toc" class="toc-article">
+                <strong class="toc-title">Catalogue</strong>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#早期系统"><span class="toc-number">2.</span> <span class="toc-text">早期系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多道程序和时分共享"><span class="toc-number">3.</span> <span class="toc-text">多道程序和时分共享</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#粗糙的机器共享"><span class="toc-number">3.1.</span> <span class="toc-text">粗糙的机器共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高效的时分共享"><span class="toc-number">3.2.</span> <span class="toc-text">高效的时分共享</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#地址空间"><span class="toc-number">4.</span> <span class="toc-text">地址空间</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#如何虚拟化内存"><span class="toc-number">4.1.</span> <span class="toc-text">如何虚拟化内存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚拟化内存的三个目标"><span class="toc-number">5.</span> <span class="toc-text">虚拟化内存的三个目标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#透明"><span class="toc-number">5.1.</span> <span class="toc-text">透明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#效率"><span class="toc-number">5.2.</span> <span class="toc-text">效率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#保护"><span class="toc-number">5.3.</span> <span class="toc-text">保护</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                </div>
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文依旧是对<a href="https://book.douban.com/subject/19973015//" target="_blank" rel="noopener">《Operating Systems: Three Easy Pieces》</a>一书的一个读书笔记，主要分享<strong>虚拟内存</strong>的一些内容，篇幅不多。</p>
+<a id="more"></a>
+<h2 id="早期系统"><a href="#早期系统" class="headerlink" title="早期系统"></a>早期系统</h2><p>从内存来看，早期的机器并没有提供多少抽象给用户。基本上，机器的物理内存看起来如图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_early_day.png" alt="visual_memory_1"></p>
+<h2 id="多道程序和时分共享"><a href="#多道程序和时分共享" class="headerlink" title="多道程序和时分共享"></a>多道程序和时分共享</h2><p>目前的机器都是多道程序，其中多个进程在给定时间准备运行，比如当有一个进程在等待I/O操作的时候，操作系统会切换这些进程。</p>
+<h3 id="粗糙的机器共享"><a href="#粗糙的机器共享" class="headerlink" title="粗糙的机器共享"></a>粗糙的机器共享</h3><p>很快，人们开始对机器要求更多，分时系统的时代诞生了，一种实现时分共享的方法，是让一个进程单独占用全部内存运行一小段时间，然后停止它，并<strong>将它所有的状态信息保存在磁盘上</strong>，加载其他进程的状态信息，再运行一个一段时间，这就是实现了某种比较<strong>粗糙的机器共享</strong>。</p>
+<p>这个方法存在的问题是：<strong>速度太慢了，将进程的全部内存信息保存到磁盘中还是太慢了</strong>。因此，在进程切换的时候，我们仍然将进程信息放在内存中 (目前的做法) , 这样做更快，操作系统可以更有效率地实现时分共享。</p>
+<h3 id="高效的时分共享"><a href="#高效的时分共享" class="headerlink" title="高效的时分共享"></a>高效的时分共享</h3><p>如下图所示，在3个进程 (A, B, C) ，每个进程拥有从512KB物理内存只切出来给它们的一小部分内存，假定只有一个CPU，操作系统选择运行其中一个进程 (比如A) ，同时其他进程 (B和C) 则在队列中等待运行。</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_2.png" alt="visual_memory"></p>
+<p>随着时分共享变得流行，人们对操作系统又有了新的要求，特别是多个程序同时驻留在物理内存中，<strong>「保护」</strong> 成为重要问题，具体来说就是如何保护一个进程拥有的内存不被其他进程读取，当然修改更不允许。</p>
+<h2 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h2><p>操作系统提供了一个易用的物理内存抽象，这个抽象叫做 <strong>地址空间 (address space)</strong>，是运行的程序看到的系统中的内存。一个进程的地址空间包含运行的程序的所有内存状态，比如：程序的代码必须在内存中。当程序运行时，利用栈来保存当前的函数调用信息，分配空间给局部变量，传递参数和函数返回值。最后，堆用于管理动态分配的、用户管理的内存.</p>
+<p>下面是一个简答的地址空间的例子，我们假设有一个很小的地址空间 (只有16KB)。程序代码位于地址空间的顶部 (本例从 0 开始，并且装入到地址空间的前 1KB)。如图所示：</p>
+<p><img src="https://pjmike-1253796536.cos.ap-beijing.myqcloud.com/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/visual_memory_3.png" alt="visual_memory"></p>
+<p><strong>当然这样的地址空间，是操作系统提供给运行程序的抽象 (abstract)，程序实际上不在物理地址 0 ~ 16KB 的内存中，而是加载在任意的物理地址</strong>。</p>
+<h3 id="如何虚拟化内存"><a href="#如何虚拟化内存" class="headerlink" title="如何虚拟化内存"></a>如何虚拟化内存</h3><p>此刻问题来了，多个进程如何加载到内存的不同地址，<strong>操作系统如何在的单一的物理内存上为多个运行的进程 (所有进程共享内存) 构建一个私有的、可能很大的地址空间的抽象</strong>？</p>
+<p>现在的操作系统解决了这个问题，引入虚拟内存机制，虚拟内存系统为程序提供了一个巨大的、稀疏的、私有的地址空间的抽象，其中保存了程序的所有指令和数据。操作系统在专门的硬件的帮助下，通过每一个虚拟内存的索引，将其转换为物理地址，物理内存根据<br> 获得的物理地址去获取所需的信息。</p>
+<h2 id="虚拟化内存的三个目标"><a href="#虚拟化内存的三个目标" class="headerlink" title="虚拟化内存的三个目标"></a>虚拟化内存的三个目标</h2><p>本文对虚拟内存的具体实现机制不做讨论，主要分享<strong>虚拟内存的设计思想</strong>，也就是下面这三个目标</p>
+<blockquote>
+<p>画外音：认识这三个目标可以让你更好的理解虚拟内存机制</p>
+</blockquote>
+<h3 id="透明"><a href="#透明" class="headerlink" title="透明"></a>透明</h3><p>虚拟内存的一个主要目标是 「透明」。操作系统实现虚拟内存的方式，应该让运行的程序看不见。因此，程序不应该感知到内存被虚拟化的事实，相反，程序的行为就好像它拥有自己的私有物理内存。在幕后，操作系统 (和硬件) 完成了所有的工作，让不同的工作复用内存，从而实现了这个假象。</p>
+<h3 id="效率"><a href="#效率" class="headerlink" title="效率"></a>效率</h3><p>虚拟内存的另一个目标就是 「效率」。操作系统应该追求虚拟化尽可能高效，包括时间上 (即不会使程序运行得更慢) 和空间上 (即不需要太多额外的内存来支持虚拟化)。在实现高效率虚拟化时，操作系统不得不依靠硬件支持，包括TLB功能。</p>
+<h3 id="保护"><a href="#保护" class="headerlink" title="保护"></a>保护</h3><p>第三个目标是 「保护」，也可以说成「隔离」。操作系统应确保进程受到保护，不会受到其他进程影响，操作系统本身也不会受进程影响。当一个进程执行加载、存储或指令提取时，它不应该以任何方式访问或影响任何其他进程或操作系统本身的内存内容。</p>
+<p>因此，保护让我们能够在进程之间提供隔离的特性，每个进程都应该在自己的独立环境中运行，避免其他出错或恶意进程的影响</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>Operating Systems: Three Easy Pieces</li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/" data-id="ck6ki90yc002dwgtd2f542zm2" class="article-share-link"><i class="fas fa-share"></i>Bagikan</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fab fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fab fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fab fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fab fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/#comments" class="article-comment-link disqus-comment-count" data-disqus-url="https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/">Komentar</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2020/01/27/聊聊那些锁事/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Lebih lama</strong>
+            <div class="article-nav-title">聊聊那些锁事</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Kategori</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a><span class="category-list-count">13</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/并发/">并发</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java，并发/">Java，并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MyBatis/">MyBatis</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NIO/">NIO</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a><span class="category-list-count">6</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/RPC/">RPC</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Nginx/">Nginx</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RabbitMQ/">RabbitMQ</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis/">Redis</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-Security/">Spring Security</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/maven/">maven</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/web/">web</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代理/">代理</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术杂谈/">技术杂谈</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/操作系统/">操作系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构/">数据结构</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据结构与算法/">数据结构与算法</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/文件系统/">文件系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/">日常翻译</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日常翻译/Java/">Java</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/笔记/">笔记</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">Arsip</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">January 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">December 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">17</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">22</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a><span class="archive-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tag</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanUtils/">BeanUtils</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP/">CSAPP</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CSAPP，笔记/">CSAPP，笔记</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTP/">HTTP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/">MyBatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO-2/">NIO.2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Netty/">Netty</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/">Nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RPC/">RPC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RabbitMQ/">RabbitMQ</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reactor/">Reactor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis，分布式/">Redis，分布式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Socket/">Socket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Security/">Spring Security</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/TCP/">TCP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/">leetcode</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/maven/">maven</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mybatis/">mybatis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-data-jpa/">spring data jpa</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/">springboot</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websocket/">websocket</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/二叉搜索树/">二叉搜索树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代理/">代理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/平衡二叉树/">平衡二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/排序算法/">排序算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件I-O/">文件I/O</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件系统/">文件系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日常翻译/">日常翻译</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/虚拟内存/">虚拟内存</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/限流/">限流</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">awan tag</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/BeanUtils/" style="font-size: 10px;">BeanUtils</a> <a href="/tags/CSAPP/" style="font-size: 12.5px;">CSAPP</a> <a href="/tags/CSAPP，笔记/" style="font-size: 10px;">CSAPP，笔记</a> <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 17.5px;">MySQL</a> <a href="/tags/NIO/" style="font-size: 12.5px;">NIO</a> <a href="/tags/NIO-2/" style="font-size: 10px;">NIO.2</a> <a href="/tags/Netty/" style="font-size: 17.5px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/RabbitMQ/" style="font-size: 12.5px;">RabbitMQ</a> <a href="/tags/Reactor/" style="font-size: 10px;">Reactor</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Redis，分布式/" style="font-size: 10px;">Redis，分布式</a> <a href="/tags/Socket/" style="font-size: 10px;">Socket</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/Spring-Security/" style="font-size: 12.5px;">Spring Security</a> <a href="/tags/TCP/" style="font-size: 10px;">TCP</a> <a href="/tags/leetcode/" style="font-size: 12.5px;">leetcode</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mybatis/" style="font-size: 10px;">mybatis</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/spring/" style="font-size: 10px;">spring</a> <a href="/tags/spring-data-jpa/" style="font-size: 10px;">spring data jpa</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/二叉搜索树/" style="font-size: 10px;">二叉搜索树</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/平衡二叉树/" style="font-size: 10px;">平衡二叉树</a> <a href="/tags/排序算法/" style="font-size: 10px;">排序算法</a> <a href="/tags/操作系统/" style="font-size: 12.5px;">操作系统</a> <a href="/tags/文件I-O/" style="font-size: 10px;">文件I/O</a> <a href="/tags/文件系统/" style="font-size: 10px;">文件系统</a> <a href="/tags/日常翻译/" style="font-size: 10px;">日常翻译</a> <a href="/tags/笔记/" style="font-size: 12.5px;">笔记</a> <a href="/tags/虚拟内存/" style="font-size: 10px;">虚拟内存</a> <a href="/tags/限流/" style="font-size: 10px;">限流</a> <a href="/tags/随笔/" style="font-size: 10px;">随笔</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">tautan</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="https://zoutq.com/">Roger</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2020 pjmike<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+    <div calss="count-span">
+		<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+	</span>
+		<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+	</div>	
+</footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+        
+    
+    <script>
+    var disqus_config = function () {
+        
+            this.page.url = 'https://pjmike.github.io/2020/02/13/聊聊虚拟内存的思想/';
+        
+        this.page.identifier = '聊聊虚拟内存的思想';
+    };
+    (function() { 
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'pjmike' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
